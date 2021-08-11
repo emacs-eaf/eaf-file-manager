@@ -1,0 +1,11 @@
+{
+    "vue_install": true,
+    "pip": {
+        "linux": [
+            "python-magic"
+        ],
+        "win32": [
+            "python-magic"
+        ]
+    }
+}
