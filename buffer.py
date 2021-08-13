@@ -42,22 +42,32 @@ class AppBuffer(BrowserBuffer):
 
     def init_path(self):
         if get_emacs_var("eaf-emacs-theme-mode") == "dark":
+            if get_emacs_var("eaf-emacs-theme-background-color") == "#000000":
+                select_color = QColor(get_emacs_var("eaf-file-manager-dark-select-color"))
+            else:
+                select_color = QColor(get_emacs_var("eaf-emacs-theme-background-color")).darker(120).name()
+
             self.buffer_widget.execute_js('''initColors(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
                 get_emacs_var("eaf-emacs-theme-background-color"),
                 get_emacs_var("eaf-emacs-theme-foreground-color"),
                 get_emacs_var("eaf-file-manager-dark-header-color"),
                 get_emacs_var("eaf-file-manager-dark-directory-color"),
                 get_emacs_var("eaf-file-manager-dark-symlink-color"),
-                QColor(get_emacs_var("eaf-emacs-theme-background-color")).darker(120).name()
+                select_color
             ))
         else:
+            if get_emacs_var("eaf-emacs-theme-background-color") == "#FFFFFF":
+                select_color = QColor(get_emacs_var("eaf-file-manager-light-select-color"))
+            else:
+                select_color = QColor(get_emacs_var("eaf-emacs-theme-background-color")).darker(110).name()
+
             self.buffer_widget.execute_js('''initColors(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
                 get_emacs_var("eaf-emacs-theme-background-color"),
                 get_emacs_var("eaf-emacs-theme-foreground-color"),
                 get_emacs_var("eaf-file-manager-light-header-color"),
                 get_emacs_var("eaf-file-manager-light-directory-color"),
                 get_emacs_var("eaf-file-manager-light-symlink-color"),
-                QColor(get_emacs_var("eaf-emacs-theme-background-color")).darker(110).name()
+                select_color
             ))
 
         self.change_directory(self.url, "")

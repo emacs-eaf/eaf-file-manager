@@ -120,6 +120,10 @@
   ""
   :type 'string)
 
+(defcustom eaf-file-manager-dark-select-color "#333333"
+  ""
+  :type 'string)
+
 (defcustom eaf-file-manager-light-header-color "#7E4C8D"
   ""
   :type 'string)
@@ -129,6 +133,10 @@
   :type 'string)
 
 (defcustom eaf-file-manager-light-symlink-color "#46D9FF"
+  ""
+  :type 'string)
+
+(defcustom eaf-file-manager-light-select-color "#EEEEEE"
   ""
   :type 'string)
 
