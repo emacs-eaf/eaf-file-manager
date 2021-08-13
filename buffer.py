@@ -27,6 +27,7 @@ from core.utils import get_emacs_var
 from pathlib import Path
 from functools import cmp_to_key
 from core.utils import eval_in_emacs, PostGui
+import codecs
 import magic
 import os
 import json
@@ -205,7 +206,7 @@ class FetchPreviewInfoThread(QThread):
             mime = magic.Magic(mime=True).from_file(str(path.absolute()))
             content = ""
             if mime.startswith("text/"):
-                with open(str(path.absolute())) as f:
+                with codecs.open(str(path.absolute()), 'r', encoding='utf-8', errors='ignore') as f:
                     content = f.read()
 
             file_type = "file"
