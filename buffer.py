@@ -43,7 +43,7 @@ class AppBuffer(BrowserBuffer):
     def init_path(self):
         if get_emacs_var("eaf-emacs-theme-mode") == "dark":
             if get_emacs_var("eaf-emacs-theme-background-color") == "#000000":
-                select_color = QColor(get_emacs_var("eaf-file-manager-dark-select-color"))
+                select_color = get_emacs_var("eaf-file-manager-dark-select-color")
             else:
                 select_color = QColor(get_emacs_var("eaf-emacs-theme-background-color")).darker(120).name()
 
@@ -57,7 +57,7 @@ class AppBuffer(BrowserBuffer):
             ))
         else:
             if get_emacs_var("eaf-emacs-theme-background-color") == "#FFFFFF":
-                select_color = QColor(get_emacs_var("eaf-file-manager-light-select-color"))
+                select_color = get_emacs_var("eaf-file-manager-light-select-color")
             else:
                 select_color = QColor(get_emacs_var("eaf-emacs-theme-background-color")).darker(110).name()
 
