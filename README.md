@@ -39,7 +39,12 @@ File manager application for the [Emacs Application Framework](https://github.co
 | `j` | js_select_next_file |
 | `k` | js_select_prev_file |
 | `l` | js_open_file |
+| `<left>` | js_up_directory |
+| `<down>` | js_select_next_file |
+| `<up>` | js_select_prev_file |
+| `<right>` | js_open_file |
 | `f` | js_open_file |
+| `<return>` | js_open_file |
 | `'` | js_up_directory |
 | `q` | bury-buffer |
 
