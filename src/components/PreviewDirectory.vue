@@ -43,7 +43,7 @@
  .box {
    width: 100%;
    height: 100%;
-   overflow: hidden;
+   overflow: scroll;
  }
 
  .file {
@@ -58,9 +58,13 @@
 
  .file-name {
    flex: 1;
+   padding-right: 20px;
  }
 
  .file-size {
    padding-right: 20px;
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
  }
 </style>
