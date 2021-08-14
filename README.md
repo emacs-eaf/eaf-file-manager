@@ -29,3 +29,17 @@ File manager application for the [Emacs Application Framework](https://github.co
 | Package        | Description          |
 | :--------      | :------              |
 | python-magic                   | Get the MIME type of the file                                      |
+
+### The keybinding of EAF File Manager.
+
+| Key   | Event   |
+| :---- | :------ |
+| `<f12>` | open_devtools |
+| `h` | js_up_directory |
+| `j` | js_select_next_file |
+| `k` | js_select_prev_file |
+| `l` | js_open_file |
+| `f` | js_open_file |
+| `'` | js_up_directory |
+| `q` | bury-buffer |
+
