@@ -1,7 +1,9 @@
 <template>
-  <pdf
-    :src="file"
-    :key="dynamicKey"/>
+  <div class="pdf-box">
+    <pdf
+      :src="file"
+      :key="dynamicKey"/>
+  </div>
 </template>
 
 <script>
@@ -36,4 +38,9 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+ .pdf-box {
+   width: 100%;
+   height: 100%;
+   overflow: scroll;
+ }
 </style>

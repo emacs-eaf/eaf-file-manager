@@ -1,7 +1,7 @@
 <template>
-  <pre class="code">
-    {{ content }}
-  </pre>
+  <div class="code-box">
+    <pre class="code">{{ content }}</pre>
+  </div>
 </template>
 
 <script>
@@ -29,6 +29,12 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+ .code-box {
+   width: 100%;
+   height: 100%;
+   overflow: scroll;
+ }
+
  .code {
    padding-left: 20px;
    padding-right: 20px;
