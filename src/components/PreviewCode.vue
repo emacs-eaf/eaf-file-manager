@@ -1,6 +1,9 @@
 <template>
   <div class="code-box">
-    <pre class="code">{{ content }}</pre>
+    <pre class="code" v-highlightjs="content">
+      <code :style="{ 'background': backgroundColor }">
+      </code>
+    </pre>
   </div>
 </template>
 
@@ -10,7 +13,8 @@
    components: {
    },
    props: {
-     content: String
+     content: String,
+     backgroundColor: String
    },
    watch: {
    },
@@ -36,8 +40,6 @@
  }
 
  .code {
-   padding-left: 20px;
-   padding-right: 20px;
    margin: 0;
    font-size: 16px;
  }

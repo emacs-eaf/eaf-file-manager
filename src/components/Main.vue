@@ -1,33 +1,35 @@
 <template>
   <div class="page">
-    <div
-      class="current-path"
-      :style="{ 'color': headerForegroundColor() }">
-      {{ path }}
-    </div>
     <div class="content">
-
-      <div
-        ref="filelist"
-        class="file-list">
+      <div class="file-area">
         <div
-          class="file"
-          v-for="file in files"
-          @click="selectFile(file)"
-          :key="file.path"
-          :style="{ 'background': itemBackgroundColor(file), 'color': itemForegroundColor(file) }">
-          <div class="file-name">
-            {{ file.name }}
-          </div>
-          <div class="file-size">
-            {{ file.size }}
+          class="current-path"
+          :style="{ 'color': headerForegroundColor() }">
+          {{ path }}
+        </div>
+
+        <div
+          ref="filelist"
+          class="file-list">
+          <div
+            class="file"
+            v-for="file in files"
+            @click="selectFile(file)"
+            :key="file.path"
+            :style="{ 'background': itemBackgroundColor(file), 'color': itemForegroundColor(file) }">
+            <div class="file-name">
+              {{ file.name }}
+            </div>
+            <div class="file-size">
+              {{ file.size }}
+            </div>
           </div>
         </div>
       </div>
 
       <div class="preview">
         <PreviewImage v-if="previewType == 'file' && previewMime == 'image'" :file="previewPath"/>
-        <PreviewCode v-if="previewType == 'file' && previewMime == 'text'" :content="previewContent"/>
+        <PreviewCode v-if="previewType == 'file' && previewMime == 'text'" :content="previewContent" :backgroundColor="backgroundColor"/>
         <PreviewPdf v-if="previewType == 'file' && previewMime == 'pdf'" :file="previewPath"/>
         <PreviewVideo v-if="previewType == 'file' && previewMime == 'video'" :file="previewPath"/>
         <PreviewAudio v-if="previewType == 'file' && previewMime == 'audio'" :file="previewPath" :barColor="foregroundColor"/>
@@ -240,7 +242,7 @@
  }
 
  .file-list {
-   width: 50%;
+   width: 100%;
    height: 100%;
    overflow: scroll;
  }
@@ -282,5 +284,10 @@
 
    display: flex;
    flex-direction: row;
+ }
+
+ .file-area {
+   width: 50%;
+   height: 100%;
  }
 </style>
