@@ -1,10 +1,12 @@
 <template>
-  <video
-    class="video"
-    :key="dynamicKey"
-    controls>
-    <source :src="file">
-  </video>
+  <div class="video-box">
+    <video
+      class="video"
+      :key="dynamicKey"
+      controls>
+      <source :src="file">
+    </video>
+  </div>
 </template>
 
 <script>
@@ -34,6 +36,15 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+ .video-box {
+   width: 100%;
+   height: 100%;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+ }
+
  .video {
    width: 100%;
    border: none;
