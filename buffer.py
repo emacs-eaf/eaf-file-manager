@@ -23,7 +23,7 @@ from PyQt5.QtCore import QUrl, QThread
 from PyQt5.QtGui import QColor
 from PyQt5 import QtCore
 from core.webengine import BrowserBuffer
-from core.utils import get_emacs_var
+from core.utils import get_emacs_var, interactive, message_to_emacs
 from pathlib import Path
 from functools import cmp_to_key
 from core.utils import eval_in_emacs, PostGui
@@ -31,6 +31,7 @@ import codecs
 import magic
 import os
 import json
+import shutil
 
 class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, arguments):
@@ -189,6 +190,41 @@ class AppBuffer(BrowserBuffer):
 
     def destroy_buffer(self):
         self.exit_preview_thread()
+
+    @interactive
+    def delete_selected_files(self):
+        if self.buffer_widget.execute_js("getMarkFileNumber();") == 0:
+            message_to_emacs("No deletions requested")
+        else:
+            self.send_input_message("Are you sure you want to delete selected files?", "delete_file",  "yes-or-no")
+
+    @interactive
+    def delete_current_file(self):
+        self.send_input_message("Are you sure you want to delete current file?", "delete_current_file",  "yes-or-no")
+
+    def handle_input_response(self, callback_tag, result_content):
+        if callback_tag == "delete_file":
+            self.delete_files(self.buffer_widget.execute_js("getMarkFiles();"))
+
+            self.buffer_widget.eval_js("removeMarkFiles();")
+
+            message_to_emacs("Delete selected files success.")
+        elif callback_tag == "delete_current_file":
+            self.delete_file(self.buffer_widget.execute_js("getSelectFile();"))
+
+            self.buffer_widget.eval_js("removeSelectFile();")
+
+            message_to_emacs("Delete file success.")
+
+    def delete_files(self, file_infos):
+        for file_info in file_infos:
+            self.delete_file(file_info)
+
+    def delete_file(self, file_info):
+        if file_info["type"] == "file":
+            os.remove(file_info["path"])
+        elif file_info["type"] == "directory":
+            shutil.rmtree(file_info["path"])
 
 class FetchPreviewInfoThread(QThread):
 

@@ -106,6 +106,11 @@
      window.markFile = this.markFile;
      window.unmarkFile = this.unmarkFile;
      window.unmarkAllFiles = this.unmarkAllFiles;
+     window.getMarkFileNumber = this.getMarkFileNumber;
+     window.getMarkFiles = this.getMarkFiles;
+     window.removeMarkFiles = this.removeMarkFiles;
+     window.getSelectFile = this.getSelectFile;
+     window.removeSelectFile = this.removeSelectFile;
    },
    created() {
      // eslint-disable-next-line no-undef
@@ -168,8 +173,6 @@
          this.currentIndex = index;
        }
 
-       console.log(index, this.files, this.currentIndex);
-
        this.currentPath = this.files[this.currentIndex].path;
 
        this.keepSelectVisible();
@@ -205,6 +208,40 @@
 
      unmarkAllFiles() {
        this.files.forEach(file => {file.mark = ""});
+     },
+
+     getMarkFileNumber() {
+       return this.files.filter(file => { return file.mark == "mark" }).length;
+     },
+
+     getMarkFiles() {
+       return this.files.filter(file => { return file.mark == "mark" });
+     },
+
+     removeMarkFiles() {
+       this.files = this.files.filter(file => { return file.mark != "mark" });
+       this.fileNumber = this.files.length;
+       if (this.currentIndex > this.fileNumber - 1) {
+         this.currentIndex = this.fileNumber - 1;
+       }
+       this.currentPath = this.files[this.currentIndex].path;
+
+       this.selectFile(this.files[this.currentIndex]);
+     },
+
+     getSelectFile() {
+       return this.files[this.currentIndex];
+     },
+
+     removeSelectFile() {
+       this.files = this.files.filter(file => { return file.path != this.currentPath });
+       this.fileNumber = this.files.length;
+       if (this.currentIndex > this.fileNumber - 1) {
+         this.currentIndex = this.fileNumber - 1;
+       }
+       this.currentPath = this.files[this.currentIndex].path;
+
+       this.selectFile(this.files[this.currentIndex]);
      },
 
      getSceenElementNumber() {
