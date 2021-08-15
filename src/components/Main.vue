@@ -162,7 +162,7 @@
        this.keepSelectVisible();
 
        this.updatePreview();
-     }
+     },
 
      selectNextFile() {
        this.selectFile(this.currentIndex + 1);
@@ -178,7 +178,7 @@
 
      scrollDown() {
        this.selectFile(this.currentIndex - 10);
-     }
+     },
 
      selectFile(file) {
        this.currentPath = file.path;
