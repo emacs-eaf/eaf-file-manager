@@ -74,6 +74,7 @@
      return {
        path: "",
        files: [],
+       fileNumber: 0,
        currentIndex: 0,
        currentPath: "",
        backgroundColor: "",
@@ -112,6 +113,7 @@
      changePath(path, files, index) {
        this.path = path;
        this.files = files;
+       this.fileNumber = files.length;
        this.currentIndex = index;
        this.currentPath = files[this.currentIndex].path;
      },
@@ -149,15 +151,15 @@
      },
 
      selectFileByIndex(index) {
-       if (index >= this.files.length) {
-         this.currentIndex = this.file.length - 1;
+       if (index >= this.fileNumber) {
+         this.currentIndex = this.fileNumber - 1;
        } else if (index <= 0) {
          this.currentIndex = 0;
        } else {
          this.currentIndex = index;
        }
 
-       console.log(index, this.currentIndex);
+       console.log(index, this.files, this.currentIndex);
 
        this.currentPath = this.files[this.currentIndex].path;
 
@@ -175,11 +177,15 @@
      },
 
      scrollUpSelectFile() {
-       this.selectFileByIndex(this.currentIndex + 10);
+       this.selectFileByIndex(this.currentIndex + this.getSceenElementNumber());
      },
 
      scrollDownSelectFile() {
-       this.selectFileByIndex(this.currentIndex - 10);
+       this.selectFileByIndex(this.currentIndex - this.getSceenElementNumber());
+     },
+
+     getSceenElementNumber() {
+       return Math.floor(window.innerHeight / this.$refs.filelist.children[this.currentIndex].clientHeight);
      },
 
      selectFile(file) {
