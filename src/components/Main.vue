@@ -219,11 +219,19 @@
      },
 
      removeMarkFiles() {
+       var markNumber = this.getMarkFileNumber();
+
        this.files = this.files.filter(file => { return file.mark != "mark" });
        this.fileNumber = this.files.length;
+
+       this.currentIndex -= markNumber;
+
        if (this.currentIndex > this.fileNumber - 1) {
          this.currentIndex = this.fileNumber - 1;
+       } else if (this.currentIndex < 0) {
+         this.currentIndex = 0;
        }
+
        this.currentPath = this.files[this.currentIndex].path;
 
        this.selectFile(this.files[this.currentIndex]);
@@ -236,9 +244,13 @@
      removeSelectFile() {
        this.files = this.files.filter(file => { return file.path != this.currentPath });
        this.fileNumber = this.files.length;
+
        if (this.currentIndex > this.fileNumber - 1) {
          this.currentIndex = this.fileNumber - 1;
+       } else if (this.currentIndex < 0) {
+         this.currentIndex = 0;
        }
+
        this.currentPath = this.files[this.currentIndex].path;
 
        this.selectFile(this.files[this.currentIndex]);
