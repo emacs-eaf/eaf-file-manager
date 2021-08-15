@@ -253,9 +253,18 @@
    flex-direction: column;
  }
 
+
+ .file-area {
+   width: 50%;
+   height: 100%;
+   display: flex;
+   flex-direction: column;
+ }
+
  .current-path {
    font-size: 18px;
    padding-left: 20px;
+   padding-top: 5px;
    padding-bottom: 5px;
  }
 
@@ -302,10 +311,5 @@
 
    display: flex;
    flex-direction: row;
- }
-
- .file-area {
-   width: 50%;
-   height: 100%;
  }
 </style>
