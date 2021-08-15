@@ -99,6 +99,9 @@
     ("b" . "js_scroll_down_select_file")
     ("<return>" . "js_open_file")
     ("'" . "js_up_directory")
+    ("m" . "js_mark_file")
+    ("u" . "js_unmark_file")
+    ("U" . "js_unmark_all_files")
     ("q" . "bury-buffer")
     )
   "The keybinding of EAF File Manager."
@@ -131,6 +134,10 @@
   ""
   :type 'string)
 
+(defcustom eaf-file-manager-dark-mark-color "#D63F19"
+  ""
+  :type 'string)
+
 (defcustom eaf-file-manager-light-header-color "#7E4C8D"
   ""
   :type 'string)
@@ -144,6 +151,10 @@
   :type 'string)
 
 (defcustom eaf-file-manager-light-select-color "#EEEEEE"
+  ""
+  :type 'string)
+
+(defcustom eaf-file-manager-light-mark-color "#E11441"
   ""
   :type 'string)
 

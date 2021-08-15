@@ -48,12 +48,13 @@ class AppBuffer(BrowserBuffer):
             else:
                 select_color = QColor(get_emacs_var("eaf-emacs-theme-background-color")).darker(120).name()
 
-            self.buffer_widget.execute_js('''initColors(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
+            self.buffer_widget.execute_js('''initColors(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
                 get_emacs_var("eaf-emacs-theme-background-color"),
                 get_emacs_var("eaf-emacs-theme-foreground-color"),
                 get_emacs_var("eaf-file-manager-dark-header-color"),
                 get_emacs_var("eaf-file-manager-dark-directory-color"),
                 get_emacs_var("eaf-file-manager-dark-symlink-color"),
+                get_emacs_var("eaf-file-manager-dark-mark-color"),
                 select_color
             ))
         else:
@@ -62,12 +63,13 @@ class AppBuffer(BrowserBuffer):
             else:
                 select_color = QColor(get_emacs_var("eaf-emacs-theme-background-color")).darker(110).name()
 
-            self.buffer_widget.execute_js('''initColors(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
+            self.buffer_widget.execute_js('''initColors(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
                 get_emacs_var("eaf-emacs-theme-background-color"),
                 get_emacs_var("eaf-emacs-theme-foreground-color"),
                 get_emacs_var("eaf-file-manager-light-header-color"),
                 get_emacs_var("eaf-file-manager-light-directory-color"),
                 get_emacs_var("eaf-file-manager-light-symlink-color"),
+                get_emacs_var("eaf-file-manager-light-mark-color"),
                 select_color
             ))
 
@@ -97,7 +99,8 @@ class AppBuffer(BrowserBuffer):
                     "path": str(p.absolute()),
                     "name": p.name,
                     "type": file_type,
-                    "size": file_size
+                    "size": file_size,
+                    "mark": ""
                 }
 
                 file_infos.append(file_info)

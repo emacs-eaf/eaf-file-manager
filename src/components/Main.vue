@@ -80,6 +80,7 @@
        backgroundColor: "",
        foregroundColor: "",
        headerColor: "",
+       markColor: "",
        fileColor: "",
        directoryColor: "",
        symlinkColor: "",
@@ -102,6 +103,9 @@
      window.openFile = this.openFile;
      window.upDirectory = this.upDirectory;
      window.setPreview = this.setPreview;
+     window.markFile = this.markFile;
+     window.unmarkFile = this.unmarkFile;
+     window.unmarkAllFiles = this.unmarkAllFiles;
    },
    created() {
      // eslint-disable-next-line no-undef
@@ -118,13 +122,14 @@
        this.currentPath = files[this.currentIndex].path;
      },
 
-     initColors(backgroundColor, foregroundColor, headerColor, directoryColor, symlinkColor, selectColor) {
+     initColors(backgroundColor, foregroundColor, headerColor, directoryColor, symlinkColor, markColor, selectColor) {
        this.backgroundColor = backgroundColor;
        this.foregroundColor = foregroundColor;
        this.fileColor = foregroundColor;
        this.headerColor = headerColor;
        this.directoryColor = directoryColor;
        this.symlinkColor = symlinkColor;
+       this.markColor = markColor;
        this.selectColor = selectColor;
      },
 
@@ -137,12 +142,16 @@
      },
 
      itemForegroundColor(item) {
-       if (item.type == "directory") {
-         return this.directoryColor;
-       } else if (item.type == "file") {
-         return this.fileColor;
-       } else if (item.type == "symlink") {
-         return this.symlinkColor;
+       if (item.mark == "mark") {
+         return this.markColor;
+       } else {
+         if (item.type == "directory") {
+           return this.directoryColor;
+         } else if (item.type == "file") {
+           return this.fileColor;
+         } else if (item.type == "symlink") {
+           return this.symlinkColor;
+         }
        }
      },
 
@@ -182,6 +191,20 @@
 
      scrollDownSelectFile() {
        this.selectFileByIndex(this.currentIndex - this.getSceenElementNumber());
+     },
+
+     markFile() {
+       this.files[this.currentIndex].mark = "mark";
+       this.selectNextFile();
+     },
+
+     unmarkFile() {
+       this.files[this.currentIndex].mark = "";
+       this.selectNextFile();
+     },
+
+     unmarkAllFiles() {
+       this.files.forEach(file => {file.mark = ""});
      },
 
      getSceenElementNumber() {
@@ -262,7 +285,7 @@
  }
 
  .current-path {
-   font-size: 18px;
+   font-size: 16px;
    padding-left: 20px;
    padding-top: 5px;
    padding-bottom: 5px;
