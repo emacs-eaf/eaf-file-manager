@@ -138,21 +138,24 @@ class AppBuffer(BrowserBuffer):
     @QtCore.pyqtSlot(str, str)
     def change_directory(self, dir, current_dir):
         file_infos = self.get_files(dir)
-        select_index = 0
-
-        if current_dir != "":
-            files = list(map(lambda file: file["path"], file_infos))
-            select_index = files.index(current_dir)
-
-        self.buffer_widget.execute_js('''changePath(\"{}\", {}, {});'''.format(
-            self.url,
-            json.dumps(file_infos),
-            select_index))
-
-        if file_infos == []:
-            self.update_preview("")
+        if current_dir == "" and len(file_infos) == 0:
+            eval_in_emacs("message", ["Nothing in {}, no need to enter directory.".format(dir)])
         else:
-            self.update_preview(file_infos[select_index]["path"])
+            select_index = 0
+
+            if current_dir != "":
+                files = list(map(lambda file: file["path"], file_infos))
+                select_index = files.index(current_dir)
+
+            self.buffer_widget.execute_js('''changePath(\"{}\", {}, {});'''.format(
+                self.url,
+                json.dumps(file_infos),
+                select_index))
+
+            if file_infos == []:
+                self.update_preview("")
+            else:
+                self.update_preview(file_infos[select_index]["path"])
 
     @QtCore.pyqtSlot(str)
     def change_up_directory(self, file):
