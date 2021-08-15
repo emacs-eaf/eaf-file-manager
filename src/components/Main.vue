@@ -96,8 +96,8 @@
      window.initColors = this.initColors;
      window.selectNextFile = this.selectNextFile;
      window.selectPrevFile = this.selectPrevFile;
-     window.scrollUp = this.scrollUp;
-     window.scrollDown = this.scrollDown;
+     window.scrollUpSelectFile = this.scrollUpSelectFile;
+     window.scrollDownSelectFile = this.scrollDownSelectFile;
      window.openFile = this.openFile;
      window.upDirectory = this.upDirectory;
      window.setPreview = this.setPreview;
@@ -157,6 +157,8 @@
          this.currentIndex = index;
        }
 
+       console.log(index, this.currentIndex);
+
        this.currentPath = this.files[this.currentIndex].path;
 
        this.keepSelectVisible();
@@ -172,11 +174,11 @@
        this.selectFileByIndex(this.currentIndex - 1);
      },
 
-     scrollUp() {
+     scrollUpSelectFile() {
        this.selectFileByIndex(this.currentIndex + 10);
      },
 
-     scrollDown() {
+     scrollDownSelectFile() {
        this.selectFileByIndex(this.currentIndex - 10);
      },
 
