@@ -148,7 +148,7 @@
        return this.headerColor;
      },
 
-     selectFile(index) {
+     selectFileByIndex(index) {
        if (index >= this.files.length) {
          this.currentIndex = this.file.length - 1;
        } else if (index <= 0) {
@@ -165,19 +165,19 @@
      },
 
      selectNextFile() {
-       this.selectFile(this.currentIndex + 1);
+       this.selectFileByIndex(this.currentIndex + 1);
      },
 
      selectPrevFile() {
-       this.selectFile(this.currentIndex - 1);
+       this.selectFileByIndex(this.currentIndex - 1);
      },
 
      scrollUp() {
-       this.selectFile(this.currentIndex + 10);
+       this.selectFileByIndex(this.currentIndex + 10);
      },
 
      scrollDown() {
-       this.selectFile(this.currentIndex - 10);
+       this.selectFileByIndex(this.currentIndex - 10);
      },
 
      selectFile(file) {
