@@ -96,6 +96,8 @@
      window.initColors = this.initColors;
      window.selectNextFile = this.selectNextFile;
      window.selectPrevFile = this.selectPrevFile;
+     window.scrollUp = this.scrollUp;
+     window.scrollDown = this.scrollDown;
      window.openFile = this.openFile;
      window.upDirectory = this.upDirectory;
      window.setPreview = this.setPreview;
@@ -146,9 +148,13 @@
        return this.headerColor;
      },
 
-     selectNextFile() {
-       if (this.currentIndex < this.files.length - 1) {
-         this.currentIndex += 1;
+     selectFile(index) {
+       if (index >= this.files.length) {
+         this.currentIndex = this.file.length - 1;
+       } else if (index <= 0) {
+         this.currentIndex = 0;
+       } else {
+         this.currentIndex = index;
        }
 
        this.currentPath = this.files[this.currentIndex].path;
@@ -156,19 +162,23 @@
        this.keepSelectVisible();
 
        this.updatePreview();
+     }
+
+     selectNextFile() {
+       this.selectFile(this.currentIndex + 1);
      },
 
      selectPrevFile() {
-       if (this.currentIndex > 0) {
-         this.currentIndex -= 1;
-       }
-
-       this.currentPath = this.files[this.currentIndex].path;
-
-       this.keepSelectVisible();
-
-       this.updatePreview();
+       this.selectFile(this.currentIndex - 1);
      },
+
+     scrollUp() {
+       this.selectFile(this.currentIndex + 10);
+     },
+
+     scrollDown() {
+       this.selectFile(this.currentIndex - 10);
+     }
 
      selectFile(file) {
        this.currentPath = file.path;

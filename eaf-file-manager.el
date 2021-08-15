@@ -95,6 +95,8 @@
     ("<up>" . "js_select_prev_file")
     ("<right>" . "js_open_file")
     ("f" . "js_open_file")
+    ("SPC" . "js_scroll_up")
+    ("b" . "js_scroll_down")
     ("<return>" . "js_open_file")
     ("'" . "js_up_directory")
     ("q" . "bury-buffer")
