@@ -210,11 +210,12 @@ class AppBuffer(BrowserBuffer):
 
             message_to_emacs("Delete selected files success.")
         elif callback_tag == "delete_current_file":
-            self.delete_file(self.buffer_widget.execute_js("getSelectFile();"))
+            file_info = self.buffer_widget.execute_js("getSelectFile();")
+            self.delete_file(file_info)
 
             self.buffer_widget.eval_js("removeSelectFile();")
 
-            message_to_emacs("Delete file success.")
+            message_to_emacs("Delete file {} success.".format(file_info["path"]))
 
     def delete_files(self, file_infos):
         for file_info in file_infos:
