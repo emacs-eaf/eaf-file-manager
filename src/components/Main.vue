@@ -29,6 +29,7 @@
 
       <div class="preview">
         <PreviewImage v-if="previewType == 'file' && previewMime == 'image'" :file="previewPath"/>
+        <PreviewHtml v-if="previewType == 'file' && previewMime == 'html'" :file="previewPath"/>
         <PreviewCode v-if="previewType == 'file' && previewMime == 'text'" :content="previewContent" :backgroundColor="backgroundColor"/>
         <PreviewPdf v-if="previewType == 'file' && previewMime == 'pdf'" :file="previewPath"/>
         <PreviewVideo v-if="previewType == 'file' && previewMime == 'video'" :file="previewPath"/>
@@ -50,6 +51,7 @@
  import PreviewAudio from "./PreviewAudio.vue"
  import PreviewPdf from "./PreviewPdf.vue"
  import PreviewCode from "./PreviewCode.vue"
+ import PreviewHtml from "./PreviewHtml.vue"
  import PreviewImage from "./PreviewImage.vue"
  import PreviewEmpty from "./PreviewEmpty.vue"
  import PreviewSymlink from "./PreviewSymlink.vue"
@@ -62,6 +64,7 @@
      PreviewAudio,
      PreviewPdf,
      PreviewCode,
+     PreviewHtml,
      PreviewImage,
      PreviewEmpty,
      PreviewSymlink,
@@ -321,6 +324,8 @@
 
          if (mime.startsWith("image/")) {
            this.previewMime = "image"
+         } else if (mime == "text/html") {
+           this.previewMime = "html"
          } else if (mime.startsWith("text/")) {
            this.previewMime = "text"
            this.previewContent = fileInfos[0]["content"]

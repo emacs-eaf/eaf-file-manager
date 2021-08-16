@@ -248,7 +248,7 @@ class FetchPreviewInfoThread(QThread):
         if path.is_file():
             mime = magic.Magic(mime=True).from_file(str(path.absolute()))
             content = ""
-            if mime.startswith("text/"):
+            if mime.startswith("text/") and mime != "text/html":
                 with codecs.open(str(path.absolute()), 'r', encoding='utf-8', errors='ignore') as f:
                     content = f.read()
 
