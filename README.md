@@ -52,6 +52,7 @@ File manager application for the [Emacs Application Framework](https://github.co
 | `'` | js_up_directory |
 | `m` | js_mark_file |
 | `u` | js_unmark_file |
+| `t` | js_toggle_mark_file |
 | `U` | js_unmark_all_files |
 | `d` | delete_selected_files |
 | `D` | delete_current_file |

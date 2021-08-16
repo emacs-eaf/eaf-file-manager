@@ -108,6 +108,7 @@
      window.markFile = this.markFile;
      window.unmarkFile = this.unmarkFile;
      window.unmarkAllFiles = this.unmarkAllFiles;
+     window.toggleMarkFile = this.toggleMarkFile;
      window.getMarkFileNumber = this.getMarkFileNumber;
      window.getMarkFiles = this.getMarkFiles;
      window.removeMarkFiles = this.removeMarkFiles;
@@ -218,6 +219,16 @@
 
      unmarkAllFiles() {
        this.files.forEach(file => {file.mark = ""});
+     },
+
+     toggleMarkFile() {
+       this.files.map(file => {
+         if (file.mark == "mark") {
+           file.mark = ""
+         } else {
+           file.mark = "mark"
+         }
+       })
      },
 
      getMarkFileNumber() {
