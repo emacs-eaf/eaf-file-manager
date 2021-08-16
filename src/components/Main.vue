@@ -98,6 +98,8 @@
      window.initColors = this.initColors;
      window.selectNextFile = this.selectNextFile;
      window.selectPrevFile = this.selectPrevFile;
+     window.selectFirstFile = this.selectFirstFile;
+     window.selectLastFile = this.selectLastFile;
      window.scrollUpSelectFile = this.scrollUpSelectFile;
      window.scrollDownSelectFile = this.scrollDownSelectFile;
      window.openFile = this.openFile;
@@ -186,6 +188,14 @@
 
      selectPrevFile() {
        this.selectFileByIndex(this.currentIndex - 1);
+     },
+
+     selectFirstFile() {
+       this.selectFileByIndex(0);
+     },
+
+     selectLastFile() {
+       this.selectFileByIndex(this.fileNumber - 1);
      },
 
      scrollUpSelectFile() {
