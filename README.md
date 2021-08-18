@@ -41,6 +41,7 @@ File manager application for the [Emacs Application Framework](https://github.co
 | `l` | js_open_file |
 | `J` | js_select_last_file |
 | `K` | js_select_first_file |
+| `r` | js_rename_file |
 | `<left>` | js_up_directory |
 | `<down>` | js_select_next_file |
 | `<up>` | js_select_prev_file |

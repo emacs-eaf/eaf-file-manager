@@ -204,18 +204,11 @@ class AppBuffer(BrowserBuffer):
 
     def handle_input_response(self, callback_tag, result_content):
         if callback_tag == "delete_file":
-            self.delete_files(self.buffer_widget.execute_js("getMarkFiles();"))
-
-            self.buffer_widget.eval_js("removeMarkFiles();")
-
-            message_to_emacs("Delete selected files success.")
+            self.handle_delete_file()
         elif callback_tag == "delete_current_file":
-            file_info = self.buffer_widget.execute_js("getSelectFile();")
-            self.delete_file(file_info)
-
-            self.buffer_widget.eval_js("removeSelectFile();")
-
-            message_to_emacs("Delete file {} success.".format(file_info["path"]))
+            self.handle_delete_current_file()
+        elif callback_tag == "rename_file":
+            self.handle_rename_file(result_content)
 
     def delete_files(self, file_infos):
         for file_info in file_infos:
@@ -226,6 +219,42 @@ class AppBuffer(BrowserBuffer):
             os.remove(file_info["path"])
         elif file_info["type"] == "directory":
             shutil.rmtree(file_info["path"])
+
+    @QtCore.pyqtSlot(str)
+    def rename_file(self, file_path):
+        self.rename_file_path = file_path
+        self.rename_file_name = os.path.basename(file_path)
+        self.send_input_message("Rename file name '{}' to: ".format(self.rename_file_name), "rename_file", "string", self.rename_file_name)
+
+    def handle_delete_file(self):
+        self.delete_files(self.buffer_widget.execute_js("getMarkFiles();"))
+        self.buffer_widget.eval_js("removeMarkFiles();")
+
+        message_to_emacs("Delete selected files success.")
+
+    def handle_delete_current_file(self):
+        file_info = self.buffer_widget.execute_js("getSelectFile();")
+        self.delete_file(file_info)
+        self.buffer_widget.eval_js("removeSelectFile();")
+
+        message_to_emacs("Delete file {} success.".format(file_info["path"]))
+
+    def handle_rename_file(self, new_file_name):
+        if new_file_name == self.rename_file_name:
+            message_to_emacs("Same as original name, the file name remains unchanged.")
+        elif new_file_name in os.listdir(os.path.dirname(self.rename_file_path)):
+            self.send_input_message("File name '{}' exists, choose different name: ".format(self.rename_file_name), "rename_file", "string", new_file_name)
+        else:
+            try:
+                new_file_path = os.path.join(os.path.dirname(self.rename_file_path), new_file_name)
+                os.rename(self.rename_file_path, new_file_path)
+
+                self.buffer_widget.eval_js("rename(\"{}\", \"{}\", \"{}\");".format(self.rename_file_path, new_file_path, new_file_name))
+
+                message_to_emacs("Rename to '{}'".format(new_file_name))
+            except:
+                import traceback
+                message_to_emacs("Error in rename file: " + str(traceback.print_exc()))
 
 class FetchPreviewInfoThread(QThread):
 

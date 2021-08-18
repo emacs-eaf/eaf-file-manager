@@ -117,6 +117,8 @@
      window.removeMarkFiles = this.removeMarkFiles;
      window.getSelectFile = this.getSelectFile;
      window.removeSelectFile = this.removeSelectFile;
+     window.renameFile = this.renameFile;
+     window.rename = this.rename;
    },
    created() {
      // eslint-disable-next-line no-undef
@@ -311,6 +313,20 @@
 
      updatePreview() {
        window.pyobject.update_preview(this.files[this.currentIndex].path);
+     },
+
+     renameFile() {
+       window.pyobject.rename_file(this.files[this.currentIndex].path);
+     },
+
+     rename(old_file_path, new_file_path, new_file_name) {
+       for (var i=0; i<this.fileNumber; i++) {
+         if (this.files[i]["path"] == old_file_path) {
+           this.files[i]["path"] = new_file_path;
+           this.files[i]["name"] = new_file_name;
+           break
+         }
+       }
      },
 
      setPreview(filePath, fileType, fileInfos) {
