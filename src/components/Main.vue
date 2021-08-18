@@ -17,6 +17,7 @@
             @click="selectFile(file)"
             :key="file.path"
             :style="{ 'background': itemBackgroundColor(file), 'color': itemForegroundColor(file) }">
+            <img class="file-icon" :src="fileIconPath(file.icon)"/>
             <div class="file-name">
               {{ file.name }}
             </div>
@@ -36,7 +37,10 @@
         <PreviewAudio v-if="previewType == 'file' && previewMime == 'audio'" :file="previewPath" :barColor="foregroundColor"/>
         <PreviewDirectory
           v-if="previewType == 'directory' && previewFiles.length > 0"
-          :files="previewFiles" :itemBackgroundColor="itemBackgroundColor" :itemForegroundColor="itemForegroundColor"/>
+          :files="previewFiles"
+          :itemBackgroundColor="itemBackgroundColor"
+          :itemForegroundColor="itemForegroundColor"
+          :fileIconPath="fileIconPath"/>
         <PreviewEmpty v-if="previewType == 'directory' && previewFiles.length == 0"/>
         <PreviewSymlink v-if="previewType == 'symlink'"/>
       </div>
@@ -94,6 +98,9 @@
        previewFiles: [],
        previewMime: "",
        previewContent: "",
+
+       pathSep: "",
+       iconCacheDir: ""
      }
    },
    mounted() {
@@ -119,6 +126,7 @@
      window.removeSelectFile = this.removeSelectFile;
      window.renameFile = this.renameFile;
      window.rename = this.rename;
+     window.initIconCacheDir = this.initIconCacheDir;
    },
    created() {
      // eslint-disable-next-line no-undef
@@ -144,6 +152,11 @@
        this.symlinkColor = symlinkColor;
        this.markColor = markColor;
        this.selectColor = selectColor;
+     },
+
+     initIconCacheDir(iconCacheDir, pathSep) {
+       this.iconCacheDir = iconCacheDir;
+       this.pathSep = pathSep;
      },
 
      itemBackgroundColor(item) {
@@ -329,6 +342,10 @@
        }
      },
 
+     fileIconPath(iconFile) {
+       return this.iconCacheDir + this.pathSep + iconFile;
+     },
+
      setPreview(filePath, fileType, fileInfos) {
        this.previewPath = filePath;
        this.previewType = fileType;
@@ -338,18 +355,18 @@
          var mime = fileInfos[0]["mime"]
          console.log("***** ", filePath, mime)
 
-         if (mime.startsWith("image/")) {
+         if (mime.startsWith("image-")) {
            this.previewMime = "image"
-         } else if (mime == "text/html") {
+         } else if (mime == "text-html") {
            this.previewMime = "html"
-         } else if (mime.startsWith("text/")) {
+         } else if (mime.startsWith("text-")) {
            this.previewMime = "text"
            this.previewContent = fileInfos[0]["content"]
-         } else if (mime == "application/pdf") {
+         } else if (mime == "application-pdf") {
            this.previewMime = "pdf"
-         } else if (mime.startsWith("video/")) {
+         } else if (mime.startsWith("video-")) {
            this.previewMime = "video"
-         } else if (mime.startsWith("audio/")) {
+         } else if (mime.startsWith("audio-")) {
            this.previewMime = "audio"
          }
        }
@@ -396,6 +413,12 @@
 
    display: flex;
    flex-direction: row;
+   align-items: center;
+ }
+
+ .file-icon {
+   width: 30px;
+   margin-right: 5px;
  }
 
  .file-name {

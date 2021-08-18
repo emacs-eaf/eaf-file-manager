@@ -24,12 +24,6 @@ File manager application for the [Emacs Application Framework](https://github.co
 (require 'eaf-file-manager)
 ```
 
-### Dependency List
-
-| Package        | Description          |
-| :--------      | :------              |
-| python-magic                   | Get the MIME type of the file                                      |
-
 ### The keybinding of EAF File Manager.
 
 | Key   | Event   |
@@ -58,4 +52,3 @@ File manager application for the [Emacs Application Framework](https://github.co
 | `d` | delete_selected_files |
 | `D` | delete_current_file |
 | `q` | bury-buffer |
-

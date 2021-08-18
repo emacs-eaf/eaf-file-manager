@@ -5,6 +5,7 @@
       v-for="file in files"
       :key="file.path"
       :style="{ 'background': itemBackgroundColor(file), 'color': itemForegroundColor(file) }">
+      <img class="file-icon" :src="fileIconPath(file.icon)"/>
       <div class="file-name">
         {{ file.name }}
       </div>
@@ -22,6 +23,7 @@
      files: Array,
      itemBackgroundColor: Function,
      itemForegroundColor: Function,
+     fileIconPath: Function,
    },
    watch: {
    },
@@ -55,6 +57,12 @@
 
    display: flex;
    flex-direction: row;
+   align-items: center;
+ }
+
+ .file-icon {
+   width: 30px;
+   margin-right: 5px;
  }
 
  .file-name {

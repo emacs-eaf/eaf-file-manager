@@ -19,16 +19,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import QUrl, QThread
-from PyQt5.QtGui import QColor
-from PyQt5 import QtCore
+from PyQt5.QtCore import QUrl, QThread, QMimeDatabase
+from PyQt5.QtGui import QColor, QIcon
+from PyQt5 import QtCore, QtWidgets
 from core.webengine import BrowserBuffer
 from core.utils import get_emacs_var, interactive, message_to_emacs
 from pathlib import Path
 from functools import cmp_to_key
-from core.utils import eval_in_emacs, PostGui
+from core.utils import eval_in_emacs, PostGui, get_emacs_config_dir
 import codecs
-import magic
 import os
 import json
 import shutil
@@ -40,9 +39,16 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.loadFinished.connect(self.init_path)
         self.load_index_html(__file__)
 
+        self.mime_db = QMimeDatabase()
+        self.icon_cache_dir = os.path.join(os.path.dirname(__file__,), "src", "assets", "icon_cache")
+        if not os.path.exists(self.icon_cache_dir):
+            os.makedirs(self.icon_cache_dir)
+
         self.fetch_preview_info_thread = None
 
     def init_path(self):
+        self.buffer_widget.execute_js('''initIconCacheDir(\"{}\", \"{}\")'''.format(self.icon_cache_dir, os.path.sep))
+
         if get_emacs_var("eaf-emacs-theme-mode") == "dark":
             if get_emacs_var("eaf-emacs-theme-background-color") == "#000000":
                 select_color = get_emacs_var("eaf-file-manager-dark-select-color")
@@ -76,6 +82,27 @@ class AppBuffer(BrowserBuffer):
 
         self.change_directory(self.url, "")
 
+    def get_file_mime(self, file_path):
+        if os.path.isdir(file_path):
+            return "directory"
+        else:
+            file_info = QtCore.QFileInfo(file_path)
+            return self.mime_db.mimeTypeForFile(file_info).name().replace("/", "-")
+
+    def generate_file_icon(self, file_path):
+        file_mime = self.get_file_mime(file_path)
+        icon_name = "{}.{}".format(file_mime, "png")
+        icon_path = os.path.join(self.icon_cache_dir, icon_name)
+
+        if not os.path.exists(icon_path):
+            if file_mime == "directory":
+                icon = QIcon.fromTheme("folder")
+            else:
+                icon = QIcon.fromTheme(file_mime, QIcon("text-x-generic"))
+            icon.pixmap(24, 24).save(icon_path)
+
+        return icon_name
+
     def get_files(self, path):
         self.url = os.path.expanduser(path)
         search_path = Path(self.url)
@@ -96,12 +123,15 @@ class AppBuffer(BrowserBuffer):
                     file_type = "symlink"
                     file_size = "1"
 
+                file_path = str(p.absolute())
+
                 file_info = {
-                    "path": str(p.absolute()),
+                    "path": file_path,
                     "name": p.name,
                     "type": file_type,
                     "size": file_size,
-                    "mark": ""
+                    "mark": "",
+                    "icon": self.generate_file_icon(file_path)
                 }
 
                 file_infos.append(file_info)
@@ -174,7 +204,7 @@ class AppBuffer(BrowserBuffer):
     def update_preview(self, file):
         self.exit_preview_thread()
 
-        self.fetch_preview_info_thread = FetchPreviewInfoThread(file, self.get_files)
+        self.fetch_preview_info_thread = FetchPreviewInfoThread(file, self.get_files, self.get_file_mime)
         self.fetch_preview_info_thread.fetch_finish.connect(self.update_preview_info)
         self.fetch_preview_info_thread.start()
 
@@ -260,11 +290,12 @@ class FetchPreviewInfoThread(QThread):
 
     fetch_finish = QtCore.pyqtSignal(str, str, str)
 
-    def __init__(self, file, get_files_callback):
+    def __init__(self, file, get_files_callback, get_file_mime_callback):
         QThread.__init__(self)
 
         self.file = file
         self.get_files_callback = get_files_callback
+        self.get_file_mime_callback = get_file_mime_callback
 
     def run(self):
         path = ""
@@ -275,9 +306,10 @@ class FetchPreviewInfoThread(QThread):
         file_infos = []
 
         if path.is_file():
-            mime = magic.Magic(mime=True).from_file(str(path.absolute()))
+            mime = self.get_file_mime_callback(str(path.absolute()))
+
             content = ""
-            if mime.startswith("text/") and mime != "text/html":
+            if mime.startswith("text-") and mime != "text-html":
                 with codecs.open(str(path.absolute()), 'r', encoding='utf-8', errors='ignore') as f:
                     content = f.read()
 
