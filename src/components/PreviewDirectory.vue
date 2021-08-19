@@ -61,7 +61,7 @@
  }
 
  .file-icon {
-   width: 30px;
+   width: 24px;
    margin-right: 5px;
  }
 
