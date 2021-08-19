@@ -245,6 +245,11 @@ class AppBuffer(BrowserBuffer):
     def new_directory(self):
         self.send_input_message("Create directory: ", "create_directory")
 
+    @interactive
+    def copy_dir_path(self):
+        eval_in_emacs("kill-new", [self.url])
+        message_to_emacs("Copy '{}'".format(self.url))
+
     def handle_input_response(self, callback_tag, result_content):
         if callback_tag == "delete_file":
             self.handle_delete_file()

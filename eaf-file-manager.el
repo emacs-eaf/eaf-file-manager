@@ -103,6 +103,7 @@
     ("<return>" . "js_open_file")
     ("w" . "js_copy_file_name")
     ("W" . "js_copy_file_path")
+    ("/" . "copy_dir_path")
     ("n" . "new_file")
     ("N" . "new_directory")
     ("'" . "js_up_directory")
