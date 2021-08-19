@@ -105,7 +105,7 @@ class AppBuffer(BrowserBuffer):
                 if icon.availableSizes() == []:
                     icon = QIcon.fromTheme("text-plain")
 
-            icon.pixmap(24, 24).save(icon_path)
+            icon.pixmap(64, 64).save(icon_path)
 
         return icon_name
 
