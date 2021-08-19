@@ -121,6 +121,7 @@
      window.toggleMarkFile = this.toggleMarkFile;
      window.getMarkFileNumber = this.getMarkFileNumber;
      window.getMarkFiles = this.getMarkFiles;
+     window.getCurrentFile = this.getCurrentFile;
      window.removeMarkFiles = this.removeMarkFiles;
      window.getSelectFile = this.getSelectFile;
      window.removeSelectFile = this.removeSelectFile;
@@ -259,6 +260,10 @@
 
      getMarkFiles() {
        return this.files.filter(file => { return file.mark == "mark" });
+     },
+
+     getCurrentFile() {
+       return this.files[this.currentIndex];
      },
 
      removeMarkFiles() {

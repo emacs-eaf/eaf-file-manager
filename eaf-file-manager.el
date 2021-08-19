@@ -106,6 +106,7 @@
     ("/" . "copy_dir_path")
     ("n" . "new_file")
     ("N" . "new_directory")
+    ("x" . "move_current_or_mark_file")
     ("'" . "js_up_directory")
     ("m" . "js_mark_file")
     ("u" . "js_unmark_file")

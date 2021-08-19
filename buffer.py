@@ -250,6 +250,16 @@ class AppBuffer(BrowserBuffer):
         eval_in_emacs("kill-new", [self.url])
         message_to_emacs("Copy '{}'".format(self.url))
 
+    @interactive
+    def move_current_or_mark_file(self):
+        mark_number = self.buffer_widget.execute_js("getMarkFileNumber();")
+        if mark_number > 0:
+            self.move_files = self.buffer_widget.execute_js("getMarkFiles();")
+            self.send_input_message("Move mark files to: ", "move_files", "file", self.url)
+        else:
+            self.move_file = self.buffer_widget.execute_js("getCurrentFile();")
+            self.send_input_message("Move '{}' to: ".format(self.move_file["name"]), "move_file", "file", self.url)
+
     def handle_input_response(self, callback_tag, result_content):
         if callback_tag == "delete_file":
             self.handle_delete_file()
@@ -261,6 +271,10 @@ class AppBuffer(BrowserBuffer):
             self.handle_create_file(result_content)
         elif callback_tag == "create_directory":
             self.handle_create_directory(result_content)
+        elif callback_tag == "move_file":
+            self.handle_move_file(result_content)
+        elif callback_tag == "move_files":
+            self.handle_move_files(result_content)
 
     def delete_files(self, file_infos):
         for file_info in file_infos:
@@ -330,6 +344,36 @@ class AppBuffer(BrowserBuffer):
             print("Create directory: ", new_directory_path)
 
             self.buffer_widget.execute_js('''addNewDirectory({})'''.format(json.dumps(self.get_file_info(new_directory_path))))
+
+    def handle_move_file(self, new_file):
+        if new_file == self.url:
+            message_to_emacs("The directory has not changed, file '{}' not moved.".format(self.move_file["name"]))
+        else:
+            try:
+                shutil.move(self.move_file["path"], new_file)
+                self.buffer_widget.eval_js("removeSelectFile();")
+
+                message_to_emacs("Move '{}' to '{}'".format(self.move_file["name"], new_file))
+            except:
+                import traceback
+                message_to_emacs("Error in move file: " + str(traceback.print_exc()))
+
+    def handle_move_files(self, new_dir):
+        if new_dir == self.url:
+            message_to_emacs("The directory has not changed, mark files not moved.")
+        elif os.path.isdir(new_dir):
+            try:
+                for move_file in self.move_files:
+                    shutil.move(move_file["path"], new_dir)
+
+                self.buffer_widget.eval_js("removeMarkFiles();")
+
+                message_to_emacs("Move mark files to '{}'".format(new_dir))
+            except:
+                import traceback
+                message_to_emacs("Error in move files: " + str(traceback.print_exc()))
+        else:
+            message_to_emacs("'{}' is not directory, abandon movement.")
 
 class FetchPreviewInfoThread(QThread):
 
