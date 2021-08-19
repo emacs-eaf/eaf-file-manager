@@ -36,7 +36,7 @@ class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, arguments):
         BrowserBuffer.__init__(self, buffer_id, url, arguments, False)
 
-        self.buffer_widget.loadFinished.connect(self.init_path)
+        self.buffer_widget.loadFinished.connect(self.init_app)
         self.load_index_html(__file__)
 
         self.mime_db = QMimeDatabase()
@@ -46,7 +46,7 @@ class AppBuffer(BrowserBuffer):
 
         self.fetch_preview_info_thread = None
 
-    def init_path(self):
+    def init_app(self):
         self.buffer_widget.execute_js('''initIconCacheDir(\"{}\", \"{}\")'''.format(self.icon_cache_dir, os.path.sep))
 
         if get_emacs_var("eaf-emacs-theme-mode") == "dark":
