@@ -36,7 +36,6 @@ class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, arguments):
         BrowserBuffer.__init__(self, buffer_id, url, arguments, False)
 
-        self.buffer_widget.loadFinished.connect(self.init_app)
         self.load_index_html(__file__)
 
         self.mime_db = QMimeDatabase()
