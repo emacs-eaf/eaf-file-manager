@@ -317,7 +317,8 @@ class FetchPreviewInfoThread(QThread):
             content = ""
             if mime.startswith("text-") and mime != "text-html":
                 with codecs.open(str(path.absolute()), 'r', encoding='utf-8', errors='ignore') as f:
-                    content = f.read()
+                    # Limit read 50kb
+                    content = f.read(1024 * 50)
 
             file_type = "file"
             file_infos = [{
