@@ -127,6 +127,8 @@
      window.renameFile = this.renameFile;
      window.rename = this.rename;
      window.initIconCacheDir = this.initIconCacheDir;
+     window.copyFileName = this.copyFileName;
+     window.copyFilePath = this.copyFilePath;
    },
    created() {
      // eslint-disable-next-line no-undef
@@ -344,6 +346,18 @@
 
      fileIconPath(iconFile) {
        return this.iconCacheDir + this.pathSep + iconFile;
+     },
+
+     copyFileName() {
+       var currentFile = this.files[this.currentIndex];
+       window.pyobject.eval_emacs_function("kill-new", [currentFile.name])
+       window.pyobject.eval_emacs_function("message", ["Copy '" + currentFile.name + "'"])
+     },
+
+     copyFilePath() {
+       var currentFile = this.files[this.currentIndex];
+       window.pyobject.eval_emacs_function("kill-new", [currentFile.path])
+       window.pyobject.eval_emacs_function("message", ["Copy '" + currentFile.path + "'"])
      },
 
      setPreview(filePath, fileType, fileInfos) {

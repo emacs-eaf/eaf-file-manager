@@ -101,6 +101,8 @@
     ("SPC" . "js_scroll_up_select_file")
     ("b" . "js_scroll_down_select_file")
     ("<return>" . "js_open_file")
+    ("w" . "js_copy_file_name")
+    ("W" . "js_copy_file_path")
     ("'" . "js_up_directory")
     ("m" . "js_mark_file")
     ("u" . "js_unmark_file")
