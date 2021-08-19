@@ -260,6 +260,16 @@ class AppBuffer(BrowserBuffer):
             self.move_file = self.buffer_widget.execute_js("getCurrentFile();")
             self.send_input_message("Move '{}' to: ".format(self.move_file["name"]), "move_file", "file", self.url)
 
+    @interactive
+    def copy_current_or_mark_file(self):
+        mark_number = self.buffer_widget.execute_js("getMarkFileNumber();")
+        if mark_number > 0:
+            self.copy_files = self.buffer_widget.execute_js("getMarkFiles();")
+            self.send_input_message("Copy mark files to: ", "copy_files", "file", self.url)
+        else:
+            self.copy_file = self.buffer_widget.execute_js("getCurrentFile();")
+            self.send_input_message("Copy '{}' to: ".format(self.copy_file["name"]), "copy_file", "file", self.url)
+
     def handle_input_response(self, callback_tag, result_content):
         if callback_tag == "delete_file":
             self.handle_delete_file()
@@ -275,6 +285,10 @@ class AppBuffer(BrowserBuffer):
             self.handle_move_file(result_content)
         elif callback_tag == "move_files":
             self.handle_move_files(result_content)
+        elif callback_tag == "copy_file":
+            self.handle_copy_file(result_content)
+        elif callback_tag == "copy_files":
+            self.handle_copy_files(result_content)
 
     def delete_files(self, file_infos):
         for file_info in file_infos:
@@ -374,6 +388,39 @@ class AppBuffer(BrowserBuffer):
                 message_to_emacs("Error in move files: " + str(traceback.print_exc()))
         else:
             message_to_emacs("'{}' is not directory, abandon movement.")
+
+    def handle_copy_file(self, new_file):
+        if new_file == self.url:
+            message_to_emacs("The directory has not changed, file '{}' not copyd.".format(self.copy_file["name"]))
+        else:
+            try:
+                if os.path.isdir(self.copy_file["path"]):
+                    shutil.copytree(src=self.copy_file["path"], dst=new_file, dirs_exist_ok=True)
+                else:
+                    shutil.copy(self.copy_file["path"], new_file)
+
+                message_to_emacs("Copy '{}' to '{}'".format(self.copy_file["name"], new_file))
+            except:
+                import traceback
+                message_to_emacs("Error in copy file: " + str(traceback.print_exc()))
+
+    def handle_copy_files(self, new_dir):
+        if new_dir == self.url:
+            message_to_emacs("The directory has not changed, mark files not copyd.")
+        elif os.path.isdir(new_dir):
+            try:
+                for copy_file in self.copy_files:
+                    if os.path.isdir(copy_file["path"]):
+                        shutil.copytree(src=copy_file["path"], dst=new_dir, dirs_exist_ok=True)
+                    else:
+                        shutil.copy(copy_file["path"], new_dir)
+
+                message_to_emacs("Copy mark files to '{}'".format(new_dir))
+            except:
+                import traceback
+                message_to_emacs("Error in copy files: " + str(traceback.print_exc()))
+        else:
+            message_to_emacs("'{}' is not directory, abandon copy.")
 
 class FetchPreviewInfoThread(QThread):
 
