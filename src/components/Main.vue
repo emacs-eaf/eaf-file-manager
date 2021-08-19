@@ -129,6 +129,8 @@
      window.initIconCacheDir = this.initIconCacheDir;
      window.copyFileName = this.copyFileName;
      window.copyFilePath = this.copyFilePath;
+     window.addNewFile = this.addNewFile;
+     window.addNewDirectory = this.addNewDirectory;
    },
    created() {
      // eslint-disable-next-line no-undef
@@ -358,6 +360,26 @@
        var currentFile = this.files[this.currentIndex];
        window.pyobject.eval_emacs_function("kill-new", [currentFile.path])
        window.pyobject.eval_emacs_function("message", ["Copy '" + currentFile.path + "'"])
+     },
+
+     addNewFile(new_file) {
+       this.files.push(new_file);
+       this.fileNumber = this.files.length;
+
+       /* Use nextTick wait DOM update, then select last file. */
+       this.$nextTick(function(){
+         this.selectLastFile();
+       })
+     },
+
+     addNewDirectory(new_directory) {
+       var insert_index = this.files.filter(file => { return file.type == "directory" }).length;
+       this.files.splice(insert_index, 0, new_directory);
+       this.fileNumber = this.files.length;
+       this.currentIndex = insert_index;
+       this.currentPath = this.files[this.currentIndex].path;
+
+       this.selectFileByIndex(insert_index);
      },
 
      setPreview(filePath, fileType, fileInfos) {

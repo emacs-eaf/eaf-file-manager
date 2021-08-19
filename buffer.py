@@ -108,38 +108,36 @@ class AppBuffer(BrowserBuffer):
 
         return icon_name
 
-    def get_files(self, path):
-        self.url = os.path.expanduser(path)
-        search_path = Path(self.url)
+    def get_file_info(self, file_path):
+        file_type = ""
+        file_size = ""
 
+        if os.path.isfile(file_path):
+            file_type = "file"
+            file_size = self.file_size_format(os.path.getsize(file_path))
+        elif os.path.isdir(file_path):
+            file_type = "directory"
+            file_size = str(self.get_dir_file_number(file_path))
+        elif os.path.islink(file_path):
+            file_type = "symlink"
+            file_size = "1"
+
+        file_info = {
+            "path": file_path,
+            "name": os.path.basename(file_path),
+            "type": file_type,
+            "size": file_size,
+            "mark": "",
+            "icon": self.generate_file_icon(file_path)
+        }
+
+        return file_info
+
+    def get_file_infos(self, path):
         file_infos = []
-        for p in search_path.glob("*"):
+        for p in Path(os.path.expanduser(path)).glob("*"):
             if not p.name.startswith("."):
-                file_type = ""
-                file_size = ""
-
-                if p.is_file():
-                    file_type = "file"
-                    file_size = self.file_size_format(os.path.getsize(p.absolute()))
-                elif p.is_dir():
-                    file_type = "directory"
-                    file_size = str(self.get_dir_file_number(p.absolute()))
-                elif p.is_symlink():
-                    file_type = "symlink"
-                    file_size = "1"
-
-                file_path = str(p.absolute())
-
-                file_info = {
-                    "path": file_path,
-                    "name": p.name,
-                    "type": file_type,
-                    "size": file_size,
-                    "mark": "",
-                    "icon": self.generate_file_icon(file_path)
-                }
-
-                file_infos.append(file_info)
+                file_infos.append(self.get_file_info(str(p.absolute())))
 
         file_infos.sort(key=cmp_to_key(self.file_compare))
 
@@ -176,7 +174,9 @@ class AppBuffer(BrowserBuffer):
 
     @QtCore.pyqtSlot(str, str)
     def change_directory(self, dir, current_dir):
-        file_infos = self.get_files(dir)
+        self.url = dir
+
+        file_infos = self.get_file_infos(dir)
         if current_dir == "" and len(file_infos) == 0:
             eval_in_emacs("message", ["Nothing in {}, no need to enter directory.".format(dir)])
         else:
@@ -209,7 +209,7 @@ class AppBuffer(BrowserBuffer):
     def update_preview(self, file):
         self.exit_preview_thread()
 
-        self.fetch_preview_info_thread = FetchPreviewInfoThread(file, self.get_files, self.get_file_mime)
+        self.fetch_preview_info_thread = FetchPreviewInfoThread(file, self.get_file_infos, self.get_file_mime)
         self.fetch_preview_info_thread.fetch_finish.connect(self.update_preview_info)
         self.fetch_preview_info_thread.start()
 
@@ -237,6 +237,14 @@ class AppBuffer(BrowserBuffer):
     def delete_current_file(self):
         self.send_input_message("Are you sure you want to delete current file?", "delete_current_file",  "yes-or-no")
 
+    @interactive
+    def new_file(self):
+        self.send_input_message("Create file: ", "create_file")
+
+    @interactive
+    def new_directory(self):
+        self.send_input_message("Create directory: ", "create_directory")
+
     def handle_input_response(self, callback_tag, result_content):
         if callback_tag == "delete_file":
             self.handle_delete_file()
@@ -244,6 +252,10 @@ class AppBuffer(BrowserBuffer):
             self.handle_delete_current_file()
         elif callback_tag == "rename_file":
             self.handle_rename_file(result_content)
+        elif callback_tag == "create_file":
+            self.handle_create_file(result_content)
+        elif callback_tag == "create_directory":
+            self.handle_create_directory(result_content)
 
     def delete_files(self, file_infos):
         for file_info in file_infos:
@@ -290,6 +302,29 @@ class AppBuffer(BrowserBuffer):
             except:
                 import traceback
                 message_to_emacs("Error in rename file: " + str(traceback.print_exc()))
+
+    def handle_create_file(self, new_file):
+        if new_file in os.listdir(os.path.dirname(self.url)):
+            self.send_input_message("File '{}' exists, choose different name: ".format(new_file), "create_file")
+        else:
+            new_file_path = os.path.join(self.url, new_file)
+            with open(new_file_path, "a"):
+                os.utime(new_file_path)
+
+            print("Create file: ", new_file_path)
+
+            self.buffer_widget.execute_js('''addNewFile({})'''.format(json.dumps(self.get_file_info(new_file_path))))
+
+    def handle_create_directory(self, new_directory):
+        if new_directory in os.listdir(os.path.dirname(self.url)):
+            self.send_input_message("Directory '{}' exists, choose different name: ".format(new_directory), "create_directory")
+        else:
+            new_directory_path = os.path.join(self.url, new_directory)
+            os.makedirs(new_directory_path)
+
+            print("Create directory: ", new_directory_path)
+
+            self.buffer_widget.execute_js('''addNewDirectory({})'''.format(json.dumps(self.get_file_info(new_directory_path))))
 
 class FetchPreviewInfoThread(QThread):
 

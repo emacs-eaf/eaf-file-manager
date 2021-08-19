@@ -46,6 +46,8 @@ File manager application for the [Emacs Application Framework](https://github.co
 | `<return>` | js_open_file |
 | `w` | js_copy_file_name |
 | `W` | js_copy_file_path |
+| `n` | new_file |
+| `N` | new_directory |
 | `'` | js_up_directory |
 | `m` | js_mark_file |
 | `u` | js_unmark_file |
