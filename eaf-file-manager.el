@@ -93,6 +93,7 @@
     ("J" . "js_select_last_file")
     ("K" . "js_select_first_file")
     ("r" . "js_rename_file")
+    ("R" . "batch_rename")
     ("<left>" . "js_up_directory")
     ("<down>" . "js_select_next_file")
     ("<up>" . "js_select_prev_file")
@@ -170,6 +171,70 @@
 (defcustom eaf-file-manager-light-mark-color "#E11441"
   ""
   :type 'string)
+
+(defvar eaf-file-manager-rename-edit-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c C-k") #'eaf-file-manager-rename-edit-buffer-cancel)
+    (define-key map (kbd "C-c C-c") #'eaf-file-manager-rename-edit-buffer-confirm)
+    map))
+
+(defun eaf-file-manager-rename-edit-buffer-cancel ()
+  "Cancel EAF Browser focus text input and closes the buffer."
+  (interactive)
+  (let ((edit-text-buffer (current-buffer))
+        (buffer-id eaf--buffer-id))
+    (catch 'found-eaf
+      (eaf-for-each-eaf-buffer
+       (when (string= eaf--buffer-id buffer-id)
+         (switch-to-buffer buffer)
+         (throw 'found-eaf t))))
+    (kill-buffer edit-text-buffer)
+    (message "[EAF/file-manager] Rename edit cancelled!")))
+
+(defun eaf-file-manager-rename-edit-buffer-confirm ()
+  "Confirm input text and send the text to corresponding EAF app."
+  (interactive)
+  (let* ((new-files (remove-if 'string-empty-p (string-lines (buffer-string))))
+         (test-files (delq nil (delete-dups (remove-if 'string-empty-p (string-lines (buffer-string))))))
+         (buffer-id eaf--buffer-id))
+    (if (equal (length new-files) eaf--files-number)
+        (if (equal (length new-files) (length test-files))
+            (progn
+              (eaf-call-async "call_function_with_args" eaf--buffer-id "batch_rename_confirm" (buffer-string))
+              (kill-buffer)
+              (catch 'found-eaf
+                (eaf-for-each-eaf-buffer
+                 (when (string= eaf--buffer-id buffer-id)
+                   (switch-to-buffer buffer)
+                   (throw 'found-eaf t))))
+              (message "Rename files finish."))
+          (message "There are multiple files have same name."))
+      (message "File number are inconsistent (%s %s)" eaf--files-number (length new-files)))))
+
+(defun eaf-file-manager-rename-edit-set-header-line (dir)
+  "Set header line."
+  (setq header-line-format
+        (substitute-command-keys
+         (concat
+          "\\<eaf-file-manager-rename-edit-mode-map>"
+          " EAF/file-manager '" dir "' RENAME EDIT: "
+          "Confirm with `\\[eaf-file-manager-rename-edit-buffer-confirm]', "
+          "Cancel with `\\[eaf-file-manager-rename-edit-buffer-cancel]'. "
+          ))))
+
+(define-derived-mode eaf-file-manager-rename-edit-mode text-mode "EAF/file-manager-rename"
+  "The major mode to edit focus text input.")
+
+(defun eaf-file-manager-rename-edit-buffer (buffer-id dir files)
+  (let ((edit-text-buffer (generate-new-buffer "eaf-file-manager-rename-edit-buffer")))
+    (with-current-buffer edit-text-buffer
+      (eaf-file-manager-rename-edit-mode)
+      (set (make-local-variable 'eaf--buffer-id) buffer-id)
+      (set (make-local-variable 'eaf--files-number) (length (string-lines files)))
+      (eaf-file-manager-rename-edit-set-header-line dir))
+    (switch-to-buffer edit-text-buffer)
+    (insert files)
+    (goto-char (point-min))))
 
 (provide 'eaf-file-manager)
 

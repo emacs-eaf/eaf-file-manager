@@ -270,6 +270,31 @@ class AppBuffer(BrowserBuffer):
             self.copy_file = self.buffer_widget.execute_js("getCurrentFile();")
             self.send_input_message("Copy '{}' to: ".format(self.copy_file["name"]), "copy_file", "file", self.url)
 
+    @interactive
+    def batch_rename(self):
+        self.batch_rename_files = self.buffer_widget.execute_js("getAllFiles();")
+        files = "\n".join(map(lambda file: file["name"], self.batch_rename_files))
+        eval_in_emacs("eaf-file-manager-rename-edit-buffer", [self.buffer_id, os.path.basename(os.path.normpath(self.url)), files])
+
+    def batch_rename_confirm(self, new_file_string):
+        new_files = new_file_string.split("\n")
+
+        file_index = 0
+        for old_file in self.batch_rename_files:
+            old_file_path = old_file["path"]
+            old_file_dir = os.path.dirname(old_file_path)
+            new_file_name = new_files[file_index]
+            new_file_path = os.path.join(old_file_dir, new_file_name)
+
+            os.rename(old_file_path, new_file_path)
+
+            self.batch_rename_files[file_index]["name"] = new_file_name
+            self.batch_rename_files[file_index]["path"] = new_file_path
+
+            file_index += 1
+
+        self.buffer_widget.execute_js('''renameFiles({})'''.format(json.dumps(self.batch_rename_files)))
+
     def handle_input_response(self, callback_tag, result_content):
         if callback_tag == "delete_file":
             self.handle_delete_file()

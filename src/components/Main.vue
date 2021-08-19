@@ -121,11 +121,13 @@
      window.toggleMarkFile = this.toggleMarkFile;
      window.getMarkFileNumber = this.getMarkFileNumber;
      window.getMarkFiles = this.getMarkFiles;
+     window.getAllFiles = this.getAllFiles;
      window.getCurrentFile = this.getCurrentFile;
      window.removeMarkFiles = this.removeMarkFiles;
      window.getSelectFile = this.getSelectFile;
      window.removeSelectFile = this.removeSelectFile;
      window.renameFile = this.renameFile;
+     window.renameFiles = this.renameFiles;
      window.rename = this.rename;
      window.initIconCacheDir = this.initIconCacheDir;
      window.copyFileName = this.copyFileName;
@@ -262,6 +264,10 @@
        return this.files.filter(file => { return file.mark == "mark" });
      },
 
+     getAllFiles() {
+       return this.files;
+     },
+
      getCurrentFile() {
        return this.files[this.currentIndex];
      },
@@ -339,6 +345,10 @@
 
      renameFile() {
        window.pyobject.rename_file(this.files[this.currentIndex].path);
+     },
+
+     renameFiles(new_files) {
+       this.files = new_files;
      },
 
      rename(old_file_path, new_file_path, new_file_name) {
