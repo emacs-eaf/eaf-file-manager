@@ -98,7 +98,13 @@ class AppBuffer(BrowserBuffer):
             if file_mime == "directory":
                 icon = QIcon.fromTheme("folder")
             else:
-                icon = QIcon.fromTheme(file_mime, QIcon("text-x-generic"))
+                icon = QIcon.fromTheme(file_mime, QIcon("text-plain"))
+
+                # If nothing match, icon size is empty.
+                # Then we use fallback icon.
+                if icon.availableSizes() == []:
+                    icon = QIcon.fromTheme("text-plain")
+
             icon.pixmap(24, 24).save(icon_path)
 
         return icon_name
