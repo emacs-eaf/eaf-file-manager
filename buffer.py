@@ -38,6 +38,8 @@ class AppBuffer(BrowserBuffer):
 
         self.load_index_html(__file__)
 
+        self.show_hidden_file = False
+
         self.mime_db = QMimeDatabase()
         self.icon_cache_dir = os.path.join(os.path.dirname(__file__,), "src", "assets", "icon_cache")
         if not os.path.exists(self.icon_cache_dir):
@@ -136,12 +138,15 @@ class AppBuffer(BrowserBuffer):
     def get_file_infos(self, path):
         file_infos = []
         for p in Path(os.path.expanduser(path)).glob("*"):
-            if not p.name.startswith("."):
+            if self.filter_file(p.name):
                 file_infos.append(self.get_file_info(str(p.absolute())))
 
         file_infos.sort(key=cmp_to_key(self.file_compare))
 
         return file_infos
+
+    def filter_file(self, file_name):
+        return self.show_hidden_file or (not file_name.startswith("."))
 
     def file_size_format(self, num, suffix='B'):
         for unit in ['','K','M','G','T','P','E','Z']:
@@ -152,7 +157,7 @@ class AppBuffer(BrowserBuffer):
 
     def get_dir_file_number(self, dir):
         try:
-            return len(list(filter(lambda f: not f.startswith("."), (os.listdir(dir)))))
+            return len(list(filter(lambda f: self.filter_file(f), (os.listdir(dir)))))
         except PermissionError:
             return 0
 
@@ -275,6 +280,17 @@ class AppBuffer(BrowserBuffer):
         self.batch_rename_files = self.buffer_widget.execute_js("getAllFiles();")
         files = "\n".join(map(lambda file: file["name"], self.batch_rename_files))
         eval_in_emacs("eaf-file-manager-rename-edit-buffer", [self.buffer_id, os.path.basename(os.path.normpath(self.url)), files])
+
+    @interactive
+    def toggle_hidden_file(self):
+        if self.show_hidden_file:
+            message_to_emacs("Show hidden file")
+        else:
+            message_to_emacs("Hide hidden file")
+
+        self.show_hidden_file = not self.show_hidden_file
+
+        self.change_directory(self.url, "")
 
     def batch_rename_confirm(self, new_file_string):
         new_files = new_file_string.split("\n")
