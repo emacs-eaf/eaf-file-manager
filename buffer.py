@@ -355,6 +355,16 @@ class AppBuffer(BrowserBuffer):
         self.refresh()
         message_to_emacs("Refresh current directory done.")
 
+    @interactive
+    def open_current_file_in_new_tab(self):
+        current_file = self.buffer_widget.execute_js("getCurrentFile();")
+        if current_file and type(current_file).__name__ == "dict" and "path" in current_file:
+            eval_in_emacs("eaf-open-in-file-manager", [current_file["path"]])
+
+    @interactive
+    def open_file(self):
+        self.send_input_message("Open file: ", "open_file", "file", self.url)
+
     def refresh(self):
         current_file = self.buffer_widget.execute_js("getCurrentFile();")
         if current_file and type(current_file).__name__ == "dict" and "path" in current_file:
@@ -402,6 +412,8 @@ class AppBuffer(BrowserBuffer):
             self.handle_open_link(result_content)
         elif callback_tag == "find_files":
             self.handle_find_files(result_content)
+        elif callback_tag == "open_file":
+            self.handle_open_file(result_content)
 
     def cancel_input_response(self, callback_tag):
         ''' Cancel input message.'''
@@ -554,6 +566,15 @@ class AppBuffer(BrowserBuffer):
 
     def handle_find_files(self, regex):
         eval_in_emacs("eaf-open", [self.url, "file-manager", "search:{}".format(regex), "always-new"])
+
+    def handle_open_file(self, new_file):
+        if os.path.exists(new_file):
+            if os.path.isfile(new_file):
+                eval_in_emacs("find-file", [new_file])
+            elif os.path.isdir(new_file):
+                eval_in_emacs("eaf-open-in-file-manager", [new_file])
+        else:
+            message_to_emacs("File '{}' not exists".format(new_file))
 
 class FetchPreviewInfoThread(QThread):
 

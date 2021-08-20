@@ -75,6 +75,8 @@
     ("<right>" . "js_open_current_file")
     ("f" . "js_open_current_file")
     ("F" . "open_link")
+    ("T" . "open_current_file_in_new_tab")
+    ("H" . "open_file")
     ("SPC" . "js_scroll_up_select_file")
     ("b" . "js_scroll_down_select_file")
     ("<return>" . "js_open_current_file")
