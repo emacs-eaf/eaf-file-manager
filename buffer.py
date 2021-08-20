@@ -333,7 +333,7 @@ class AppBuffer(BrowserBuffer):
 
         self.show_hidden_file = not self.show_hidden_file
 
-        self.change_directory(self.url, "")
+        self.refresh()
 
     @interactive
     def toggle_preview(self):
@@ -346,7 +346,7 @@ class AppBuffer(BrowserBuffer):
 
         self.buffer_widget.execute_js('''setPreviewOption(\"{}\")'''.format("true" if self.show_preview else "false"))
 
-        self.change_directory(self.url, "")
+        self.refresh()
 
     @interactive
     def find_files(self):
@@ -354,8 +354,11 @@ class AppBuffer(BrowserBuffer):
 
     @interactive
     def refresh_dir(self):
-        self.change_directory(self.url, "")
+        self.refresh()
         message_to_emacs("Refresh current directory done.")
+
+    def refresh(self):
+        self.change_directory(self.url, self.buffer_widget.execute_js("getCurrentFile();")["path"])
 
     def batch_rename_confirm(self, new_file_string):
         new_files = new_file_string.split("\n")
