@@ -547,7 +547,7 @@ class AppBuffer(BrowserBuffer):
         marker = result_content.strip()
         file_name = self.buffer_widget.execute_js("Marker.getMarkerText('%s')" % str(marker))
         class_name = self.buffer_widget.execute_js("Marker.getMarkerClass('%s')" % str(marker))
-        
+
         if class_name == "eaf-file-manager-file-name":
             self.buffer_widget.execute_js('''openFileByName(\"{}\")'''.format(file_name))
         elif class_name == "eaf-file-manager-preview-file-name":
@@ -583,8 +583,8 @@ class FetchPreviewInfoThread(QThread):
                 content = ""
                 if (mime.startswith("text-") and mime != "text-html") or mime == "application-json":
                     with codecs.open(str(path.absolute()), 'r', encoding='utf-8', errors='ignore') as f:
-                        # Limit read 50kb
-                        content = f.read(1024 * 50)
+                        # Limit read 4kb, 4kb is enough for preview text file.
+                        content = f.read(1024 * 4)
 
                 file_type = "file"
                 file_infos = [{
