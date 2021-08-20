@@ -334,6 +334,11 @@ class AppBuffer(BrowserBuffer):
     def find_files(self):
         self.send_input_message("Find file with regexp: ", "find_files", "string")
 
+    @interactive
+    def refresh_dir(self):
+        self.change_directory(self.url, "")
+        message_to_emacs("Refresh current directory done.")
+
     def batch_rename_confirm(self, new_file_string):
         new_files = new_file_string.split("\n")
 

@@ -118,6 +118,7 @@
     ("D" . "delete_current_file")
     ("o" . "toggle_hidden_file")
     ("q" . "bury-buffer")
+    ("g" . "refresh_dir")
     ("G" . "find_files")
     )
   "The keybinding of EAF File Manager."
