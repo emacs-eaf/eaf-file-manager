@@ -330,6 +330,13 @@ class AppBuffer(BrowserBuffer):
             self.handle_copy_file(result_content)
         elif callback_tag == "copy_files":
             self.handle_copy_files(result_content)
+        elif callback_tag == "open_link":
+            self.buffer_widget._open_link(result_content.strip())
+
+    def cancel_input_response(self, callback_tag):
+        ''' Cancel input message.'''
+        if callback_tag == "open_link":
+            self.buffer_widget.cleanup_links_dom()
 
     def delete_files(self, file_infos):
         for file_info in file_infos:

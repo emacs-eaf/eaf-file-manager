@@ -18,7 +18,7 @@
             :key="file.path"
             :style="{ 'background': itemBackgroundColor(file), 'color': itemForegroundColor(file) }">
             <img class="file-icon" :src="fileIconPath(file.icon)"/>
-            <div class="file-name">
+            <div class="eaf-file-manager-file-name">
               {{ file.name }}
             </div>
             <div class="file-size">
@@ -472,7 +472,7 @@
    margin-right: 5px;
  }
 
- .file-name {
+ .eaf-file-manager-file-name {
    flex: 1;
    padding-right: 20px;
  }
