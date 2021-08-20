@@ -570,7 +570,7 @@ class FetchPreviewInfoThread(QThread):
                 mime = self.get_file_mime_callback(str(path.absolute()))
 
                 content = ""
-                if mime.startswith("text-") and mime != "text-html":
+                if (mime.startswith("text-") and mime != "text-html") or mime == "application-json":
                     with codecs.open(str(path.absolute()), 'r', encoding='utf-8', errors='ignore') as f:
                         # Limit read 50kb
                         content = f.read(1024 * 50)

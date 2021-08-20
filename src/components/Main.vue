@@ -419,7 +419,7 @@
            this.previewMime = "image"
          } else if (mime == "text-html") {
            this.previewMime = "html"
-         } else if (mime.startsWith("text-")) {
+         } else if (mime.startsWith("text-") || mime == "application-json") {
            this.previewMime = "text"
            this.previewContent = fileInfos[0]["content"]
          } else if (mime == "application-pdf") {
