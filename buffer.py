@@ -481,6 +481,8 @@ class AppBuffer(BrowserBuffer):
                 shutil.move(self.move_file["path"], new_file)
                 self.buffer_widget.eval_js("removeSelectFile();")
 
+                self.refresh()
+
                 message_to_emacs("Move '{}' to '{}'".format(self.move_file["name"], new_file))
             except:
                 import traceback
@@ -512,6 +514,8 @@ class AppBuffer(BrowserBuffer):
                     shutil.copytree(src=self.copy_file["path"], dst=new_file, dirs_exist_ok=True)
                 else:
                     shutil.copy(self.copy_file["path"], new_file)
+
+                self.refresh()
 
                 message_to_emacs("Copy '{}' to '{}'".format(self.copy_file["name"], new_file))
             except:
