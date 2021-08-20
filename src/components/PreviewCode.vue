@@ -13,20 +13,36 @@
    components: {
    },
    props: {
-     content: String,
+     file: String,
      backgroundColor: String
    },
    watch: {
+     file: function() {
+       this.readFileContent();
+     }
    },
    data() {
      return {
+       content: ""
      }
    },
    mounted() {
    },
    created() {
+     this.readFileContent();
    },
    methods: {
+     readFileContent() {
+       const xhr = new XMLHttpRequest();
+       xhr.open("get", this.file, true);
+       xhr.responseType = "arraybuffer";
+       xhr.onload = () => {
+         if (xhr.status == 0) {
+           this.content = String.fromCharCode.apply(null, new Uint8Array(xhr.response));
+         }
+       };
+       xhr.send();
+     }
    }
  }
 </script>

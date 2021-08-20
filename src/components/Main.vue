@@ -33,7 +33,7 @@
         class="preview">
         <PreviewImage v-if="previewType == 'file' && previewMime == 'image'" :file="previewPath"/>
         <PreviewHtml v-if="previewType == 'file' && previewMime == 'html'" :file="previewPath"/>
-        <PreviewCode v-if="previewType == 'file' && previewMime == 'text'" :content="previewContent" :backgroundColor="backgroundColor"/>
+        <PreviewCode v-if="previewType == 'file' && previewMime == 'text'" :file="previewPath" :backgroundColor="backgroundColor"/>
         <PreviewPdf v-if="previewType == 'file' && previewMime == 'pdf'" :file="previewPath"/>
         <PreviewVideo v-if="previewType == 'file' && previewMime == 'video'" :file="previewPath"/>
         <PreviewAudio v-if="previewType == 'file' && previewMime == 'audio'" :file="previewPath" :barColor="foregroundColor"/>
@@ -449,7 +449,6 @@
            this.previewMime = "html"
          } else if (mime.startsWith("text-") || mime == "application-json") {
            this.previewMime = "text"
-           this.previewContent = fileInfos[0]["content"]
          } else if (mime == "application-pdf") {
            this.previewMime = "pdf"
          } else if (mime.startsWith("video-")) {

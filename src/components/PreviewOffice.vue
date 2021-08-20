@@ -27,6 +27,7 @@
    mounted() {
    },
    created() {
+     this.getWordText();
    },
    methods: {
      getWordText() {

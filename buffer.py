@@ -580,16 +580,9 @@ class FetchPreviewInfoThread(QThread):
             if path.is_file():
                 mime = self.get_file_mime_callback(str(path.absolute()))
 
-                content = ""
-                if (mime.startswith("text-") and mime != "text-html") or mime == "application-json":
-                    with codecs.open(str(path.absolute()), 'r', encoding='utf-8', errors='ignore') as f:
-                        # Limit read 4kb, 4kb is enough for preview text file.
-                        content = f.read(1024 * 4)
-
                 file_type = "file"
                 file_infos = [{
                     "mime": mime,
-                    "content": content
                 }]
             elif path.is_dir():
                 file_type = "directory"
