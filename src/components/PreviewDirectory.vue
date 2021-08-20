@@ -7,7 +7,7 @@
       :key="file.path"
       :style="{ 'background': itemBackgroundColor(file), 'color': itemForegroundColor(file) }">
       <img class="file-icon" :src="fileIconPath(file.icon)"/>
-      <div class="eaf-file-manager-file-name">
+      <div class="eaf-file-manager-preview-file-name">
         {{ file.name }}
       </div>
       <div class="file-size">
@@ -18,12 +18,11 @@
 </template>
 
 <script>
- import { QWebChannel } from "qwebchannel";
-
  export default {
    name: 'PreviewDirectory',
    props: {
      files: Array,
+     openFile: Function,
      itemBackgroundColor: Function,
      itemForegroundColor: Function,
      fileIconPath: Function,
@@ -37,19 +36,8 @@
    mounted() {
    },
    created() {
-     // eslint-disable-next-line no-undef
-     new QWebChannel(qt.webChannelTransport, channel => {
-       window.pyobject = channel.objects.pyobject;
-     });
    },
    methods: {
-     openFile(file) {
-       if (file.type == "directory") {
-         window.pyobject.change_directory(file.path, "");
-       } else if (file.type == "file") {
-         window.pyobject.eval_emacs_function("find-file", [file.path])
-       }
-     },
    }
  }
 </script>
@@ -79,7 +67,7 @@
    margin-right: 5px;
  }
 
- .eaf-file-manager-file-name {
+ .eaf-file-manager-preview-file-name {
    flex: 1;
    padding-right: 20px;
  }

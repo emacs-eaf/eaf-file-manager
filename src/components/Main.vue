@@ -40,6 +40,7 @@
         <PreviewDirectory
           v-if="previewType == 'directory' && previewFiles.length > 0"
           :files="previewFiles"
+          :openFile="openFile"
           :itemBackgroundColor="itemBackgroundColor"
           :itemForegroundColor="itemForegroundColor"
           :fileIconPath="fileIconPath"/>
@@ -116,7 +117,7 @@
      window.selectLastFile = this.selectLastFile;
      window.scrollUpSelectFile = this.scrollUpSelectFile;
      window.scrollDownSelectFile = this.scrollDownSelectFile;
-     window.openFile = this.openFile;
+     window.openCurrentFile = this.openCurrentFile;
      window.upDirectory = this.upDirectory;
      window.setPreview = this.setPreview;
      window.markFile = this.markFile;
@@ -139,6 +140,8 @@
      window.copyFilePath = this.copyFilePath;
      window.addNewFile = this.addNewFile;
      window.addNewDirectory = this.addNewDirectory;
+     window.openFileByName = this.openFileByName;
+     window.openPreviewFileByName = this.openPreviewFileByName;
    },
    created() {
      // eslint-disable-next-line no-undef
@@ -330,14 +333,8 @@
        this.$refs.filelist.children[this.currentIndex].scrollIntoViewIfNeeded(false);
      },
 
-     openFile() {
-       var currentFile = this.files[this.currentIndex];
-
-       if (currentFile.type == "directory") {
-         window.pyobject.change_directory(currentFile.path, "");
-       } else if (currentFile.type == "file") {
-         window.pyobject.eval_emacs_function("find-file", [currentFile.path])
-       }
+     openCurrentFile() {
+       this.openFile(this.files[this.currentIndex]);
      },
 
      upDirectory() {
@@ -400,6 +397,34 @@
        this.currentPath = this.files[this.currentIndex].path;
 
        this.selectFileByIndex(insert_index);
+     },
+
+     openFileByName(fileName) {
+       for (var i=0; i< this.files.length; i++) {
+         if (this.files[i]["name"] == fileName) {
+           this.openFile(this.files[i]);
+
+           break;
+         }
+       }
+     },
+
+     openPreviewFileByName(fileName) {
+       for (var i=0; i< this.previewFiles.length; i++) {
+         if (this.previewFiles[i]["name"] == fileName) {
+           this.openFile(this.previewFiles[i]);
+
+           break;
+         }
+       }
+     },
+
+     openFile(file) {
+       if (file.type == "directory") {
+         window.pyobject.change_directory(file.path, "");
+       } else if (file.type == "file") {
+         window.pyobject.eval_emacs_function("find-file", [file.path])
+       }
      },
 
      setPreviewOption(option) {

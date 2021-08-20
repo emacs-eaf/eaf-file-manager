@@ -544,7 +544,16 @@ class AppBuffer(BrowserBuffer):
             message_to_emacs("'{}' is not directory, abandon copy.")
 
     def handle_open_link(self, result_content):
-        self.buffer_widget._open_link(result_content.strip())
+        marker = result_content.strip()
+        file_name = self.buffer_widget.execute_js("Marker.getMarkerText('%s')" % str(marker))
+        class_name = self.buffer_widget.execute_js("Marker.getMarkerClass('%s')" % str(marker))
+        
+        if class_name == "eaf-file-manager-file-name":
+            self.buffer_widget.execute_js('''openFileByName(\"{}\")'''.format(file_name))
+        elif class_name == "eaf-file-manager-preview-file-name":
+            self.buffer_widget.execute_js('''openPreviewFileByName(\"{}\")'''.format(file_name))
+
+        self.buffer_widget.cleanup_links_dom()
 
     def handle_find_files(self, regex):
         eval_in_emacs("eaf-open", [self.url, "file-manager", "search:{}".format(regex), "always-new"])
