@@ -26,7 +26,7 @@ from core.webengine import BrowserBuffer
 from core.utils import get_emacs_var, interactive, message_to_emacs
 from pathlib import Path
 from functools import cmp_to_key
-from core.utils import eval_in_emacs, PostGui, get_emacs_config_dir
+from core.utils import eval_in_emacs, PostGui, get_emacs_var
 import codecs
 import os
 import json
@@ -38,7 +38,7 @@ class AppBuffer(BrowserBuffer):
 
         self.load_index_html(__file__)
 
-        self.show_hidden_file = False
+        self.show_hidden_file = get_emacs_var("eaf-file-manager-show-hidden-file")
 
         self.mime_db = QMimeDatabase()
         self.icon_cache_dir = os.path.join(os.path.dirname(__file__,), "src", "assets", "icon_cache")

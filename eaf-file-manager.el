@@ -173,6 +173,10 @@
   ""
   :type 'string)
 
+(defcustom eaf-file-manager-show-hidden-file nil
+  ""
+  :type 'boolean)
+
 (defvar eaf-file-manager-rename-edit-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-k") #'eaf-file-manager-rename-edit-buffer-cancel)
