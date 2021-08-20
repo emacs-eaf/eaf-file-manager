@@ -36,6 +36,8 @@ class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, arguments):
         BrowserBuffer.__init__(self, buffer_id, url, arguments, False)
 
+        self.search_regex = arguments
+
         self.load_index_html(__file__)
 
         self.show_hidden_file = get_emacs_var("eaf-file-manager-show-hidden-file")
@@ -81,7 +83,32 @@ class AppBuffer(BrowserBuffer):
                 select_color
             ))
 
-        self.change_directory(self.url, "")
+        if self.search_regex != "":
+            self.search_directory(self.url, self.search_regex)
+        else:
+            self.change_directory(self.url, "")
+
+    def search_directory(self, dir, search_regex):
+        file_infos = []
+        for p in Path(os.path.expanduser(dir)).rglob(search_regex):
+            if self.filter_file(p.name):
+                file_infos.append(self.get_file_info(str(p.absolute())))
+
+        file_infos.sort(key=cmp_to_key(self.file_compare))
+
+        print(file_infos)
+
+        select_index = 0
+
+        self.buffer_widget.execute_js('''changePath(\"{}\", {}, {});'''.format(
+            self.url,
+            json.dumps(file_infos),
+            select_index))
+
+        if file_infos == []:
+            self.update_preview("")
+        else:
+            self.update_preview(file_infos[select_index]["path"])
 
     def get_file_mime(self, file_path):
         if os.path.isdir(file_path):
@@ -292,6 +319,10 @@ class AppBuffer(BrowserBuffer):
 
         self.change_directory(self.url, "")
 
+    @interactive
+    def find_files(self):
+        self.send_input_message("Find file with regexp: ", "find_files", "string")
+
     def batch_rename_confirm(self, new_file_string):
         new_files = new_file_string.split("\n")
 
@@ -332,6 +363,8 @@ class AppBuffer(BrowserBuffer):
             self.handle_copy_files(result_content)
         elif callback_tag == "open_link":
             self.buffer_widget._open_link(result_content.strip())
+        elif callback_tag == "find_files":
+            self.handle_find_files(result_content)
 
     def cancel_input_response(self, callback_tag):
         ''' Cancel input message.'''
@@ -470,6 +503,9 @@ class AppBuffer(BrowserBuffer):
         else:
             message_to_emacs("'{}' is not directory, abandon copy.")
 
+    def handle_find_files(self, regex):
+        eval_in_emacs("eaf-open", [self.url, "file-manager", regex, "always-new"])
+
 class FetchPreviewInfoThread(QThread):
 
     fetch_finish = QtCore.pyqtSignal(str, str, str)
@@ -483,30 +519,30 @@ class FetchPreviewInfoThread(QThread):
 
     def run(self):
         path = ""
-        if self.file != "":
-            path = Path(self.file)
-
         file_type = ""
         file_infos = []
 
-        if path.is_file():
-            mime = self.get_file_mime_callback(str(path.absolute()))
+        if self.file != "":
+            path = Path(self.file)
 
-            content = ""
-            if mime.startswith("text-") and mime != "text-html":
-                with codecs.open(str(path.absolute()), 'r', encoding='utf-8', errors='ignore') as f:
-                    # Limit read 50kb
-                    content = f.read(1024 * 50)
+            if path.is_file():
+                mime = self.get_file_mime_callback(str(path.absolute()))
 
-            file_type = "file"
-            file_infos = [{
-                "mime": mime,
-                "content": content
-            }]
-        elif path.is_dir():
-            file_type = "directory"
-            file_infos = self.get_files_callback(self.file)
-        elif path.is_symlink():
-            file_type = "symlink"
+                content = ""
+                if mime.startswith("text-") and mime != "text-html":
+                    with codecs.open(str(path.absolute()), 'r', encoding='utf-8', errors='ignore') as f:
+                        # Limit read 50kb
+                        content = f.read(1024 * 50)
+
+                file_type = "file"
+                file_infos = [{
+                    "mime": mime,
+                    "content": content
+                }]
+            elif path.is_dir():
+                file_type = "directory"
+                file_infos = self.get_files_callback(self.file)
+            elif path.is_symlink():
+                file_type = "symlink"
 
         self.fetch_finish.emit(self.file, file_type, json.dumps(file_infos))

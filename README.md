@@ -61,4 +61,5 @@ File manager application for the [Emacs Application Framework](https://github.co
 | `D` | delete_current_file |
 | `o` | toggle_hidden_file |
 | `q` | bury-buffer |
+| `G` | find_files |
 

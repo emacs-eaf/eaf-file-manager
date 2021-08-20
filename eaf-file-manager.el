@@ -118,6 +118,7 @@
     ("D" . "delete_current_file")
     ("o" . "toggle_hidden_file")
     ("q" . "bury-buffer")
+    ("G" . "find_files")
     )
   "The keybinding of EAF File Manager."
   :type 'cons)
