@@ -37,6 +37,7 @@
         <PreviewPdf v-if="previewType == 'file' && previewMime == 'pdf'" :file="previewPath"/>
         <PreviewVideo v-if="previewType == 'file' && previewMime == 'video'" :file="previewPath"/>
         <PreviewAudio v-if="previewType == 'file' && previewMime == 'audio'" :file="previewPath" :barColor="foregroundColor"/>
+        <PreviewOffice v-if="previewType == 'file' && previewMime == 'office'" :file="previewPath"/>
         <PreviewDirectory
           v-if="previewType == 'directory' && previewFiles.length > 0"
           :files="previewFiles"
@@ -63,6 +64,7 @@
  import PreviewEmpty from "./PreviewEmpty.vue"
  import PreviewSymlink from "./PreviewSymlink.vue"
  import PreviewDirectory from "./PreviewDirectory.vue"
+ import PreviewOffice from "./PreviewOffice.vue"
 
  export default {
    name: 'Main',
@@ -76,6 +78,7 @@
      PreviewEmpty,
      PreviewSymlink,
      PreviewDirectory,
+     PreviewOffice,
    },
    props: {
      msg: String
@@ -453,6 +456,8 @@
            this.previewMime = "video"
          } else if (mime.startsWith("audio-")) {
            this.previewMime = "audio"
+         } else if (mime == "application-wps-office.docx") {
+           this.previewMime = "office"
          }
        }
      }
