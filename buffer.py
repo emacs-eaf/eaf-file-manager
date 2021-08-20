@@ -38,7 +38,7 @@ class AppBuffer(BrowserBuffer):
 
         self.arguments = arguments
 
-        self.load_index_html(__file__)
+        self.load_index_html(__file__, convert_path=False)
 
         self.show_hidden_file = get_emacs_var("eaf-file-manager-show-hidden-file")
 
