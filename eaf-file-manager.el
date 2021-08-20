@@ -200,8 +200,8 @@
 (defun eaf-file-manager-rename-edit-buffer-confirm ()
   "Confirm input text and send the text to corresponding EAF app."
   (interactive)
-  (let* ((new-files (remove-if 'string-empty-p (string-lines (buffer-string))))
-         (test-files (delq nil (delete-dups (remove-if 'string-empty-p (string-lines (buffer-string))))))
+  (let* ((new-files (cl-remove-if 'string-empty-p (string-lines (buffer-string))))
+         (test-files (delq nil (delete-dups (cl-remove-if 'string-empty-p (string-lines (buffer-string))))))
          (buffer-id eaf--buffer-id))
     (if (equal (length new-files) eaf--files-number)
         (if (equal (length new-files) (length test-files))
