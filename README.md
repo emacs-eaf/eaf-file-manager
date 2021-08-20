@@ -34,7 +34,7 @@ File manager application for the [Emacs Application Framework](https://github.co
 | `C-n` | js_select_next_file |
 | `k` | js_select_prev_file |
 | `C-p` | js_select_prev_file |
-| `l` | js_open_file |
+| `l` | js_open_current_file |
 | `J` | js_select_last_file |
 | `K` | js_select_first_file |
 | `r` | js_rename_file |
@@ -42,11 +42,12 @@ File manager application for the [Emacs Application Framework](https://github.co
 | `<left>` | js_up_directory |
 | `<down>` | js_select_next_file |
 | `<up>` | js_select_prev_file |
-| `<right>` | js_open_file |
-| `f` | open_link |
+| `<right>` | js_open_current_file |
+| `f` | js_open_current_file |
+| `F` | open_link |
 | `SPC` | js_scroll_up_select_file |
 | `b` | js_scroll_down_select_file |
-| `<return>` | js_open_file |
+| `<return>` | js_open_current_file |
 | `w` | js_copy_file_name |
 | `W` | js_copy_file_path |
 | `/` | copy_dir_path |
@@ -65,5 +66,7 @@ File manager application for the [Emacs Application Framework](https://github.co
 | `o` | toggle_hidden_file |
 | `O` | toggle_preview |
 | `q` | bury-buffer |
+| `Q` | close_buffer |
 | `g` | refresh_dir |
 | `G` | find_files |
+
