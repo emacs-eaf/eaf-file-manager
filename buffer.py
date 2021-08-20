@@ -31,6 +31,7 @@ import codecs
 import os
 import json
 import shutil
+import time
 
 class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, arguments):
@@ -48,7 +49,8 @@ class AppBuffer(BrowserBuffer):
         if not os.path.exists(self.icon_cache_dir):
             os.makedirs(self.icon_cache_dir)
 
-        self.fetch_preview_info_thread = None
+        self.preview_file = None
+        self.fetch_preview_info_threads = []
 
     def init_app(self):
         self.buffer_widget.execute_js('''setPreviewOption(\"{}\")'''.format("true" if self.show_preview else "false"))
@@ -253,24 +255,19 @@ class AppBuffer(BrowserBuffer):
     @QtCore.pyqtSlot(str)
     def update_preview(self, file):
         if self.show_preview:
-            self.exit_preview_thread()
+            self.preview_file = file
 
-            self.fetch_preview_info_thread = FetchPreviewInfoThread(file, self.get_file_infos, self.get_file_mime)
-            self.fetch_preview_info_thread.fetch_finish.connect(self.update_preview_info)
-            self.fetch_preview_info_thread.start()
+            thread = FetchPreviewInfoThread(file, self.get_preview_file, self.get_file_infos, self.get_file_mime)
+            thread.fetch_finish.connect(self.update_preview_info)
 
-    def exit_preview_thread(self):
-        if self.fetch_preview_info_thread != None and self.fetch_preview_info_thread.isRunning():
-            # We need call "quit" and then call "wait" function to quit thread safely.
-            # Otherwise will cause crash.
-            self.fetch_preview_info_thread.quit()
-            self.fetch_preview_info_thread.wait()
+            self.fetch_preview_info_threads.append(thread)
+            thread.start()
+
+    def get_preview_file(self):
+        return self.preview_file
 
     def update_preview_info(self, file, file_type, file_infos):
         self.buffer_widget.execute_js('''setPreview(\"{}\", \"{}\", {});'''.format(file, file_type, file_infos))
-
-    def destroy_buffer(self):
-        self.exit_preview_thread()
 
     @interactive
     def delete_selected_files(self):
@@ -465,8 +462,6 @@ class AppBuffer(BrowserBuffer):
             with open(new_file_path, "a"):
                 os.utime(new_file_path)
 
-            print("Create file: ", new_file_path)
-
             self.buffer_widget.execute_js('''addNewFile({})'''.format(json.dumps(self.get_file_info(new_file_path))))
 
     def handle_create_directory(self, new_directory):
@@ -475,8 +470,6 @@ class AppBuffer(BrowserBuffer):
         else:
             new_directory_path = os.path.join(self.url, new_directory)
             os.makedirs(new_directory_path)
-
-            print("Create directory: ", new_directory_path)
 
             self.buffer_widget.execute_js('''addNewDirectory({})'''.format(json.dumps(self.get_file_info(new_directory_path))))
 
@@ -562,32 +555,36 @@ class FetchPreviewInfoThread(QThread):
 
     fetch_finish = QtCore.pyqtSignal(str, str, str)
 
-    def __init__(self, file, get_files_callback, get_file_mime_callback):
+    def __init__(self, file, get_preview_file_callback, get_files_callback, get_file_mime_callback):
         QThread.__init__(self)
 
         self.file = file
+        self.get_preview_file_callback = get_preview_file_callback
         self.get_files_callback = get_files_callback
         self.get_file_mime_callback = get_file_mime_callback
 
     def run(self):
-        path = ""
-        file_type = ""
-        file_infos = []
+        # Wait 300 milliseconds, if current preview file is changed, stop fetch thread.
+        time.sleep(0.3)
+        if self.get_preview_file_callback() == self.file:
+            path = ""
+            file_type = ""
+            file_infos = []
 
-        if self.file != "":
-            path = Path(self.file)
+            if self.file != "":
+                path = Path(self.file)
 
-            if path.is_file():
-                mime = self.get_file_mime_callback(str(path.absolute()))
+                if path.is_file():
+                    mime = self.get_file_mime_callback(str(path.absolute()))
 
-                file_type = "file"
-                file_infos = [{
-                    "mime": mime,
-                }]
-            elif path.is_dir():
-                file_type = "directory"
-                file_infos = self.get_files_callback(self.file)
-            elif path.is_symlink():
-                file_type = "symlink"
+                    file_type = "file"
+                    file_infos = [{
+                        "mime": mime,
+                    }]
+                elif path.is_dir():
+                    file_type = "directory"
+                    file_infos = self.get_files_callback(self.file)
+                elif path.is_symlink():
+                    file_type = "symlink"
 
-        self.fetch_finish.emit(self.file, file_type, json.dumps(file_infos))
+            self.fetch_finish.emit(self.file, file_type, json.dumps(file_infos))
