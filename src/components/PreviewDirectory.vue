@@ -18,6 +18,8 @@
 </template>
 
 <script>
+ import { QWebChannel } from "qwebchannel";
+
  export default {
    name: 'PreviewDirectory',
    props: {
