@@ -245,10 +245,12 @@
 (defun eaf-open-in-file-manager (&optional file)
   (interactive)
   (let ((jump-file (or file (buffer-file-name))))
-    (if jump-file
-        (eaf-open (file-name-directory jump-file) "file-manager" (format "jump:%s" jump-file) t)
-      (eaf-open (file-name-directory (directory-file-name default-directory)) "file-manager")
-      )))
+    (cond (jump-file
+           (eaf-open (file-name-directory jump-file) "file-manager" (format "jump:%s" jump-file) t))
+          ((equal major-mode 'eaf-mode)
+           (eaf-open (file-name-directory (directory-file-name (file-truename default-directory))) "file-manager"))
+          (t
+           (eaf-open (file-truename default-directory) "file-manager")))))
 
 (provide 'eaf-file-manager)
 
