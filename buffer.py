@@ -36,7 +36,7 @@ class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, arguments):
         BrowserBuffer.__init__(self, buffer_id, url, arguments, False)
 
-        self.search_regex = arguments
+        self.arguments = arguments
 
         self.load_index_html(__file__)
 
@@ -83,8 +83,16 @@ class AppBuffer(BrowserBuffer):
                 select_color
             ))
 
-        if self.search_regex != "":
-            self.search_directory(self.url, self.search_regex)
+        if self.arguments != "":
+            if self.arguments.startswith("search:"):
+                search_regex = self.arguments.split("search:")[1]
+                if search_regex != "":
+                    self.search_directory(self.url, search_regex)
+                else:
+                    self.change_directory(self.url, "")
+            elif self.arguments.startswith("jump:"):
+                jump_file = self.arguments.split("jump:")[1]
+                self.change_directory(self.url, jump_file)
         else:
             self.change_directory(self.url, "")
 
@@ -209,6 +217,7 @@ class AppBuffer(BrowserBuffer):
         self.url = dir
 
         file_infos = self.get_file_infos(dir)
+
         if current_dir == "" and len(file_infos) == 0:
             eval_in_emacs("message", ["Nothing in {}, no need to enter directory.".format(dir)])
         else:
@@ -504,7 +513,7 @@ class AppBuffer(BrowserBuffer):
             message_to_emacs("'{}' is not directory, abandon copy.")
 
     def handle_find_files(self, regex):
-        eval_in_emacs("eaf-open", [self.url, "file-manager", regex, "always-new"])
+        eval_in_emacs("eaf-open", [self.url, "file-manager", "search:{}".format(regex), "always-new"])
 
 class FetchPreviewInfoThread(QThread):
 
