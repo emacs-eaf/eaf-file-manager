@@ -399,7 +399,7 @@ class AppBuffer(BrowserBuffer):
         elif callback_tag == "copy_files":
             self.handle_copy_files(result_content)
         elif callback_tag == "open_link":
-            self.buffer_widget._open_link(result_content.strip())
+            self.handle_open_link(result_content)
         elif callback_tag == "find_files":
             self.handle_find_files(result_content)
 
@@ -539,6 +539,10 @@ class AppBuffer(BrowserBuffer):
                 message_to_emacs("Error in copy files: " + str(traceback.print_exc()))
         else:
             message_to_emacs("'{}' is not directory, abandon copy.")
+
+    def handle_open_link(self, result_content):
+        self.buffer_widget._open_link(result_content.strip())
+        self.buffer_widget.execute_js('''openFile();''')
 
     def handle_find_files(self, regex):
         eval_in_emacs("eaf-open", [self.url, "file-manager", "search:{}".format(regex), "always-new"])
