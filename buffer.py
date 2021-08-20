@@ -126,7 +126,10 @@ class AppBuffer(BrowserBuffer):
             return "directory"
         else:
             file_info = QtCore.QFileInfo(file_path)
-            return self.mime_db.mimeTypeForFile(file_info).name().replace("/", "-")
+            if file_path.endswith(".vue"):
+                return "text-plain"
+            else:
+                return self.mime_db.mimeTypeForFile(file_info).name().replace("/", "-")
 
     def generate_file_icon(self, file_path):
         file_mime = self.get_file_mime(file_path)
