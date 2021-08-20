@@ -3,10 +3,11 @@
     <div
       class="file"
       v-for="file in files"
+      @click="openFile(file)"
       :key="file.path"
       :style="{ 'background': itemBackgroundColor(file), 'color': itemForegroundColor(file) }">
       <img class="file-icon" :src="fileIconPath(file.icon)"/>
-      <div class="file-name">
+      <div class="eaf-file-manager-file-name">
         {{ file.name }}
       </div>
       <div class="file-size">
@@ -34,8 +35,19 @@
    mounted() {
    },
    created() {
+     // eslint-disable-next-line no-undef
+     new QWebChannel(qt.webChannelTransport, channel => {
+       window.pyobject = channel.objects.pyobject;
+     });
    },
    methods: {
+     openFile(file) {
+       if (file.type == "directory") {
+         window.pyobject.change_directory(file.path, "");
+       } else if (file.type == "file") {
+         window.pyobject.eval_emacs_function("find-file", [file.path])
+       }
+     },
    }
  }
 </script>
@@ -65,7 +77,7 @@
    margin-right: 5px;
  }
 
- .file-name {
+ .eaf-file-manager-file-name {
    flex: 1;
    padding-right: 20px;
  }
