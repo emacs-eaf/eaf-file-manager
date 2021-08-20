@@ -38,7 +38,8 @@
        xhr.responseType = "arraybuffer";
        xhr.onload = () => {
          if (xhr.status == 0) {
-           this.content = String.fromCharCode.apply(null, new Uint8Array(xhr.response));
+           var enc = new TextDecoder();
+           this.content = enc.decode(xhr.response)
          }
        };
        xhr.send();
