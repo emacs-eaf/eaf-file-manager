@@ -7,8 +7,8 @@
 ;; Copyright (C) 2021, Andy Stewart, all rights reserved.
 ;; Created: 2021-07-31 20:45:09
 ;; Version: 0.1
-;; Last-Updated: 2021-07-31 20:45:09
-;;           By: Andy Stewart
+;; Last-Updated: Fri Aug 20 02:08:24 2021 (-0400)
+;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf-file-manager.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 28.0.50
@@ -56,39 +56,14 @@
 ;; No need more.
 
 ;;; Customize:
-;;
-;;
-;;
-;; All of the above can customize by:
-;;      M-x customize-group RET eaf-file-manager RET
-;;
-
-;;; Change log:
-;;
-;; 2021/07/31
-;;      * First released.
-;;
-
-;;; Acknowledgements:
-;;
-;;
-;;
-
-;;; TODO
-;;
-;;
-;;
-
-;;; Require
-
-
-;;; Code:
 
 (defcustom eaf-file-manager-keybinding
   '(("<f12>" . "open_devtools")
     ("h" . "js_up_directory")
     ("j" . "js_select_next_file")
+    ("C-n" . "js_select_next_file")
     ("k" . "js_select_prev_file")
+    ("C-p" . "js_select_prev_file")
     ("l" . "js_open_file")
     ("J" . "js_select_last_file")
     ("K" . "js_select_first_file")
@@ -179,6 +154,33 @@
 (defcustom eaf-file-manager-show-hidden-file nil
   ""
   :type 'boolean)
+
+;;
+;; All of the above can customize by:
+;;      M-x customize-group RET eaf-file-manager RET
+;;
+
+;;; Change log:
+;;
+;; 2021/07/31
+;;      * First released.
+;;
+
+;;; Acknowledgements:
+;;
+;;
+;;
+
+;;; TODO
+;;
+;;
+;;
+
+;;; Require
+
+
+;;; Code:
+
 
 (defvar eaf-file-manager-rename-edit-mode-map
   (let ((map (make-sparse-keymap)))
