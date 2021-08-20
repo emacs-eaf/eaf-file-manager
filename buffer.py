@@ -107,8 +107,6 @@ class AppBuffer(BrowserBuffer):
 
         file_infos.sort(key=cmp_to_key(self.file_compare))
 
-        print(file_infos)
-
         select_index = 0
 
         self.buffer_widget.execute_js('''changePath(\"{}\", {}, {});'''.format(
@@ -346,7 +344,10 @@ class AppBuffer(BrowserBuffer):
 
         self.buffer_widget.execute_js('''setPreviewOption(\"{}\")'''.format("true" if self.show_preview else "false"))
 
-        self.refresh()
+        if self.show_preview:
+            current_file = self.buffer_widget.execute_js("getCurrentFile();")
+            if current_file and type(current_file).__name__ == "dict" and "path" in current_file:
+                self.update_preview(current_file["path"])
 
     @interactive
     def find_files(self):
@@ -358,7 +359,9 @@ class AppBuffer(BrowserBuffer):
         message_to_emacs("Refresh current directory done.")
 
     def refresh(self):
-        self.change_directory(self.url, self.buffer_widget.execute_js("getCurrentFile();")["path"])
+        current_file = self.buffer_widget.execute_js("getCurrentFile();")
+        if current_file and type(current_file).__name__ == "dict" and "path" in current_file:
+            self.change_directory(self.url, current_file["path"])
 
     def batch_rename_confirm(self, new_file_string):
         new_files = new_file_string.split("\n")
@@ -542,7 +545,6 @@ class AppBuffer(BrowserBuffer):
 
     def handle_open_link(self, result_content):
         self.buffer_widget._open_link(result_content.strip())
-        self.buffer_widget.execute_js('''openFile();''')
 
     def handle_find_files(self, regex):
         eval_in_emacs("eaf-open", [self.url, "file-manager", "search:{}".format(regex), "always-new"])
