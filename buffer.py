@@ -217,6 +217,7 @@ class AppBuffer(BrowserBuffer):
         self.url = dir
 
         eval_in_emacs('eaf--change-default-directory', [dir])
+        self.change_title(os.path.basename(dir))
 
         file_infos = self.get_file_infos(dir)
 
