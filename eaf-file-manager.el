@@ -96,6 +96,7 @@
     ("o" . "toggle_hidden_file")
     ("O" . "toggle_preview")
     ("q" . "bury-buffer")
+    ("Q" . "close_buffer")
     ("g" . "refresh_dir")
     ("G" . "find_files")
     )
