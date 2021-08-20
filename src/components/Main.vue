@@ -28,7 +28,9 @@
         </div>
       </div>
 
-      <div class="preview">
+      <div
+        v-if="showPreview === 'true'"
+        class="preview">
         <PreviewImage v-if="previewType == 'file' && previewMime == 'image'" :file="previewPath"/>
         <PreviewHtml v-if="previewType == 'file' && previewMime == 'html'" :file="previewPath"/>
         <PreviewCode v-if="previewType == 'file' && previewMime == 'text'" :content="previewContent" :backgroundColor="backgroundColor"/>
@@ -100,7 +102,9 @@
        previewContent: "",
 
        pathSep: "",
-       iconCacheDir: ""
+       iconCacheDir: "",
+
+       showPreview: "false"
      }
    },
    mounted() {
@@ -130,6 +134,7 @@
      window.renameFiles = this.renameFiles;
      window.rename = this.rename;
      window.initIconCacheDir = this.initIconCacheDir;
+     window.setPreviewOption = this.setPreviewOption;
      window.copyFileName = this.copyFileName;
      window.copyFilePath = this.copyFilePath;
      window.addNewFile = this.addNewFile;
@@ -397,6 +402,10 @@
        this.selectFileByIndex(insert_index);
      },
 
+     setPreviewOption(option) {
+       this.showPreview = option;
+     },
+
      setPreview(filePath, fileType, fileInfos) {
        this.previewPath = filePath;
        this.previewType = fileType;
@@ -435,9 +444,8 @@
    flex-direction: column;
  }
 
-
  .file-area {
-   width: 50%;
+   flex: 1 1 0px;
    height: 100%;
    display: flex;
    flex-direction: column;
@@ -485,7 +493,7 @@
  }
 
  .preview {
-   width: 50%;
+   flex: 1 1 0px;
    height: 100%;
    overflow: hidden;
 

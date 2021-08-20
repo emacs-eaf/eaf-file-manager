@@ -93,6 +93,7 @@
     ("x" . "delete_selected_files")
     ("X" . "delete_current_file")
     ("o" . "toggle_hidden_file")
+    ("O" . "toggle_preview")
     ("q" . "bury-buffer")
     ("g" . "refresh_dir")
     ("G" . "find_files")
@@ -152,6 +153,10 @@
   :type 'string)
 
 (defcustom eaf-file-manager-show-hidden-file nil
+  ""
+  :type 'boolean)
+
+(defcustom eaf-file-manager-show-preview t
   ""
   :type 'boolean)
 

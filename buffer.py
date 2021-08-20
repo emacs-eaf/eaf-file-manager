@@ -41,6 +41,7 @@ class AppBuffer(BrowserBuffer):
         self.load_index_html(__file__)
 
         self.show_hidden_file = get_emacs_var("eaf-file-manager-show-hidden-file")
+        self.show_preview = get_emacs_var("eaf-file-manager-show-preview")
 
         self.mime_db = QMimeDatabase()
         self.icon_cache_dir = os.path.join(os.path.dirname(__file__,), "src", "assets", "icon_cache")
@@ -50,6 +51,8 @@ class AppBuffer(BrowserBuffer):
         self.fetch_preview_info_thread = None
 
     def init_app(self):
+        self.buffer_widget.execute_js('''setPreviewOption(\"{}\")'''.format("true" if self.show_preview else "false"))
+
         self.buffer_widget.execute_js('''initIconCacheDir(\"{}\", \"{}\")'''.format(self.icon_cache_dir, os.path.sep))
 
         if get_emacs_var("eaf-emacs-theme-mode") == "dark":
@@ -251,11 +254,12 @@ class AppBuffer(BrowserBuffer):
 
     @QtCore.pyqtSlot(str)
     def update_preview(self, file):
-        self.exit_preview_thread()
+        if self.show_preview:
+            self.exit_preview_thread()
 
-        self.fetch_preview_info_thread = FetchPreviewInfoThread(file, self.get_file_infos, self.get_file_mime)
-        self.fetch_preview_info_thread.fetch_finish.connect(self.update_preview_info)
-        self.fetch_preview_info_thread.start()
+            self.fetch_preview_info_thread = FetchPreviewInfoThread(file, self.get_file_infos, self.get_file_mime)
+            self.fetch_preview_info_thread.fetch_finish.connect(self.update_preview_info)
+            self.fetch_preview_info_thread.start()
 
     def exit_preview_thread(self):
         if self.fetch_preview_info_thread != None and self.fetch_preview_info_thread.isRunning():
@@ -323,11 +327,24 @@ class AppBuffer(BrowserBuffer):
     @interactive
     def toggle_hidden_file(self):
         if self.show_hidden_file:
-            message_to_emacs("Show hidden file")
-        else:
             message_to_emacs("Hide hidden file")
+        else:
+            message_to_emacs("Show hidden file")
 
         self.show_hidden_file = not self.show_hidden_file
+
+        self.change_directory(self.url, "")
+
+    @interactive
+    def toggle_preview(self):
+        if self.show_preview:
+            message_to_emacs("Hide file preview.")
+        else:
+            message_to_emacs("Show file preview.")
+
+        self.show_preview = not self.show_preview
+
+        self.buffer_widget.execute_js('''setPreviewOption(\"{}\")'''.format("true" if self.show_preview else "false"))
 
         self.change_directory(self.url, "")
 
