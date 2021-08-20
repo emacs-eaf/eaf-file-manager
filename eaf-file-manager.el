@@ -242,9 +242,9 @@
     (insert files)
     (goto-char (point-min))))
 
-(defun eaf-open-in-file-manager ()
+(defun eaf-open-in-file-manager (&optional file)
   (interactive)
-  (let ((jump-file (buffer-file-name)))
+  (let ((jump-file (or file (buffer-file-name))))
     (if jump-file
         (eaf-open (file-name-directory jump-file) "file-manager" (format "jump:%s" jump-file) t)
       (eaf-open (file-name-directory (directory-file-name default-directory)) "file-manager")
