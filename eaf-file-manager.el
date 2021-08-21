@@ -186,7 +186,7 @@
 ;;
 
 ;;; Require
-
+(require 'subr-x)
 
 ;;; Code:
 
