@@ -191,7 +191,6 @@
 ;;
 
 ;;; Require
-(require 'subr-x)
 
 ;;; Code:
 
@@ -218,8 +217,8 @@
 (defun eaf-file-manager-rename-edit-buffer-confirm ()
   "Confirm input text and send the text to corresponding EAF app."
   (interactive)
-  (let* ((new-files (cl-remove-if 'string-empty-p (string-lines (buffer-string))))
-         (test-files (delq nil (delete-dups (cl-remove-if 'string-empty-p (string-lines (buffer-string))))))
+  (let* ((new-files (cl-remove-if 'string-empty-p (split-string (buffer-string) "\n")))
+         (test-files (delq nil (delete-dups (cl-remove-if 'string-empty-p (split-string (buffer-string) "\n")))))
          (buffer-id eaf--buffer-id))
     (if (equal (length new-files) eaf--files-number)
         (if (equal (length new-files) (length test-files))
@@ -254,7 +253,7 @@
     (with-current-buffer edit-text-buffer
       (eaf-file-manager-rename-edit-mode)
       (set (make-local-variable 'eaf--buffer-id) buffer-id)
-      (set (make-local-variable 'eaf--files-number) (length (string-lines files)))
+      (set (make-local-variable 'eaf--files-number) (length (split-string files "\n")))
       (eaf-file-manager-rename-edit-set-header-line dir))
     (switch-to-buffer edit-text-buffer)
     (insert files)
