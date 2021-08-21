@@ -579,6 +579,12 @@ class AppBuffer(BrowserBuffer):
         else:
             message_to_emacs("File '{}' not exists".format(new_file))
 
+    def marker_offset_x(self):
+        return -28
+
+    def marker_offset_y(self):
+        return 4
+
 class FetchPreviewInfoThread(QThread):
 
     fetch_finish = QtCore.pyqtSignal(str, str, str)
