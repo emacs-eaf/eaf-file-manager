@@ -147,6 +147,8 @@
      window.openPreviewFileByName = this.openPreviewFileByName;
      window.previewScrollUp = this.previewScrollUp;
      window.previewScrollDown = this.previewScrollDown;
+     window.previewScrollUpLine = this.previewScrollUpLine;
+     window.previewScrollDownLine = this.previewScrollDownLine;
      window.previewToggle = this.previewToggle;
    },
    created() {
@@ -438,10 +440,19 @@
      },
 
      previewScrollUp() {
-
+       this.$root.$emit("scrollUp");
      },
 
      previewScrollDown() {
+       this.$root.$emit("scrollDown");
+     },
+
+     previewScrollUpLine() {
+       this.$root.$emit("scrollUpLine");
+     },
+
+     previewScrollDownLine() {
+       this.$root.$emit("scrollDownLine");
      },
 
      previewToggle() {

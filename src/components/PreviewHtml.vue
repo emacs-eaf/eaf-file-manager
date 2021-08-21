@@ -24,7 +24,23 @@
      var that = this;
 
      this.$root.$on("previewToggle", function() {
-       that.$refs.scrollArea.scrollTop = that.$refs.scrollArea.scrollTop + that.$refs.scrollArea.clientHeight;
+       that.scrollUp();
+     });
+
+     this.$root.$on("scrollUp", function() {
+       that.scrollUp();
+     });
+
+     this.$root.$on("scrollDown", function() {
+       that.scrollDown();
+     });
+
+     this.$root.$on("scrollUpLine", function() {
+       that.scrollUpLine();
+     });
+
+     this.$root.$on("scrollDownLine", function() {
+       that.scrollDownLine();
      });
    },
    created() {
@@ -43,6 +59,22 @@
          }
        };
        xhr.send();
+     },
+
+     scrollUp() {
+       this.$refs.scrollArea.scrollTop = this.$refs.scrollArea.scrollTop + this.$refs.scrollArea.clientHeight;
+     },
+
+     scrollDown() {
+       this.$refs.scrollArea.scrollTop = this.$refs.scrollArea.scrollTop - this.$refs.scrollArea.clientHeight;
+     },
+
+     scrollUpLine() {
+       this.$refs.scrollArea.scrollTop = this.$refs.scrollArea.scrollTop + 50;
+     },
+
+     scrollDownLine() {
+       this.$refs.scrollArea.scrollTop = this.$refs.scrollArea.scrollTop - 50;
      }
    }
  }
