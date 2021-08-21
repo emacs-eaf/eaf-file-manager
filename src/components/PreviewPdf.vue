@@ -30,6 +30,8 @@
    mounted() {
      var that = this;
 
+     this.$refs.scrollArea.scrollTop = 0;
+     
      this.$root.$on("previewToggle", function() {
        that.scrollUp();
      });

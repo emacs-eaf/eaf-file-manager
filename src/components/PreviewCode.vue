@@ -19,6 +19,7 @@
    watch: {
      file: function() {
        this.readFileContent();
+       this.$refs.scrollArea.scrollTop = 0;
      }
    },
    data() {
