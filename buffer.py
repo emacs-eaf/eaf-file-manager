@@ -249,7 +249,7 @@ class AppBuffer(BrowserBuffer):
     @QtCore.pyqtSlot(str)
     def change_up_directory(self, file):
         current_dir = os.path.dirname(file)
-        up_directory_path = Path(current_dir).parent.absolute()
+        up_directory_path = str(Path(current_dir).parent.absolute())
         if up_directory_path != current_dir:
             self.change_directory(up_directory_path, current_dir)
         else:
