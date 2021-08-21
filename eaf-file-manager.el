@@ -55,6 +55,8 @@
 ;;
 ;; No need more.
 
+(require 'json)
+
 ;;; Customize:
 
 (defcustom eaf-file-manager-keybinding
@@ -256,7 +258,16 @@
       (set (make-local-variable 'eaf--files-number) (length (split-string files "\n")))
       (eaf-file-manager-rename-edit-set-header-line dir))
     (switch-to-buffer edit-text-buffer)
-    (insert files)
+    (mapc (lambda (file)
+            (let* ((name (elt file 0))
+                   (type (elt file 1))
+                   (face (cond
+                          ((equal type "directory") 'dired-directory)
+                          ((equal type "symlink") 'dired-symlink)
+                          (t 'default))))
+              (insert (propertize name 'name name 'face face))
+              (insert "\n")))
+          (json-read-from-string files))
     (goto-char (point-min))))
 
 (defun eaf-open-in-file-manager (&optional file)

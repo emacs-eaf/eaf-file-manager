@@ -355,8 +355,10 @@ class AppBuffer(BrowserBuffer):
     @interactive
     def batch_rename(self):
         self.batch_rename_files = self.buffer_widget.execute_js("getAllFiles();")
-        files = "\n".join(map(lambda file: file["name"], self.batch_rename_files))
-        eval_in_emacs("eaf-file-manager-rename-edit-buffer", [self.buffer_id, os.path.basename(os.path.normpath(self.url)), files])
+        files = []
+        for file in self.batch_rename_files:
+            files.append([file["name"], file["type"]])
+        eval_in_emacs("eaf-file-manager-rename-edit-buffer", [self.buffer_id, os.path.basename(os.path.normpath(self.url)), json.dumps(files)])
 
     @interactive
     def toggle_hidden_file(self):
