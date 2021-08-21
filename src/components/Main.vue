@@ -145,6 +145,9 @@
      window.addNewDirectory = this.addNewDirectory;
      window.openFileByName = this.openFileByName;
      window.openPreviewFileByName = this.openPreviewFileByName;
+     window.previewScrollUp = this.previewScrollUp;
+     window.previewScrollDown = this.previewScrollDown;
+     window.previewToggle = this.previewToggle;
    },
    created() {
      // eslint-disable-next-line no-undef
@@ -432,6 +435,17 @@
 
      setPreviewOption(option) {
        this.showPreview = option;
+     },
+
+     previewScrollUp() {
+
+     },
+
+     previewScrollDown() {
+     },
+
+     previewToggle() {
+       this.$root.$emit("previewToggle");
      },
 
      setPreview(filePath, fileType, fileInfos) {

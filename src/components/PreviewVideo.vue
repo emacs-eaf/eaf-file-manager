@@ -2,6 +2,7 @@
   <div class="video-box">
     <video
       class="video"
+      ref="player"
       :key="dynamicKey"
       controls>
       <source :src="file">
@@ -26,6 +27,14 @@
      }
    },
    mounted() {
+     var that = this;
+     this.$root.$on("previewToggle", function() {
+       if (that.$refs.player.paused) {
+         that.$refs.player.play();
+       } else {
+         that.$refs.player.pause();
+       }
+     });
    },
    created() {
    },

@@ -20,7 +20,6 @@
       ref="player"
       class="audio"
       :key="dynamicKey"
-      autoplay
       controls>
       <source :src="file">
     </audio>
@@ -42,10 +41,21 @@
    data() {
      return {
        dynamicKey: "",
-       visualCanvasWidth: 0
+       visualCanvasWidth: 0,
      }
    },
    mounted() {
+     var that = this;
+
+     this.$refs.player.pause();
+
+     this.$root.$on("previewToggle", function() {
+       if (that.$refs.player.paused) {
+         that.$refs.player.play();
+       } else {
+         that.$refs.player.pause();
+       }
+     });
    },
    created() {
      this.visualCanvasWidth = window.innerWidth / 3;
@@ -71,5 +81,17 @@
    border: none;
    outline: none;
    display: none;
+ }
+
+ .notify-info-wrap {
+   width: 100%;
+   height: 100%;
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+ }
+
+ .notify-info {
+   text-align: center;
  }
 </style>

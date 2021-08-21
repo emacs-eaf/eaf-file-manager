@@ -1,5 +1,5 @@
 <template>
-  <div class="pdf-box">
+  <div ref="scrollArea" class="pdf-box">
     <pdf
       :src="file"
       :key="dynamicKey"/>
@@ -28,6 +28,11 @@
      }
    },
    mounted() {
+     var that = this;
+
+     this.$root.$on("previewToggle", function() {
+       that.$refs.scrollArea.scrollTop = that.$refs.scrollArea.scrollTop + that.$refs.scrollArea.clientHeight;
+     });
    },
    created() {
    },

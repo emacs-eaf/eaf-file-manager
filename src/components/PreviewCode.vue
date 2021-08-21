@@ -1,5 +1,5 @@
 <template>
-  <div class="code-box">
+  <div ref="scrollArea" class="code-box">
     <pre class="code" v-highlightjs="content">
       <code :style="{ 'background': backgroundColor }">
       </code>
@@ -27,6 +27,11 @@
      }
    },
    mounted() {
+     var that = this;
+
+     this.$root.$on("previewToggle", function() {
+       that.$refs.scrollArea.scrollTop = that.$refs.scrollArea.scrollTop + that.$refs.scrollArea.clientHeight;
+     });
    },
    created() {
      this.readFileContent();

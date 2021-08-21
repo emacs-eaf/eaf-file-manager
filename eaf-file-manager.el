@@ -101,6 +101,9 @@
     ("Q" . "close_buffer")
     ("g" . "refresh_dir")
     ("G" . "find_files")
+    ("SPC" . "js_preview_toggle")
+    ("," . "js_preview_scroll_up")
+    ("." . "js_preview_scroll_down")
     )
   "The keybinding of EAF File Manager."
   :type 'cons)

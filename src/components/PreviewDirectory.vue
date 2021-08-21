@@ -1,5 +1,5 @@
 <template>
-  <div class="box">
+  <div ref="scrollArea" class="box">
     <div
       class="file"
       v-for="file in files"
@@ -34,6 +34,11 @@
      }
    },
    mounted() {
+     var that = this;
+
+     this.$root.$on("previewToggle", function() {
+       that.$refs.scrollArea.scrollTop = that.$refs.scrollArea.scrollTop + that.$refs.scrollArea.clientHeight;
+     });
    },
    created() {
    },

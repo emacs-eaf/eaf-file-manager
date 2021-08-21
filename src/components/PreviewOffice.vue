@@ -1,5 +1,5 @@
 <template>
-  <div class="office-box">
+  <div ref="scrollArea" class="office-box">
     <div v-html="wordText"/>
   </div>
 </template>
@@ -25,6 +25,11 @@
      }
    },
    mounted() {
+     var that = this;
+
+     this.$root.$on("previewToggle", function() {
+       that.$refs.scrollArea.scrollTop = that.$refs.scrollArea.scrollTop + that.$refs.scrollArea.clientHeight;
+     });
    },
    created() {
      this.getWordText();
