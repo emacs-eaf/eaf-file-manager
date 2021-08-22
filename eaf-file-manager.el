@@ -306,6 +306,8 @@
       (eaf-file-manager-rename-edit-mode)
       (set (make-local-variable 'eaf--buffer-id) buffer-id)
       (set (make-local-variable 'eaf--files-number) (length (split-string files "\n")))
+      (set (make-local-variable 'yank-excluded-properties)
+           '(total index path name face))
       (eaf-file-manager-rename-edit-set-header-line dir))
     (switch-to-buffer edit-text-buffer)
     (mapc (lambda (file)
@@ -319,7 +321,11 @@
                           ((equal type "symlink") 'eaf-file-manager-symlink)
                           ((equal type "file") 'eaf-file-manager-file)
                           (t 'default))))
-              (insert (propertize name 'total total 'index index 'path path 'name name 'face face))
+              (insert (propertize
+                       name
+                       'total total 'index index
+                       'path path 'name name 'face face
+                       'front-sticky nil 'rear-nonsticky '(face)))
               (insert "\n")))
           (json-read-from-string files))
     (goto-char (point-min))))
