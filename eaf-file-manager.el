@@ -123,46 +123,6 @@
   (interactive)
   (eaf-open "~" "file-manager"))
 
-(defcustom eaf-file-manager-dark-header-color "#EEC900"
-  ""
-  :type 'string)
-
-(defcustom eaf-file-manager-dark-directory-color "#00B8FF"
-  ""
-  :type 'string)
-
-(defcustom eaf-file-manager-dark-symlink-color "#46D9FF"
-  ""
-  :type 'string)
-
-(defcustom eaf-file-manager-dark-select-color "#333333"
-  ""
-  :type 'string)
-
-(defcustom eaf-file-manager-dark-mark-color "#D63F19"
-  ""
-  :type 'string)
-
-(defcustom eaf-file-manager-light-header-color "#7E4C8D"
-  ""
-  :type 'string)
-
-(defcustom eaf-file-manager-light-directory-color "#2257A0"
-  ""
-  :type 'string)
-
-(defcustom eaf-file-manager-light-symlink-color "#46D9FF"
-  ""
-  :type 'string)
-
-(defcustom eaf-file-manager-light-select-color "#EEEEEE"
-  ""
-  :type 'string)
-
-(defcustom eaf-file-manager-light-mark-color "#E11441"
-  ""
-  :type 'string)
-
 (defcustom eaf-file-manager-show-hidden-file nil
   ""
   :type 'boolean)
@@ -170,18 +130,6 @@
 (defcustom eaf-file-manager-show-preview t
   ""
   :type 'boolean)
-
-(defface eaf-file-manager-directory-face
-  '((t (:inherit font-lock-builtin-face)))
-  "Face used for subdirectories in batch rename buffer.")
-
-(defface eaf-file-manager-symlink-face
-  '((t (:inherit font-lock-keyword-face)))
-  "Face used for symbolic links in batch rename buffer.")
-
-(defface eaf-file-manager-file-face
-  '((t (:inherit default)))
-  "Face used for files in batch rename buffer.")
 
 ;;
 ;; All of the above can customize by:
@@ -317,9 +265,9 @@
                    (name (elt file 3))
                    (type (elt file 4))
                    (face (cond
-                          ((equal type "directory") 'eaf-file-manager-directory-face)
-                          ((equal type "symlink") 'eaf-file-manager-symlink-face)
-                          ((equal type "file") 'eaf-file-manager-file-face)
+                          ((equal type "directory") 'font-lock-builtin-face)
+                          ((equal type "symlink") 'font-lock-keyword-face)
+                          ((equal type "file") 'default)
                           (t 'default))))
               (insert (propertize
                        name

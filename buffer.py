@@ -23,10 +23,9 @@ from PyQt5.QtCore import QUrl, QThread, QMimeDatabase
 from PyQt5.QtGui import QColor, QIcon
 from PyQt5 import QtCore, QtWidgets
 from core.webengine import BrowserBuffer
-from core.utils import get_emacs_var, interactive, message_to_emacs
 from pathlib import Path
 from functools import cmp_to_key
-from core.utils import eval_in_emacs, PostGui, get_emacs_var, get_emacs_vars
+from core.utils import eval_in_emacs, PostGui, get_emacs_vars, interactive, message_to_emacs, get_emacs_face_foregrounds
 import codecs
 import os
 import json
@@ -77,45 +76,24 @@ class AppBuffer(BrowserBuffer):
             self.update_preview(self.file_infos[self.select_index]["path"])
 
     def init_vars(self):
-        (self.show_hidden_file, self.show_preview,
-         dark_header_color, dark_directory_color,
-         dark_symlink_color, dark_mark_color, dark_select_color,
-         light_header_color, light_directory_color,
-         light_symlink_color, light_mark_color, light_select_color
-         ) = get_emacs_vars(["eaf-file-manager-show-hidden-file",
-                             "eaf-file-manager-show-preview",
-                             "eaf-file-manager-dark-header-color",
-                             "eaf-file-manager-dark-directory-color",
-                             "eaf-file-manager-dark-symlink-color",
-                             "eaf-file-manager-dark-mark-color",
-                             "eaf-file-manager-dark-select-color",
-                             "eaf-file-manager-light-header-color",
-                             "eaf-file-manager-light-directory-color",
-                             "eaf-file-manager-light-symlink-color",
-                             "eaf-file-manager-light-mark-color",
-                             "eaf-file-manager-light-select-color"
-                             ])
+        (directory_color, symlink_color, header_color, mark_color) = get_emacs_face_foregrounds([
+            "font-lock-builtin-face",
+            "font-lock-keyword-face",
+            "font-lock-function-name-face",
+            "error"])
+
+        (self.show_hidden_file, self.show_preview) = get_emacs_vars(["eaf-file-manager-show-hidden-file", "eaf-file-manager-show-preview"])
 
         if self.theme_mode == "dark":
             if self.theme_background_color == "#000000":
-                select_color = dark_select_color
+                select_color = QColor("#333333")
             else:
                 select_color = QColor(self.theme_background_color).darker(120).name()
-
-            header_color = dark_header_color
-            directory_color = dark_directory_color
-            symlink_color = dark_symlink_color
-            mark_color = dark_mark_color
         else:
             if self.theme_background_color == "#FFFFFF":
-                select_color = light_select_color
+                select_color = QColor("#EEEEEE")
             else:
                 select_color = QColor(self.theme_background_color).darker(110).name()
-
-            header_color = light_header_color
-            directory_color = light_directory_color
-            symlink_color = light_symlink_color
-            mark_color = light_mark_color
 
         self.buffer_widget.eval_js('''init(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
             self.theme_background_color, self.theme_foreground_color, header_color, directory_color, symlink_color, mark_color, select_color,
