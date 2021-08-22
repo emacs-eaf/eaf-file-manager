@@ -1,9 +1,13 @@
 <template>
   <div ref="scrollArea" class="code-box">
-    <pre class="code" v-highlightjs="content">
+    <pre
+      v-if="size < 1024 * 100"
+      class="code"
+      v-highlightjs="content">
       <code :style="{ 'background': backgroundColor }">
       </code>
     </pre>
+    <pre v-else class="code">{{content}}</pre>
   </div>
 </template>
 
@@ -14,6 +18,7 @@
    },
    props: {
      file: String,
+     size: Number,
      backgroundColor: String
    },
    watch: {

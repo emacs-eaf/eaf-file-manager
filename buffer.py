@@ -635,11 +635,10 @@ class FetchPreviewInfoThread(QThread):
                 path = Path(self.file)
 
                 if path.is_file():
-                    mime = self.get_file_mime_callback(str(path.absolute()))
-
                     file_type = "file"
                     file_infos = [{
-                        "mime": mime,
+                        "mime": self.get_file_mime_callback(str(path.absolute())),
+                        "size": os.path.getsize(str(path.absolute()))
                     }]
                 elif path.is_dir():
                     file_type = "directory"

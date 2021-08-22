@@ -33,7 +33,7 @@
         class="preview">
         <PreviewImage v-if="previewType == 'file' && previewMime == 'image'" :file="previewPath"/>
         <PreviewHtml v-if="previewType == 'file' && previewMime == 'html'" :file="previewPath"/>
-        <PreviewCode v-if="previewType == 'file' && previewMime == 'text'" :file="previewPath" :backgroundColor="backgroundColor"/>
+        <PreviewCode v-if="previewType == 'file' && previewMime == 'text'" :file="previewPath" :size="previewSize" :backgroundColor="backgroundColor"/>
         <PreviewPdf v-if="previewType == 'file' && previewMime == 'pdf'" :file="previewPath"/>
         <PreviewVideo v-if="previewType == 'file' && previewMime == 'video'" :file="previewPath"/>
         <PreviewAudio v-if="previewType == 'file' && previewMime == 'audio'" :file="previewPath" :barColor="foregroundColor"/>
@@ -103,7 +103,7 @@
        previewType: "",
        previewFiles: [],
        previewMime: "",
-       previewContent: "",
+       previewSize: "",
 
        pathSep: "",
        iconCacheDir: "",
@@ -480,6 +480,8 @@
          } else if (mime == "application-wps-office.docx") {
            this.previewMime = "office"
          }
+
+         this.previewSize = fileInfos[0]["size"]
        }
      }
    }
