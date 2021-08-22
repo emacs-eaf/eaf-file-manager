@@ -86,12 +86,12 @@ class AppBuffer(BrowserBuffer):
 
         if self.theme_mode == "dark":
             if self.theme_background_color == "#000000":
-                select_color = QColor("#333333")
+                select_color = "#333333"
             else:
                 select_color = QColor(self.theme_background_color).darker(120).name()
         else:
             if self.theme_background_color == "#FFFFFF":
-                select_color = QColor("#EEEEEE")
+                select_color = "#EEEEEE"
             else:
                 select_color = QColor(self.theme_background_color).darker(110).name()
 
