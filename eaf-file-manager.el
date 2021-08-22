@@ -180,7 +180,7 @@
   "Face used for symbolic links in batch rename buffer.")
 
 (defface eaf-file-manager-file
-  '((t (:inherit default)))
+  '((t (:inherit font-lock-variable-name-face)))
   "Face used for files in batch rename buffer.")
 
 ;;
