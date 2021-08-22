@@ -260,7 +260,7 @@
                  file-name-invalid-regexp ""
                  (substring-no-properties new-file-name)))))
         (if (not orig-file-name)
-            (message "Warn: found no origin file name or multi origin file names, do nothing.")
+            (message "Warn: the number of original name found for '%s' is not equal 1, do nothing." new-file-name)
           (setq orig-files-total-num total)
           (setq files-total-num (+ files-total-num 1))
           (push (vector total index path orig-file-name new-file-name) files-info))))
