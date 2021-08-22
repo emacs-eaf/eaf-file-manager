@@ -230,7 +230,7 @@
 
 (defun eaf--get-text-property (prop string)
   "Do the best to find value of PROP in STRING."
-  (let ((n (- (length string) 1))
+  (let ((n (length string))
         values)
     (dotimes (i n)
       (push (get-text-property i prop new-file-name) values))
