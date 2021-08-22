@@ -77,14 +77,12 @@ class AppBuffer(BrowserBuffer):
             self.update_preview(self.file_infos[self.select_index]["path"])
 
     def init_vars(self):
-        (theme_mode,
-         self.show_hidden_file, self.show_preview,
+        (self.show_hidden_file, self.show_preview,
          dark_header_color, dark_directory_color,
          dark_symlink_color, dark_mark_color, dark_select_color,
          light_header_color, light_directory_color,
          light_symlink_color, light_mark_color, light_select_color
-         ) = get_emacs_vars(["eaf-emacs-theme-mode",
-                             "eaf-file-manager-show-hidden-file",
+         ) = get_emacs_vars(["eaf-file-manager-show-hidden-file",
                              "eaf-file-manager-show-preview",
                              "eaf-file-manager-dark-header-color",
                              "eaf-file-manager-dark-directory-color",
@@ -98,7 +96,7 @@ class AppBuffer(BrowserBuffer):
                              "eaf-file-manager-light-select-color"
                              ])
 
-        if theme_mode == "dark":
+        if self.theme_mode == "dark":
             if self.theme_background_color == "#000000":
                 select_color = dark_select_color
             else:
