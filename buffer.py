@@ -33,9 +33,12 @@ import json
 import shutil
 import time
 
+start_time = time.time()
+
 class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, arguments):
         BrowserBuffer.__init__(self, buffer_id, url, arguments, False)
+
 
         self.arguments = arguments
 
@@ -53,6 +56,8 @@ class AppBuffer(BrowserBuffer):
         self.fetch_preview_info_threads = []
 
     def init_app(self):
+        print("init_app start: ", time.time() - start_time)
+
         self.buffer_widget.execute_js('''setPreviewOption(\"{}\")'''.format("true" if self.show_preview else "false"))
 
         self.buffer_widget.execute_js('''initIconCacheDir(\"{}\", \"{}\")'''.format(self.icon_cache_dir, os.path.sep))
@@ -87,6 +92,8 @@ class AppBuffer(BrowserBuffer):
                 get_emacs_var("eaf-file-manager-light-mark-color"),
                 select_color
             ))
+
+        print("init_app finish: ", time.time() - start_time)
 
         if self.arguments != "":
             if self.arguments.startswith("search:"):
@@ -184,6 +191,8 @@ class AppBuffer(BrowserBuffer):
 
         file_infos.sort(key=cmp_to_key(self.file_compare))
 
+        print("get_file_info finish: ", time.time() - start_time)
+
         return file_infos
 
     def filter_file(self, file_name):
@@ -240,6 +249,8 @@ class AppBuffer(BrowserBuffer):
                 self.url,
                 json.dumps(file_infos),
                 select_index))
+
+            print("change_directory finish: ", time.time() - start_time)
 
             if file_infos == []:
                 self.update_preview("")
@@ -620,5 +631,7 @@ class FetchPreviewInfoThread(QThread):
                     file_infos = self.get_files_callback(self.file)
                 elif path.is_symlink():
                     file_type = "symlink"
+
+            print("fetch preview finish: ", time.time() - start_time)
 
             self.fetch_finish.emit(self.file, file_type, json.dumps(file_infos))
