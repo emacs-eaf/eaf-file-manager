@@ -171,6 +171,18 @@
   ""
   :type 'boolean)
 
+(defface eaf-file-manager-directory
+  '((t (:inherit font-lock-function-name-face)))
+  "Face used for subdirectories in batch rename buffer.")
+
+(defface eaf-file-manager-symlink
+  '((t (:inherit font-lock-keyword-face)))
+  "Face used for symbolic links in batch rename buffer.")
+
+(defface eaf-file-manager-file
+  '((t (:inherit default)))
+  "Face used for files in batch rename buffer.")
+
 ;;
 ;; All of the above can customize by:
 ;;      M-x customize-group RET eaf-file-manager RET
@@ -216,25 +228,63 @@
     (kill-buffer edit-text-buffer)
     (message "[EAF/file-manager] Rename edit cancelled!")))
 
+(defun eaf--get-text-property (prop string)
+  "Do the best to find value of PROP in STRING."
+  (let ((n (- (length string) 1))
+        values)
+    (dotimes (i n)
+      (push (get-text-property i prop new-file-name) values))
+    (setq values
+          (remove nil (delete-dups values)))
+    (when (= (length values) 1)
+      (car values))))
+
 (defun eaf-file-manager-rename-edit-buffer-confirm ()
   "Confirm input text and send the text to corresponding EAF app."
   (interactive)
   (let* ((new-files (cl-remove-if 'string-empty-p (split-string (buffer-string) "\n")))
-         (test-files (delq nil (delete-dups (cl-remove-if 'string-empty-p (split-string (buffer-string) "\n")))))
-         (buffer-id eaf--buffer-id))
-    (if (equal (length new-files) eaf--files-number)
-        (if (equal (length new-files) (length test-files))
-            (progn
-              (eaf-call-async "call_function_with_args" eaf--buffer-id "batch_rename_confirm" (buffer-string))
-              (kill-buffer)
-              (catch 'found-eaf
-                (eaf-for-each-eaf-buffer
-                 (when (string= eaf--buffer-id buffer-id)
-                   (switch-to-buffer buffer)
-                   (throw 'found-eaf t))))
-              (message "Rename files finish."))
-          (message "There are multiple files have same name."))
-      (message "File number are inconsistent (%s %s)" eaf--files-number (length new-files)))))
+         (test-files (delq nil (delete-dups new-files)))
+         (buffer-id eaf--buffer-id)
+         (files-total-num 0)
+         orig-files-total-num files-info)
+
+    (dolist (new-file-name new-files)
+      (let* ((total (eaf--get-text-property 'total new-file-name))
+             (index (eaf--get-text-property 'index new-file-name))
+             (path (eaf--get-text-property 'path new-file-name))
+             (orig-file-name (eaf--get-text-property 'name new-file-name))
+             (new-file-name
+              (if (string-match-p "[/\\]" new-file-name)
+                  orig-file-name
+                (replace-regexp-in-string
+                 file-name-invalid-regexp ""
+                 (substring-no-properties new-file-name)))))
+        (if (not orig-file-name)
+            (message "Warn: found no origin file name or multi origin file names, do nothing.")
+          (setq orig-files-total-num total)
+          (setq files-total-num (+ files-total-num 1))
+          (push (vector total index path orig-file-name new-file-name) files-info))))
+
+    (setq files-info (substring-no-properties (json-encode files-info)))
+
+    (if (equal (length new-files) (length test-files))
+        (if (> files-total-num orig-files-total-num)
+            (message "Error: find extra lines in edit buffer, do nothing.")
+          (progn
+            (eaf-call-async "call_function_with_args"
+                            eaf--buffer-id
+                            "batch_rename_confirm"
+                            files-info)
+            (kill-buffer)
+            (catch 'found-eaf
+              (eaf-for-each-eaf-buffer
+               (when (string= eaf--buffer-id buffer-id)
+                 (switch-to-buffer buffer)
+                 (throw 'found-eaf t))))
+            (if (< files-total-num orig-files-total-num)
+                (message "Rename subset files finish.")
+              (message "Rename files finish."))))
+      (message "There are multiple files have same name."))))
 
 (defun eaf-file-manager-rename-edit-set-header-line (dir)
   "Set header line."
@@ -259,13 +309,17 @@
       (eaf-file-manager-rename-edit-set-header-line dir))
     (switch-to-buffer edit-text-buffer)
     (mapc (lambda (file)
-            (let* ((name (elt file 0))
-                   (type (elt file 1))
+            (let* ((total (elt file 0))
+                   (index (elt file 1))
+                   (path (elt file 2))
+                   (name (elt file 3))
+                   (type (elt file 4))
                    (face (cond
-                          ((equal type "directory") 'dired-directory)
-                          ((equal type "symlink") 'dired-symlink)
+                          ((equal type "directory") 'eaf-file-manager-directory)
+                          ((equal type "symlink") 'eaf-file-manager-symlink)
+                          ((equal type "file") 'eaf-file-manager-file)
                           (t 'default))))
-              (insert (propertize name 'name name 'face face))
+              (insert (propertize name 'total total 'index index 'path path 'name name 'face face))
               (insert "\n")))
           (json-read-from-string files))
     (goto-char (point-min))))
