@@ -113,7 +113,7 @@
    },
    mounted() {
      window.changePath = this.changePath;
-     window.initColors = this.initColors;
+     window.init = this.init;
      window.selectNextFile = this.selectNextFile;
      window.selectPrevFile = this.selectPrevFile;
      window.selectFirstFile = this.selectFirstFile;
@@ -123,6 +123,7 @@
      window.openCurrentFile = this.openCurrentFile;
      window.upDirectory = this.upDirectory;
      window.setPreview = this.setPreview;
+     window.setPreviewOption = this.setPreviewOption;
      window.markFile = this.markFile;
      window.unmarkFile = this.unmarkFile;
      window.unmarkAllFiles = this.unmarkAllFiles;
@@ -137,8 +138,6 @@
      window.renameFile = this.renameFile;
      window.renameFiles = this.renameFiles;
      window.rename = this.rename;
-     window.initIconCacheDir = this.initIconCacheDir;
-     window.setPreviewOption = this.setPreviewOption;
      window.copyFileName = this.copyFileName;
      window.copyFilePath = this.copyFilePath;
      window.addNewFile = this.addNewFile;
@@ -166,7 +165,7 @@
        this.currentPath = files[this.currentIndex].path;
      },
 
-     initColors(backgroundColor, foregroundColor, headerColor, directoryColor, symlinkColor, markColor, selectColor) {
+     init(backgroundColor, foregroundColor, headerColor, directoryColor, symlinkColor, markColor, selectColor, iconCacheDir, pathSep, option) {
        this.backgroundColor = backgroundColor;
        this.foregroundColor = foregroundColor;
        this.fileColor = foregroundColor;
@@ -175,11 +174,9 @@
        this.symlinkColor = symlinkColor;
        this.markColor = markColor;
        this.selectColor = selectColor;
-     },
-
-     initIconCacheDir(iconCacheDir, pathSep) {
        this.iconCacheDir = iconCacheDir;
        this.pathSep = pathSep;
+       this.showPreview = option;
      },
 
      itemBackgroundColor(item) {
@@ -435,10 +432,6 @@
        }
      },
 
-     setPreviewOption(option) {
-       this.showPreview = option;
-     },
-
      previewScrollUp() {
        this.$root.$emit("scrollUp");
      },
@@ -457,6 +450,10 @@
 
      previewToggle() {
        this.$root.$emit("previewToggle");
+     },
+
+     setPreviewOption(option) {
+       this.showPreview = option;
      },
 
      setPreview(filePath, fileType, fileInfos) {
