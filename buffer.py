@@ -39,13 +39,12 @@ class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, arguments):
         BrowserBuffer.__init__(self, buffer_id, url, arguments, False)
 
-
         self.arguments = arguments
 
         self.load_index_html(__file__)
 
-        self.show_hidden_file = get_emacs_var("eaf-file-manager-show-hidden-file")
-        self.show_preview = get_emacs_var("eaf-file-manager-show-preview")
+        self.show_hidden_file = None
+        self.show_preview = None
 
         self.mime_db = QMimeDatabase()
         self.icon_cache_dir = os.path.join(os.path.dirname(__file__,), "src", "assets", "icon_cache")
@@ -58,40 +57,11 @@ class AppBuffer(BrowserBuffer):
     def init_app(self):
         print("init_app start: ", time.time() - start_time)
 
-        self.buffer_widget.execute_js('''setPreviewOption(\"{}\")'''.format("true" if self.show_preview else "false"))
-
         self.buffer_widget.execute_js('''initIconCacheDir(\"{}\", \"{}\")'''.format(self.icon_cache_dir, os.path.sep))
 
-        if get_emacs_var("eaf-emacs-theme-mode") == "dark":
-            if get_emacs_var("eaf-emacs-theme-background-color") == "#000000":
-                select_color = get_emacs_var("eaf-file-manager-dark-select-color")
-            else:
-                select_color = QColor(get_emacs_var("eaf-emacs-theme-background-color")).darker(120).name()
-
-            self.buffer_widget.execute_js('''initColors(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
-                get_emacs_var("eaf-emacs-theme-background-color"),
-                get_emacs_var("eaf-emacs-theme-foreground-color"),
-                get_emacs_var("eaf-file-manager-dark-header-color"),
-                get_emacs_var("eaf-file-manager-dark-directory-color"),
-                get_emacs_var("eaf-file-manager-dark-symlink-color"),
-                get_emacs_var("eaf-file-manager-dark-mark-color"),
-                select_color
-            ))
-        else:
-            if get_emacs_var("eaf-emacs-theme-background-color") == "#FFFFFF":
-                select_color = get_emacs_var("eaf-file-manager-light-select-color")
-            else:
-                select_color = QColor(get_emacs_var("eaf-emacs-theme-background-color")).darker(110).name()
-
-            self.buffer_widget.execute_js('''initColors(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
-                get_emacs_var("eaf-emacs-theme-background-color"),
-                get_emacs_var("eaf-emacs-theme-foreground-color"),
-                get_emacs_var("eaf-file-manager-light-header-color"),
-                get_emacs_var("eaf-file-manager-light-directory-color"),
-                get_emacs_var("eaf-file-manager-light-symlink-color"),
-                get_emacs_var("eaf-file-manager-light-mark-color"),
-                select_color
-            ))
+        self.fetch_emacs_thread = FetchEmacsVarThread()
+        self.fetch_emacs_thread.fetch_finish.connect(self.init_vars)
+        self.fetch_emacs_thread.start()
 
         print("init_app finish: ", time.time() - start_time)
 
@@ -107,6 +77,16 @@ class AppBuffer(BrowserBuffer):
                 self.change_directory(self.url, jump_file)
         else:
             self.change_directory(self.url, "")
+
+    def init_vars(self, vars):
+        (self.show_hidden_file, self.show_preview,
+         background_color, foreground_color, header_color,
+         directly_color, symlink_color, mark_color, select_color) = vars
+
+        self.buffer_widget.execute_js('''setPreviewOption(\"{}\")'''.format("true" if self.show_preview else "false"))
+
+        self.buffer_widget.execute_js('''initColors(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
+                background_color, foreground_color, header_color, directly_color, symlink_color, mark_color, select_color))
 
     def search_directory(self, dir, search_regex):
         file_infos = []
@@ -595,6 +575,47 @@ class AppBuffer(BrowserBuffer):
 
     def marker_offset_y(self):
         return 4
+
+class FetchEmacsVarThread(QThread):
+    fetch_finish = QtCore.pyqtSignal(list)
+
+    def __init__(self):
+        QThread.__init__(self)
+
+    def run(self):
+        vars = [get_emacs_var("eaf-file-manager-show-hidden-file"),
+                get_emacs_var("eaf-file-manager-show-preview")]
+
+        if get_emacs_var("eaf-emacs-theme-mode") == "dark":
+            if get_emacs_var("eaf-emacs-theme-background-color") == "#000000":
+                select_color = get_emacs_var("eaf-file-manager-dark-select-color")
+            else:
+                select_color = QColor(get_emacs_var("eaf-emacs-theme-background-color")).darker(120).name()
+
+            vars += [
+                get_emacs_var("eaf-emacs-theme-background-color"),
+                get_emacs_var("eaf-emacs-theme-foreground-color"),
+                get_emacs_var("eaf-file-manager-dark-header-color"),
+                get_emacs_var("eaf-file-manager-dark-directory-color"),
+                get_emacs_var("eaf-file-manager-dark-symlink-color"),
+                get_emacs_var("eaf-file-manager-dark-mark-color"),
+                select_color]
+        else:
+            if get_emacs_var("eaf-emacs-theme-background-color") == "#FFFFFF":
+                select_color = get_emacs_var("eaf-file-manager-light-select-color")
+            else:
+                select_color = QColor(get_emacs_var("eaf-emacs-theme-background-color")).darker(110).name()
+
+            vars += [
+                get_emacs_var("eaf-emacs-theme-background-color"),
+                get_emacs_var("eaf-emacs-theme-foreground-color"),
+                get_emacs_var("eaf-file-manager-light-header-color"),
+                get_emacs_var("eaf-file-manager-light-directory-color"),
+                get_emacs_var("eaf-file-manager-light-symlink-color"),
+                get_emacs_var("eaf-file-manager-light-mark-color"),
+                select_color]
+
+        self.fetch_finish.emit(vars)
 
 class FetchPreviewInfoThread(QThread):
 
