@@ -174,6 +174,8 @@ class AppBuffer(BrowserBuffer):
         return file_info
 
     def get_file_infos(self, path):
+        print("get_file_infos start: ", time.time() - start_time, path)
+
         file_infos = []
         for p in Path(os.path.expanduser(path)).glob("*"):
             if self.filter_file(p.name):
@@ -181,7 +183,7 @@ class AppBuffer(BrowserBuffer):
 
         file_infos.sort(key=cmp_to_key(self.file_compare))
 
-        print("get_file_info finish: ", time.time() - start_time)
+        print("get_file_infos finish: ", time.time() - start_time, path)
 
         return file_infos
 
