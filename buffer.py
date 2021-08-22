@@ -79,43 +79,40 @@ class AppBuffer(BrowserBuffer):
     def init_vars(self):
         (theme_mode,
          self.show_hidden_file, self.show_preview,
-         background_color, foreground_color,
          dark_header_color, dark_directory_color,
          dark_symlink_color, dark_mark_color, dark_select_color,
          light_header_color, light_directory_color,
          light_symlink_color, light_mark_color, light_select_color
          ) = get_emacs_vars(["eaf-emacs-theme-mode",
-                                    "eaf-file-manager-show-hidden-file",
-                                    "eaf-file-manager-show-preview",
-                                    "eaf-emacs-theme-background-color",
-                                    "eaf-emacs-theme-foreground-color",
-                                    "eaf-file-manager-dark-header-color",
-                                    "eaf-file-manager-dark-directory-color",
-                                    "eaf-file-manager-dark-symlink-color",
-                                    "eaf-file-manager-dark-mark-color",
-                                    "eaf-file-manager-dark-select-color",
-                                    "eaf-file-manager-light-header-color",
-                                    "eaf-file-manager-light-directory-color",
-                                    "eaf-file-manager-light-symlink-color",
-                                    "eaf-file-manager-light-mark-color",
-                                    "eaf-file-manager-light-select-color"
-                                    ])
+                             "eaf-file-manager-show-hidden-file",
+                             "eaf-file-manager-show-preview",
+                             "eaf-file-manager-dark-header-color",
+                             "eaf-file-manager-dark-directory-color",
+                             "eaf-file-manager-dark-symlink-color",
+                             "eaf-file-manager-dark-mark-color",
+                             "eaf-file-manager-dark-select-color",
+                             "eaf-file-manager-light-header-color",
+                             "eaf-file-manager-light-directory-color",
+                             "eaf-file-manager-light-symlink-color",
+                             "eaf-file-manager-light-mark-color",
+                             "eaf-file-manager-light-select-color"
+                             ])
 
         if theme_mode == "dark":
-            if background_color == "#000000":
+            if self.theme_background_color == "#000000":
                 select_color = dark_select_color
             else:
-                select_color = QColor(background_color).darker(120).name()
+                select_color = QColor(self.theme_background_color).darker(120).name()
 
             header_color = dark_header_color
             directory_color = dark_directory_color
             symlink_color = dark_symlink_color
             mark_color = dark_mark_color
         else:
-            if background_color == "#FFFFFF":
+            if self.theme_background_color == "#FFFFFF":
                 select_color = light_select_color
             else:
-                select_color = QColor(background_color).darker(110).name()
+                select_color = QColor(self.theme_background_color).darker(110).name()
 
             header_color = light_header_color
             directory_color = light_directory_color
@@ -123,7 +120,7 @@ class AppBuffer(BrowserBuffer):
             mark_color = light_mark_color
 
         self.buffer_widget.eval_js('''init(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
-            background_color, foreground_color, header_color, directory_color, symlink_color, mark_color, select_color,
+            self.theme_background_color, self.theme_foreground_color, header_color, directory_color, symlink_color, mark_color, select_color,
             self.icon_cache_dir, os.path.sep,
             "true" if self.show_preview else "false"))
 
