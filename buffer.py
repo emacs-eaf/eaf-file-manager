@@ -355,8 +355,23 @@ class AppBuffer(BrowserBuffer):
     @interactive
     def batch_rename(self):
         self.batch_rename_files = self.buffer_widget.execute_js("getAllFiles();")
-        files = "\n".join(map(lambda file: file["name"], self.batch_rename_files))
-        eval_in_emacs("eaf-file-manager-rename-edit-buffer", [self.buffer_id, os.path.basename(os.path.normpath(self.url)), files])
+
+        try:
+            len(self.batch_rename_files)
+        except:
+            self.batch_rename_files = []
+
+        if len(self.batch_rename_files) == 0:
+            message_to_emacs("Can not get file names, please try this command again.")
+        else:
+            files = []
+            total = len(self.batch_rename_files)
+            directory = os.path.basename(os.path.normpath(self.url))
+            index = 0
+            for f in self.batch_rename_files:
+                files.append([total, index, f["path"], f["name"], f["type"]])
+                index += 1
+            eval_in_emacs("eaf-file-manager-rename-edit-buffer", [self.buffer_id, directory, json.dumps(files)])
 
     @interactive
     def toggle_hidden_file(self):
@@ -410,21 +425,17 @@ class AppBuffer(BrowserBuffer):
             self.change_directory(self.url, current_file["path"])
 
     def batch_rename_confirm(self, new_file_string):
-        new_files = new_file_string.split("\n")
+        new_files = json.loads(new_file_string)
 
-        file_index = 0
-        for old_file in self.batch_rename_files:
-            old_file_path = old_file["path"]
-            old_file_dir = os.path.dirname(old_file_path)
-            new_file_name = new_files[file_index]
-            new_file_path = os.path.join(old_file_dir, new_file_name)
+        for [total, index, path, old_file_name, new_file_name] in new_files:
+            file_dir = os.path.dirname(path)
+            old_file_path = os.path.join(file_dir, old_file_name)
+            new_file_path = os.path.join(file_dir, new_file_name)
 
             os.rename(old_file_path, new_file_path)
 
-            self.batch_rename_files[file_index]["name"] = new_file_name
-            self.batch_rename_files[file_index]["path"] = new_file_path
-
-            file_index += 1
+            self.batch_rename_files[index]["name"] = new_file_name
+            self.batch_rename_files[index]["path"] = new_file_path
 
         self.buffer_widget.eval_js('''renameFiles({})'''.format(json.dumps(self.batch_rename_files)))
 
