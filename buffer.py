@@ -78,7 +78,16 @@ class AppBuffer(BrowserBuffer):
         else:
             self.change_directory(self.url, "")
 
+    def init_first_file_preview(self):
+        if self.show_preview != None:
+            if self.file_infos == []:
+                self.update_preview("")
+            else:
+                self.update_preview(self.file_infos[self.select_index]["path"])
+
     def init_vars(self, vars):
+        print("init_vars start: ", time.time() - start_time)
+
         (self.show_hidden_file, self.show_preview,
          background_color, foreground_color, header_color,
          directly_color, symlink_color, mark_color, select_color) = vars
@@ -88,25 +97,26 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.execute_js('''initColors(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
                 background_color, foreground_color, header_color, directly_color, symlink_color, mark_color, select_color))
 
+        self.init_first_file_preview()
+
+        print("init_vars finish: ", time.time() - start_time)
+
     def search_directory(self, dir, search_regex):
-        file_infos = []
+        self.file_infos = []
         for p in Path(os.path.expanduser(dir)).rglob(search_regex):
             if self.filter_file(p.name):
-                file_infos.append(self.get_file_info(str(p.absolute())))
+                self.file_infos.append(self.get_file_info(str(p.absolute())))
 
-        file_infos.sort(key=cmp_to_key(self.file_compare))
+        self.file_infos.sort(key=cmp_to_key(self.file_compare))
 
-        select_index = 0
+        self.select_index = 0
 
         self.buffer_widget.execute_js('''changePath(\"{}\", {}, {});'''.format(
             self.url,
-            json.dumps(file_infos),
-            select_index))
+            json.dumps(self.file_infos),
+            self.select_index))
 
-        if file_infos == []:
-            self.update_preview("")
-        else:
-            self.update_preview(file_infos[select_index]["path"])
+        self.init_first_file_preview()
 
     def get_file_mime(self, file_path):
         if os.path.isdir(file_path):
@@ -214,28 +224,25 @@ class AppBuffer(BrowserBuffer):
         eval_in_emacs('eaf--change-default-directory', [dir])
         self.change_title(os.path.basename(dir))
 
-        file_infos = self.get_file_infos(dir)
+        self.file_infos = self.get_file_infos(dir)
 
-        if current_dir == "" and len(file_infos) == 0:
+        if current_dir == "" and len(self.file_infos) == 0:
             eval_in_emacs("message", ["Nothing in {}, no need to enter directory.".format(dir)])
         else:
-            select_index = 0
+            self.select_index = 0
 
             if current_dir != "":
-                files = list(map(lambda file: file["path"], file_infos))
-                select_index = files.index(current_dir)
+                files = list(map(lambda file: file["path"], self.file_infos))
+                self.select_index = files.index(current_dir)
 
             self.buffer_widget.execute_js('''changePath(\"{}\", {}, {});'''.format(
                 self.url,
-                json.dumps(file_infos),
-                select_index))
+                json.dumps(self.file_infos),
+                self.select_index))
 
             print("change_directory finish: ", time.time() - start_time)
 
-            if file_infos == []:
-                self.update_preview("")
-            else:
-                self.update_preview(file_infos[select_index]["path"])
+            self.init_first_file_preview()
 
     @QtCore.pyqtSlot(str)
     def change_up_directory(self, file):
@@ -583,6 +590,8 @@ class FetchEmacsVarThread(QThread):
         QThread.__init__(self)
 
     def run(self):
+        print("fetch_vars start: ", time.time() - start_time)
+
         vars = [get_emacs_var("eaf-file-manager-show-hidden-file"),
                 get_emacs_var("eaf-file-manager-show-preview")]
 
@@ -614,6 +623,8 @@ class FetchEmacsVarThread(QThread):
                 get_emacs_var("eaf-file-manager-light-symlink-color"),
                 get_emacs_var("eaf-file-manager-light-mark-color"),
                 select_color]
+
+        print("fetch_vars finish: ", time.time() - start_time)
 
         self.fetch_finish.emit(vars)
 
