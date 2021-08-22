@@ -321,11 +321,20 @@ class AppBuffer(BrowserBuffer):
         if len(self.batch_rename_files) == 0:
             message_to_emacs("Can not get file names, please try this command again.")
         else:
+            pending_files=[]
+
+            for f in self.batch_rename_files:
+                if f["mark"] == "mark":
+                    pending_files.append(f)
+
+            if len(pending_files) == 0:
+                pending_files = self.batch_rename_files
+
             files = []
-            total = len(self.batch_rename_files)
+            total = len(pending_files)
             directory = os.path.basename(os.path.normpath(self.url))
             index = 0
-            for f in self.batch_rename_files:
+            for f in pending_files:
                 files.append([total, index, f["path"], f["name"], f["type"]])
                 index += 1
             eval_in_emacs("eaf-file-manager-rename-edit-buffer", [self.buffer_id, directory, json.dumps(files)])
@@ -395,6 +404,7 @@ class AppBuffer(BrowserBuffer):
             self.batch_rename_files[index]["path"] = new_file_path
 
         self.buffer_widget.eval_js('''renameFiles({})'''.format(json.dumps(self.batch_rename_files)))
+        self.refresh()
 
     def handle_input_response(self, callback_tag, result_content):
         if callback_tag == "delete_file":
