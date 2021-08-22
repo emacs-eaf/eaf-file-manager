@@ -55,11 +55,7 @@ class AppBuffer(BrowserBuffer):
         self.fetch_preview_info_threads = []
 
     def init_app(self):
-        print("init_app start: ", time.time() - start_time)
-
         self.init_vars()
-
-        print("init_app finish: ", time.time() - start_time)
 
         if self.arguments != "":
             if self.arguments.startswith("search:"):
@@ -81,8 +77,6 @@ class AppBuffer(BrowserBuffer):
             self.update_preview(self.file_infos[self.select_index]["path"])
 
     def init_vars(self):
-        print("init_vars start: ", time.time() - start_time)
-
         (theme_mode,
          self.show_hidden_file, self.show_preview,
          background_color, foreground_color,
@@ -132,8 +126,6 @@ class AppBuffer(BrowserBuffer):
             background_color, foreground_color, header_color, directory_color, symlink_color, mark_color, select_color,
             self.icon_cache_dir, os.path.sep,
             "true" if self.show_preview else "false"))
-
-        print("init_vars finish: ", time.time() - start_time)
 
     def search_directory(self, dir, search_regex):
         self.file_infos = []
@@ -208,16 +200,12 @@ class AppBuffer(BrowserBuffer):
         return file_info
 
     def get_file_infos(self, path):
-        print("get_file_infos start: ", time.time() - start_time, path)
-
         file_infos = []
         for p in Path(os.path.expanduser(path)).glob("*"):
             if self.filter_file(p.name):
                 file_infos.append(self.get_file_info(str(p.absolute())))
 
         file_infos.sort(key=cmp_to_key(self.file_compare))
-
-        print("get_file_infos finish: ", time.time() - start_time, path)
 
         return file_infos
 
@@ -255,8 +243,6 @@ class AppBuffer(BrowserBuffer):
 
     @QtCore.pyqtSlot(str, str)
     def change_directory(self, dir, current_dir):
-        print("change_directory start: ", time.time() - start_time)
-
         self.url = dir
 
         eval_in_emacs('eaf--change-default-directory', [dir])
@@ -277,8 +263,6 @@ class AppBuffer(BrowserBuffer):
                 self.url,
                 json.dumps(self.file_infos),
                 self.select_index))
-
-            print("change_directory finish: ", time.time() - start_time)
 
             self.init_first_file_preview()
 
@@ -667,7 +651,5 @@ class FetchPreviewInfoThread(QThread):
                     file_infos = self.get_files_callback(self.file)
                 elif path.is_symlink():
                     file_type = "symlink"
-
-            print("fetch preview finish: ", time.time() - start_time)
 
             self.fetch_finish.emit(self.file, file_type, json.dumps(file_infos))
