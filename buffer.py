@@ -26,7 +26,7 @@ from core.webengine import BrowserBuffer
 from core.utils import get_emacs_var, interactive, message_to_emacs
 from pathlib import Path
 from functools import cmp_to_key
-from core.utils import eval_in_emacs, PostGui, get_emacs_var, get_emacs_string_vars
+from core.utils import eval_in_emacs, PostGui, get_emacs_var, get_emacs_vars
 import codecs
 import os
 import json
@@ -90,7 +90,7 @@ class AppBuffer(BrowserBuffer):
          dark_symlink_color, dark_mark_color, dark_select_color,
          light_header_color, light_directory_color,
          light_symlink_color, light_mark_color, light_select_color
-         ) = get_emacs_string_vars(["eaf-emacs-theme-mode",
+         ) = get_emacs_vars(["eaf-emacs-theme-mode",
                                     "eaf-file-manager-show-hidden-file",
                                     "eaf-file-manager-show-preview",
                                     "eaf-emacs-theme-background-color",
