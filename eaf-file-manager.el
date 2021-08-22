@@ -171,16 +171,16 @@
   ""
   :type 'boolean)
 
-(defface eaf-file-manager-directory
-  '((t (:inherit font-lock-function-name-face)))
+(defface eaf-file-manager-directory-face
+  '((t (:inherit font-lock-builtin-face)))
   "Face used for subdirectories in batch rename buffer.")
 
-(defface eaf-file-manager-symlink
+(defface eaf-file-manager-symlink-face
   '((t (:inherit font-lock-keyword-face)))
   "Face used for symbolic links in batch rename buffer.")
 
-(defface eaf-file-manager-file
-  '((t (:inherit font-lock-variable-name-face)))
+(defface eaf-file-manager-file-face
+  '((t (:inherit default)))
   "Face used for files in batch rename buffer.")
 
 ;;
@@ -317,9 +317,9 @@
                    (name (elt file 3))
                    (type (elt file 4))
                    (face (cond
-                          ((equal type "directory") 'eaf-file-manager-directory)
-                          ((equal type "symlink") 'eaf-file-manager-symlink)
-                          ((equal type "file") 'eaf-file-manager-file)
+                          ((equal type "directory") 'eaf-file-manager-directory-face)
+                          ((equal type "symlink") 'eaf-file-manager-symlink-face)
+                          ((equal type "file") 'eaf-file-manager-file-face)
                           (t 'default))))
               (insert (propertize
                        name
