@@ -194,46 +194,53 @@
          (test-files (delq nil (delete-dups new-files)))
          (buffer-id eaf--buffer-id)
          (files-total-num 0)
-         orig-files-total-num files-info)
+         orig-files-total-num files-info
+         rename-failed files-info-json)
 
     (dolist (new-file-name new-files)
-      (let* ((new-file-name
-              (replace-regexp-in-string "^ " "" new-file-name))
-             (total (eaf--get-text-property 'total new-file-name))
+      (let* ((total (eaf--get-text-property 'total new-file-name))
              (index (eaf--get-text-property 'index new-file-name))
              (path (eaf--get-text-property 'path new-file-name))
              (orig-file-name (eaf--get-text-property 'name new-file-name))
-             (new-file-name
-              (if (string-match-p "[/\\]" new-file-name)
-                  orig-file-name
-                (replace-regexp-in-string
-                 file-name-invalid-regexp ""
-                 (substring-no-properties new-file-name)))))
-        (if (not orig-file-name)
-            (message "Warn: the number of original name found for '%s' is not equal 1, do nothing." new-file-name)
-          (setq orig-files-total-num total)
+             (new-file-name (replace-regexp-in-string
+                             file-name-invalid-regexp ""
+                             (replace-regexp-in-string
+                              "^ " ""
+                              (substring-no-properties new-file-name)))))
+        (unless orig-files-total-num
+          (setq orig-files-total-num total))
+        (if (or (not orig-file-name)
+                (equal (length new-file-name) 0)
+                (string-match-p "[/\\]" new-file-name))
+            (push orig-file-name rename-failed)
           (setq files-total-num (+ files-total-num 1))
           (push (vector total index path orig-file-name new-file-name) files-info))))
 
-    (setq files-info (substring-no-properties (json-encode files-info)))
+    (setq files-info-json (substring-no-properties (json-encode files-info)))
 
     (if (equal (length new-files) (length test-files))
         (if (> files-total-num orig-files-total-num)
             (message "Error: find extra lines in edit buffer, do nothing.")
           (progn
-            (eaf-call-async "call_function_with_args"
-                            eaf--buffer-id
-                            "batch_rename_confirm"
-                            files-info)
+            (when (> (length files-info) 0)
+              (eaf-call-async "call_function_with_args"
+                              eaf--buffer-id
+                              "batch_rename_confirm"
+                              files-info-json))
             (kill-buffer)
             (catch 'found-eaf
               (eaf-for-each-eaf-buffer
                (when (string= eaf--buffer-id buffer-id)
                  (switch-to-buffer buffer)
                  (throw 'found-eaf t))))
-            (if (< files-total-num orig-files-total-num)
-                (message "Rename subset files finish.")
-              (message "Rename files finish."))))
+            (cond (rename-failed
+                   (message "Rename files finished, fail to rename: %s."
+                            (mapconcat (lambda (x)
+                                         (propertize (format "%S" x) 'face 'warning))
+                                       rename-failed " ")))
+                  ((< files-total-num orig-files-total-num)
+                   (message "Rename subset files finish."))
+                  (t (message "Rename files finish.")))))
       (message "There are multiple files have same name."))))
 
 (defun eaf-file-manager-rename-edit-set-header-line (dir)
