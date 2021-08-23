@@ -87,12 +87,14 @@
      currentIndex: {
        // eslint-disable-next-line no-unused-vars
        handler: function(val, oldVal) {
+         this.currentPath = this.files[val].path;
          window.pyobject.vue_update_current_index(val);
        }
      },
      files: {
        // eslint-disable-next-line no-unused-vars
        handler: function (val, oldVal) {
+         this.fileNumber = val.length;
          window.pyobject.vue_update_files(val);
        },
        deep: true
@@ -171,9 +173,7 @@
      changePath(path, files, index) {
        this.path = path;
        this.files = files;
-       this.fileNumber = files.length;
        this.currentIndex = index;
-       this.currentPath = files[this.currentIndex].path;
      },
 
      init(backgroundColor, foregroundColor, headerColor, directoryColor, symlinkColor, markColor, selectColor, iconCacheDir, pathSep, option) {
@@ -224,8 +224,6 @@
        } else {
          this.currentIndex = index;
        }
-
-       this.currentPath = this.files[this.currentIndex].path;
 
        this.keepSelectVisible();
 
@@ -288,7 +286,6 @@
        var markNumber = this.getMarkFileNumber();
 
        this.files = this.files.filter(file => { return file.mark != "mark" });
-       this.fileNumber = this.files.length;
 
        this.currentIndex -= markNumber;
 
@@ -298,22 +295,17 @@
          this.currentIndex = 0;
        }
 
-       this.currentPath = this.files[this.currentIndex].path;
-
        this.selectFile(this.files[this.currentIndex]);
      },
 
      removeSelectFile() {
        this.files = this.files.filter(file => { return file.path != this.currentPath });
-       this.fileNumber = this.files.length;
 
        if (this.currentIndex > this.fileNumber - 1) {
          this.currentIndex = this.fileNumber - 1;
        } else if (this.currentIndex < 0) {
          this.currentIndex = 0;
        }
-
-       this.currentPath = this.files[this.currentIndex].path;
 
        this.selectFile(this.files[this.currentIndex]);
      },
@@ -323,7 +315,6 @@
      },
 
      selectFile(file) {
-       this.currentPath = file.path;
        this.currentIndex = this.files.map(file => file.path).indexOf(file.path);
 
        this.updatePreview();
@@ -381,7 +372,6 @@
 
      addNewFile(new_file) {
        this.files.push(new_file);
-       this.fileNumber = this.files.length;
 
        /* Use nextTick wait DOM update, then select last file. */
        this.$nextTick(function(){
@@ -392,9 +382,7 @@
      addNewDirectory(new_directory) {
        var insert_index = this.files.filter(file => { return file.type == "directory" }).length;
        this.files.splice(insert_index, 0, new_directory);
-       this.fileNumber = this.files.length;
        this.currentIndex = insert_index;
-       this.currentPath = this.files[this.currentIndex].path;
 
        this.selectFileByIndex(insert_index);
      },
