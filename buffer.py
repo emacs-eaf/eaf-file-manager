@@ -270,11 +270,11 @@ class AppBuffer(BrowserBuffer):
         if self.buffer_widget.execute_js("getMarkFileNumber();") == 0:
             message_to_emacs("No deletions requested")
         else:
-            self.send_input_message("Are you sure you want to delete selected files?", "delete_file",  "yes-or-no")
+            self.send_input_message("Are you sure you want to delete selected files? ", "delete_file",  "yes-or-no")
 
     @interactive
     def delete_current_file(self):
-        self.send_input_message("Are you sure you want to delete current file?", "delete_current_file",  "yes-or-no")
+        self.send_input_message("Are you sure you want to delete current file? ", "delete_current_file",  "yes-or-no")
 
     @interactive
     def new_file(self):
