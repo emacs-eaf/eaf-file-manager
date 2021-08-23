@@ -230,7 +230,7 @@ class AppBuffer(BrowserBuffer):
 
             if current_dir != "":
                 files = list(map(lambda file: file["path"], self.file_infos))
-                self.select_index = files.index(current_dir)
+                self.select_index = files.index(current_dir) if current_dir in files else 0
 
             self.buffer_widget.eval_js('''changePath(\"{}\", {}, {});'''.format(
                 self.url,
