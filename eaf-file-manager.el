@@ -197,7 +197,9 @@
          orig-files-total-num files-info)
 
     (dolist (new-file-name new-files)
-      (let* ((total (eaf--get-text-property 'total new-file-name))
+      (let* ((new-file-name
+              (replace-regexp-in-string "^ " "" new-file-name))
+             (total (eaf--get-text-property 'total new-file-name))
              (index (eaf--get-text-property 'index new-file-name))
              (path (eaf--get-text-property 'path new-file-name))
              (orig-file-name (eaf--get-text-property 'name new-file-name))
@@ -268,15 +270,16 @@
                           ((equal type "directory") 'font-lock-builtin-face)
                           ((equal type "symlink") 'font-lock-keyword-face)
                           ((equal type "file") 'default)
-                          (t 'default))))
-              (insert (propertize
-                       name
-                       'total total 'index index
-                       'path path 'name name 'face face
-                       'front-sticky nil 'rear-nonsticky '(face)))
+                          (t 'default)))
+                   (p (list 'total total 'index index
+                            'path path 'name name 'face face
+                            'front-sticky nil 'rear-nonsticky '(face))))
+              (insert (apply #'propertize " " 'read-only t 'rear-nonsticky '(read-only) p))
+              (insert (apply #'propertize name p))
               (insert "\n")))
           (json-read-from-string files))
-    (goto-char (point-min))))
+    (goto-char (point-min))
+    (forward-char 1)))
 
 (defun eaf-open-in-file-manager (&optional file)
   (interactive)
