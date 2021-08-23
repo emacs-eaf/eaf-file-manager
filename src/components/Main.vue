@@ -174,6 +174,8 @@
        this.path = path;
        this.files = files;
        this.currentIndex = index;
+       /* Need set currentPath here, watch track will miss update currentPath */
+       this.currentPath = this.files[this.currentIndex].path;
      },
 
      init(backgroundColor, foregroundColor, headerColor, directoryColor, symlinkColor, markColor, selectColor, iconCacheDir, pathSep, option) {
