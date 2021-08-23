@@ -316,24 +316,27 @@ class AppBuffer(BrowserBuffer):
     @interactive
     def batch_rename(self):
         self.batch_rename_files = self.vue_get_all_files()
+        directory = os.path.basename(os.path.normpath(self.url))
 
-        pending_files=[]
+        all_files = []
+        marked_files = []
+        index = 0
 
         for f in self.batch_rename_files:
+            f["index"] = index
+            all_files.append(f)
             if f["mark"] == "mark":
-                pending_files.append(f)
-
-        if len(pending_files) == 0:
-            pending_files = self.batch_rename_files
-
-        files = []
-        total = len(pending_files)
-        directory = os.path.basename(os.path.normpath(self.url))
-        index = 0
-        for f in pending_files:
-            files.append([total, index, f["path"], f["name"], f["type"]])
+                marked_files.append(f)
             index += 1
-        eval_in_emacs("eaf-file-manager-rename-edit-buffer", [self.buffer_id, directory, json.dumps(files)])
+
+        pending_files = marked_files
+        if len(pending_files) == 0:
+            pending_files = all_files
+
+        output = []
+        for f in pending_files:
+            output.append([len(pending_files), f["index"], f["path"], f["name"], f["type"]])
+        eval_in_emacs("eaf-file-manager-rename-edit-buffer", [self.buffer_id, directory, json.dumps(output)])
 
     @interactive
     def toggle_hidden_file(self):
@@ -398,7 +401,7 @@ class AppBuffer(BrowserBuffer):
 
             self.batch_rename_files[index]["name"] = new_file_name
             self.batch_rename_files[index]["path"] = new_file_path
-
+    
         self.buffer_widget.eval_js('''renameFiles({})'''.format(json.dumps(self.batch_rename_files)))
         self.refresh()
 
