@@ -7,7 +7,7 @@
 ;; Copyright (C) 2021, Andy Stewart, all rights reserved.
 ;; Created: 2021-07-31 20:45:09
 ;; Version: 0.1
-;; Last-Updated: Fri Aug 20 02:08:24 2021 (-0400)
+;; Last-Updated: Sun Aug 22 22:39:42 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf-file-manager.el
 ;; Keywords:
@@ -123,12 +123,12 @@
   (interactive)
   (eaf-open "~" "file-manager"))
 
-(defcustom eaf-file-manager-show-hidden-file nil
-  ""
+(defcustom eaf-file-manager-show-hidden-file t
+  "If non-nil, opening the EAF File Manager will default to display hidden files."
   :type 'boolean)
 
 (defcustom eaf-file-manager-show-preview t
-  ""
+  "If non-nil, opening the EAF File Manager will default to display file preview."
   :type 'boolean)
 
 ;;
