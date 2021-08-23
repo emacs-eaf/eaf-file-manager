@@ -31,6 +31,7 @@ import os
 import json
 import shutil
 import time
+import copy
 
 start_time = time.time()
 
@@ -39,6 +40,9 @@ class AppBuffer(BrowserBuffer):
         BrowserBuffer.__init__(self, buffer_id, url, arguments, False)
 
         self.arguments = arguments
+
+        self.vue_files = []
+        self.vue_current_index = 0
 
         self.load_index_html(__file__)
 
@@ -267,7 +271,7 @@ class AppBuffer(BrowserBuffer):
 
     @interactive
     def delete_selected_files(self):
-        if self.buffer_widget.execute_js("getMarkFileNumber();") == 0:
+        if len(self.vue_get_mark_files()) == 0:
             message_to_emacs("No deletions requested")
         else:
             self.send_input_message("Are you sure you want to delete selected files? ", "delete_file",  "yes-or-no")
@@ -291,53 +295,45 @@ class AppBuffer(BrowserBuffer):
 
     @interactive
     def move_current_or_mark_file(self):
-        mark_number = self.buffer_widget.execute_js("getMarkFileNumber();")
+        mark_number = len(self.vue_get_mark_files())
         if mark_number > 0:
-            self.move_files = self.buffer_widget.execute_js("getMarkFiles();")
+            self.move_files = self.vue_get_mark_files()
             self.send_input_message("Move mark files to: ", "move_files", "file", self.url)
         else:
-            self.move_file = self.buffer_widget.execute_js("getCurrentFile();")
+            self.move_file = self.vue_get_select_file()
             self.send_input_message("Move '{}' to: ".format(self.move_file["name"]), "move_file", "file", self.url)
 
     @interactive
     def copy_current_or_mark_file(self):
-        mark_number = self.buffer_widget.execute_js("getMarkFileNumber();")
+        mark_number = len(self.vue_get_mark_files())
         if mark_number > 0:
-            self.copy_files = self.buffer_widget.execute_js("getMarkFiles();")
+            self.copy_files = self.vue_get_mark_files()
             self.send_input_message("Copy mark files to: ", "copy_files", "file", self.url)
         else:
-            self.copy_file = self.buffer_widget.execute_js("getCurrentFile();")
+            self.copy_file = self.vue_get_select_file()
             self.send_input_message("Copy '{}' to: ".format(self.copy_file["name"]), "copy_file", "file", self.url)
 
     @interactive
     def batch_rename(self):
-        self.batch_rename_files = self.buffer_widget.execute_js("getAllFiles();")
+        self.batch_rename_files = self.vue_get_all_files()
 
-        try:
-            len(self.batch_rename_files)
-        except:
-            self.batch_rename_files = []
+        pending_files=[]
 
-        if len(self.batch_rename_files) == 0:
-            message_to_emacs("Can not get file names, please try this command again.")
-        else:
-            pending_files=[]
+        for f in self.batch_rename_files:
+            if f["mark"] == "mark":
+                pending_files.append(f)
 
-            for f in self.batch_rename_files:
-                if f["mark"] == "mark":
-                    pending_files.append(f)
+        if len(pending_files) == 0:
+            pending_files = self.batch_rename_files
 
-            if len(pending_files) == 0:
-                pending_files = self.batch_rename_files
-
-            files = []
-            total = len(pending_files)
-            directory = os.path.basename(os.path.normpath(self.url))
-            index = 0
-            for f in pending_files:
-                files.append([total, index, f["path"], f["name"], f["type"]])
-                index += 1
-            eval_in_emacs("eaf-file-manager-rename-edit-buffer", [self.buffer_id, directory, json.dumps(files)])
+        files = []
+        total = len(pending_files)
+        directory = os.path.basename(os.path.normpath(self.url))
+        index = 0
+        for f in pending_files:
+            files.append([total, index, f["path"], f["name"], f["type"]])
+            index += 1
+        eval_in_emacs("eaf-file-manager-rename-edit-buffer", [self.buffer_id, directory, json.dumps(files)])
 
     @interactive
     def toggle_hidden_file(self):
@@ -362,7 +358,7 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.eval_js('''setPreviewOption(\"{}\")'''.format("true" if self.show_preview else "false"))
 
         if self.show_preview:
-            current_file = self.buffer_widget.execute_js("getCurrentFile();")
+            current_file = self.vue_get_select_file()
             if current_file and type(current_file).__name__ == "dict" and "path" in current_file:
                 self.update_preview(current_file["path"])
 
@@ -377,7 +373,7 @@ class AppBuffer(BrowserBuffer):
 
     @interactive
     def open_current_file_in_new_tab(self):
-        current_file = self.buffer_widget.execute_js("getCurrentFile();")
+        current_file = self.vue_get_select_file()
         if current_file and type(current_file).__name__ == "dict" and "path" in current_file:
             eval_in_emacs("eaf-open-in-file-manager", [current_file["path"]])
 
@@ -386,7 +382,7 @@ class AppBuffer(BrowserBuffer):
         self.send_input_message("Open file: ", "open_file", "file", self.url)
 
     def refresh(self):
-        current_file = self.buffer_widget.execute_js("getCurrentFile();")
+        current_file = self.vue_get_select_file()
         if current_file and type(current_file).__name__ == "dict" and "path" in current_file:
             self.change_directory(self.url, current_file["path"])
 
@@ -447,6 +443,23 @@ class AppBuffer(BrowserBuffer):
         elif file_info["type"] == "directory":
             shutil.rmtree(file_info["path"])
 
+    def vue_get_mark_files(self):
+        return list(filter(lambda file: file["mark"] == "mark", self.vue_files)).copy()
+
+    def vue_get_all_files(self):
+        return self.vue_files.copy()
+
+    def vue_get_select_file(self):
+        return copy.deepcopy(self.vue_files[self.vue_current_index])
+
+    @QtCore.pyqtSlot(list)
+    def vue_update_files(self, vue_files):
+        self.vue_files = vue_files
+
+    @QtCore.pyqtSlot(int)
+    def vue_update_current_index(self, inex):
+        self.vue_current_index = inex
+
     @QtCore.pyqtSlot(str)
     def rename_file(self, file_path):
         self.rename_file_path = file_path
@@ -454,13 +467,13 @@ class AppBuffer(BrowserBuffer):
         self.send_input_message("Rename file name '{}' to: ".format(self.rename_file_name), "rename_file", "string", self.rename_file_name)
 
     def handle_delete_file(self):
-        self.delete_files(self.buffer_widget.execute_js("getMarkFiles();"))
+        self.delete_files(self.vue_get_mark_files())
         self.buffer_widget.eval_js("removeMarkFiles();")
 
         message_to_emacs("Delete selected files success.")
 
     def handle_delete_current_file(self):
-        file_info = self.buffer_widget.execute_js("getSelectFile();")
+        file_info = self.vue_get_select_file()
         self.delete_file(file_info)
         self.buffer_widget.eval_js("removeSelectFile();")
 

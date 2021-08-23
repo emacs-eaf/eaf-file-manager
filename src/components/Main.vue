@@ -83,6 +83,21 @@
    props: {
      msg: String
    },
+   watch: {
+     currentIndex: {
+       // eslint-disable-next-line no-unused-vars
+       handler: function(val, oldVal) {
+         window.pyobject.vue_update_current_index(val);
+       }
+     },
+     files: {
+       // eslint-disable-next-line no-unused-vars
+       handler: function (val, oldVal) {
+         window.pyobject.vue_update_files(val);
+       },
+       deep: true
+     }
+   },
    data() {
      return {
        path: "",
@@ -129,11 +144,7 @@
      window.unmarkAllFiles = this.unmarkAllFiles;
      window.toggleMarkFile = this.toggleMarkFile;
      window.getMarkFileNumber = this.getMarkFileNumber;
-     window.getMarkFiles = this.getMarkFiles;
-     window.getAllFiles = this.getAllFiles;
-     window.getCurrentFile = this.getCurrentFile;
      window.removeMarkFiles = this.removeMarkFiles;
-     window.getSelectFile = this.getSelectFile;
      window.removeSelectFile = this.removeSelectFile;
      window.renameFile = this.renameFile;
      window.renameFiles = this.renameFiles;
@@ -273,18 +284,6 @@
        return this.files.filter(file => { return file.mark == "mark" }).length;
      },
 
-     getMarkFiles() {
-       return this.files.filter(file => { return file.mark == "mark" });
-     },
-
-     getAllFiles() {
-       return this.files;
-     },
-
-     getCurrentFile() {
-       return this.files[this.currentIndex];
-     },
-
      removeMarkFiles() {
        var markNumber = this.getMarkFileNumber();
 
@@ -302,10 +301,6 @@
        this.currentPath = this.files[this.currentIndex].path;
 
        this.selectFile(this.files[this.currentIndex]);
-     },
-
-     getSelectFile() {
-       return this.files[this.currentIndex];
      },
 
      removeSelectFile() {
