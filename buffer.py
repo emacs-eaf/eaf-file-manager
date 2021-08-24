@@ -315,19 +315,20 @@ class AppBuffer(BrowserBuffer):
 
     @interactive
     def batch_rename(self):
-        self.batch_rename_files = self.vue_get_all_files()
         directory = os.path.basename(os.path.normpath(self.url))
 
         all_files = []
         marked_files = []
         index = 0
 
-        for f in self.batch_rename_files:
+        for f in self.vue_get_all_files():
             f["index"] = index
             all_files.append(f)
             if f["mark"] == "mark":
                 marked_files.append(f)
             index += 1
+
+        self.batch_rename_files = all_files
 
         pending_files = marked_files
         if len(pending_files) == 0:
@@ -399,8 +400,13 @@ class AppBuffer(BrowserBuffer):
 
             os.rename(old_file_path, new_file_path)
 
-            self.batch_rename_files[index]["name"] = new_file_name
-            self.batch_rename_files[index]["path"] = new_file_path
+            i = 0
+            for f in self.batch_rename_files:
+                if f["index"] == index:
+                    self.batch_rename_files[i]["name"] = new_file_name
+                    self.batch_rename_files[i]["path"] = new_file_path
+                    break
+                i += 1
     
         self.buffer_widget.eval_js('''renameFiles({})'''.format(json.dumps(self.batch_rename_files)))
         self.refresh()
