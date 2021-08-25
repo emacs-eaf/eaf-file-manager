@@ -108,6 +108,7 @@
     ("." . "js_preview_scroll_down_line")
     ("<" . "js_preview_scroll_up")
     (">" . "js_preview_scroll_down")
+    ("C-s" . "search_file")
     )
   "The keybinding of EAF File Manager."
   :type 'cons)

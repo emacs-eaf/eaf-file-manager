@@ -162,6 +162,7 @@
      window.previewScrollUpLine = this.previewScrollUpLine;
      window.previewScrollDownLine = this.previewScrollDownLine;
      window.previewToggle = this.previewToggle;
+     window.selectFileByIndex = this.selectFileByIndex;
    },
    created() {
      // eslint-disable-next-line no-undef

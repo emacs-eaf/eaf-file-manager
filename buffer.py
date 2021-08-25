@@ -44,6 +44,8 @@ class AppBuffer(BrowserBuffer):
         self.vue_files = []
         self.vue_current_index = 0
 
+        self.search_start_index = 0
+
         self.load_index_html(__file__)
 
         self.show_hidden_file = None
@@ -268,6 +270,11 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.eval_js('''setPreview(\"{}\", \"{}\", {});'''.format(file, file_type, file_infos))
 
     @interactive
+    def search_file(self):
+        self.search_start_index = self.vue_current_index
+        self.send_input_message("Search: ", "search_file", "search")
+
+    @interactive
     def delete_selected_files(self):
         if len(self.vue_get_mark_files()) == 0:
             message_to_emacs("No deletions requested")
@@ -434,11 +441,15 @@ class AppBuffer(BrowserBuffer):
             self.handle_find_files(result_content)
         elif callback_tag == "open_file":
             self.handle_open_file(result_content)
+        elif callback_tag == "search_file":
+            self.handle_search_file(result_content)
 
     def cancel_input_response(self, callback_tag):
         ''' Cancel input message.'''
         if callback_tag == "open_link":
             self.buffer_widget.cleanup_links_dom()
+        elif callback_tag == "search_file":
+            self.buffer_widget.eval_js('''selectFileByIndex(\"{}\")'''.format(self.search_start_index))
 
     def delete_files(self, file_infos):
         for file_info in file_infos:
@@ -612,6 +623,15 @@ class AppBuffer(BrowserBuffer):
                 eval_in_emacs("eaf-open-in-file-manager", [new_file])
         else:
             message_to_emacs("File '{}' not exists".format(new_file))
+
+    def handle_search_file(self, search_string):
+        if search_string == "":
+            self.buffer_widget.eval_js('''selectFileByIndex(\"{}\")'''.format(self.search_start_index))
+        else:
+            all_files = list(map(lambda f: f["name"], self.vue_get_all_files()))
+            for index, file in enumerate(all_files):
+                if search_string.lower() in file.lower():
+                    self.buffer_widget.eval_js('''selectFileByIndex(\"{}\")'''.format(index))
 
     def marker_offset_x(self):
         return -28
