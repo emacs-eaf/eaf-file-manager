@@ -25,7 +25,7 @@ from PyQt5 import QtCore, QtWidgets
 from core.webengine import BrowserBuffer
 from pathlib import Path
 from functools import cmp_to_key
-from core.utils import eval_in_emacs, PostGui, get_emacs_vars, interactive, message_to_emacs, get_emacs_face_foregrounds
+from core.utils import eval_in_emacs, PostGui, get_emacs_vars, interactive, message_to_emacs, get_emacs_func_result
 import codecs
 import os
 import json
@@ -80,11 +80,9 @@ class AppBuffer(BrowserBuffer):
             self.update_preview(self.file_infos[self.select_index]["path"])
 
     def init_vars(self):
-        (directory_color, symlink_color, header_color, mark_color) = get_emacs_face_foregrounds([
-            "font-lock-builtin-face",
-            "font-lock-keyword-face",
-            "font-lock-function-name-face",
-            "error"])
+        (directory_color, symlink_color, header_color, mark_color) = get_emacs_func_result(
+            "get-emacs-face-foregrounds",
+            ["font-lock-builtin-face", "font-lock-keyword-face", "font-lock-function-name-face", "error"])
 
         (self.show_hidden_file, self.show_preview) = get_emacs_vars(["eaf-file-manager-show-hidden-file", "eaf-file-manager-show-preview"])
 
@@ -407,7 +405,7 @@ class AppBuffer(BrowserBuffer):
                     self.batch_rename_files[i]["path"] = new_file_path
                     break
                 i += 1
-    
+
         self.buffer_widget.eval_js('''renameFiles({})'''.format(json.dumps(self.batch_rename_files)))
         self.refresh()
 
