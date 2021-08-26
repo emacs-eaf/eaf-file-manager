@@ -634,7 +634,9 @@ class AppBuffer(BrowserBuffer):
                 str_list = search_string.split()
                 file_match = []
                 for str in str_list:
-                    if len(str) > 0 and str.lower() in file.lower():
+                    if len(str) > 0 and str[0] != "!" and str.lower() in file.lower():
+                        file_match.append(True)
+                    elif len(str) > 0 and str[0] == "!" and (not str.lower()[1:] in file.lower()):
                         file_match.append(True)
                     else:
                         file_match.append(False)
