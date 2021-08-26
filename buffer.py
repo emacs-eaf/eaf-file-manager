@@ -634,7 +634,7 @@ class AppBuffer(BrowserBuffer):
                     return self.buffer_widget.eval_js('''selectFileByIndex(\"{}\")'''.format(index))
 
             # Notify user if no match file found.
-            message_to_emacs("Did not find a matching file")
+            eval_in_emacs("message", ["Did not find a matching file"])
 
     def is_file_match(self, file, search_word):
         return ((len(search_word) > 0 and search_word[0] != "!" and search_word.lower() in file.lower()) or
