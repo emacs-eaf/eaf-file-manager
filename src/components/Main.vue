@@ -115,6 +115,7 @@
        directoryColor: "",
        symlinkColor: "",
        selectColor: "",
+       searchMatchColor: "",
 
        previewPath: "",
        previewType: "",
@@ -163,6 +164,7 @@
      window.previewScrollDownLine = this.previewScrollDownLine;
      window.previewToggle = this.previewToggle;
      window.selectFileByIndex = this.selectFileByIndex;
+     window.setSearchMatchFiles = this.setSearchMatchFiles;
    },
    created() {
      // eslint-disable-next-line no-undef
@@ -179,7 +181,7 @@
        this.currentPath = this.files[this.currentIndex].path;
      },
 
-     init(backgroundColor, foregroundColor, headerColor, directoryColor, symlinkColor, markColor, selectColor, iconCacheDir, pathSep, option) {
+     init(backgroundColor, foregroundColor, headerColor, directoryColor, symlinkColor, markColor, selectColor, searchMatchColor, iconCacheDir, pathSep, option) {
        this.backgroundColor = backgroundColor;
        this.foregroundColor = foregroundColor;
        this.fileColor = foregroundColor;
@@ -188,6 +190,7 @@
        this.symlinkColor = symlinkColor;
        this.markColor = markColor;
        this.selectColor = selectColor;
+       this.searchMatchColor = searchMatchColor;
        this.iconCacheDir = iconCacheDir;
        this.pathSep = pathSep;
        this.showPreview = option;
@@ -202,7 +205,9 @@
      },
 
      itemForegroundColor(item) {
-       if (item.mark == "mark") {
+       if (item.match == "match") {
+         return this.searchMatchColor;
+       } else if (item.mark == "mark") {
          return this.markColor;
        } else {
          if (item.type == "directory") {
@@ -217,6 +222,12 @@
 
      headerForegroundColor() {
        return this.headerColor;
+     },
+
+     setSearchMatchFiles(fileIndexes) {
+       this.files.map(file => { file.match = "" });
+
+       fileIndexes.map(fileIndex => {this.files[fileIndex].match = "match"});
      },
 
      selectFileByIndex(index) {

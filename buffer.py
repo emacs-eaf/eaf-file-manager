@@ -51,6 +51,9 @@ class AppBuffer(BrowserBuffer):
         self.show_hidden_file = None
         self.show_preview = None
 
+        self.search_files = []
+        self.search_files_index = 0
+
         self.mime_db = QMimeDatabase()
         self.icon_cache_dir = os.path.join(os.path.dirname(__file__,), "src", "assets", "icon_cache")
         if not os.path.exists(self.icon_cache_dir):
@@ -82,9 +85,13 @@ class AppBuffer(BrowserBuffer):
             self.update_preview(self.file_infos[self.select_index]["path"])
 
     def init_vars(self):
-        (directory_color, symlink_color, header_color, mark_color) = get_emacs_func_result(
+        (directory_color, symlink_color, header_color, mark_color, search_match_color) = get_emacs_func_result(
             "get-emacs-face-foregrounds",
-            ["font-lock-builtin-face", "font-lock-keyword-face", "font-lock-function-name-face", "error"])
+            ["font-lock-builtin-face",
+             "font-lock-keyword-face",
+             "font-lock-function-name-face",
+             "error",
+             "font-lock-preprocessor-face"])
 
         (self.show_hidden_file, self.show_preview) = get_emacs_vars(["eaf-file-manager-show-hidden-file", "eaf-file-manager-show-preview"])
 
@@ -99,8 +106,8 @@ class AppBuffer(BrowserBuffer):
             else:
                 select_color = QColor(self.theme_background_color).darker(110).name()
 
-        self.buffer_widget.eval_js('''init(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
-            self.theme_background_color, self.theme_foreground_color, header_color, directory_color, symlink_color, mark_color, select_color,
+        self.buffer_widget.eval_js('''init(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
+            self.theme_background_color, self.theme_foreground_color, header_color, directory_color, symlink_color, mark_color, select_color, search_match_color,
             self.icon_cache_dir, os.path.sep,
             "true" if self.show_preview else "false"))
 
@@ -171,6 +178,7 @@ class AppBuffer(BrowserBuffer):
             "type": file_type,
             "size": file_size,
             "mark": "",
+            "match": "",
             "icon": self.generate_file_icon(file_path)
         }
 
@@ -450,6 +458,29 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.cleanup_links_dom()
         elif callback_tag == "search_file":
             self.buffer_widget.eval_js('''selectFileByIndex(\"{}\")'''.format(self.search_start_index))
+            self.buffer_widget.eval_js('''setSearchMatchFiles({})'''.format(json.dumps([])))
+
+    def handle_search_forward(self, callback_tag):
+        if callback_tag == "search_file":
+            if self.search_files_index >= len(self.search_files) - 1:
+                self.search_files_index = 0
+            else:
+                self.search_files_index += 1
+
+            self.buffer_widget.eval_js('''selectFileByIndex(\"{}\")'''.format(self.search_files[self.search_files_index][0]))
+
+    def handle_search_backward(self, callback_tag):
+        if callback_tag == "search_file":
+            if self.search_files_index <= 0:
+                self.search_files_index = len(self.search_files) - 1
+            else:
+                self.search_files_index -= 1
+
+            self.buffer_widget.eval_js('''selectFileByIndex(\"{}\")'''.format(self.search_files[self.search_files_index][0]))
+
+    def handle_search_finish(self, callback_tag):
+        if callback_tag == "search_file":
+            self.buffer_widget.eval_js('''setSearchMatchFiles({})'''.format(json.dumps([])))
 
     def delete_files(self, file_infos):
         for file_info in file_infos:
@@ -627,14 +658,30 @@ class AppBuffer(BrowserBuffer):
     def handle_search_file(self, search_string):
         if search_string == "":
             self.buffer_widget.eval_js('''selectFileByIndex(\"{}\")'''.format(self.search_start_index))
+            self.buffer_widget.eval_js('''setSearchMatchFiles({})'''.format(json.dumps([])))
         else:
-            all_files = list(map(self.pick_search_string, self.vue_get_all_files()))
-            for index, file in enumerate(all_files):
-                if not False in list(map(lambda str: self.is_file_match(file, str), search_string.split())):
-                    return self.buffer_widget.eval_js('''selectFileByIndex(\"{}\")'''.format(index))
+            in_minibuffer = get_emacs_func_result("minibufferp", [])
 
-            # Notify user if no match file found.
-            eval_in_emacs("message", ["Did not find a matching file"])
+            if in_minibuffer:
+
+                all_files = list(map(self.pick_search_string, self.vue_get_all_files()))
+                self.search_files = list(filter(
+                    lambda args: not False in list(map(lambda str: self.is_file_match(args[1], str), search_string.split())),
+                    enumerate(all_files)
+                ))
+                self.search_files_index = 0
+
+                self.buffer_widget.eval_js('''setSearchMatchFiles({})'''.format(json.dumps(
+                    list(map(lambda args: args[0], self.search_files))
+                )))
+
+                if len(self.search_files) > 0:
+                    return self.buffer_widget.eval_js('''selectFileByIndex(\"{}\")'''.format(self.search_files[self.search_files_index][0]))
+
+                # Notify user if no match file found.
+                eval_in_emacs("message", ["Did not find a matching file"])
+            else:
+                self.buffer_widget.eval_js('''setSearchMatchFiles({})'''.format(json.dumps([])))
 
     def is_file_match(self, file, search_word):
         return ((len(search_word) > 0 and search_word[0] != "!" and search_word.lower() in file.lower()) or
