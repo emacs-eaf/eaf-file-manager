@@ -632,6 +632,7 @@ class AppBuffer(BrowserBuffer):
             for index, file in enumerate(all_files):
                 if search_string.lower() in file.lower():
                     self.buffer_widget.eval_js('''selectFileByIndex(\"{}\")'''.format(index))
+                    break
 
     def marker_offset_x(self):
         return -28
