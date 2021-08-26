@@ -629,25 +629,12 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.eval_js('''selectFileByIndex(\"{}\")'''.format(self.search_start_index))
         else:
             all_files = list(map(self.pick_search_string, self.vue_get_all_files()))
-            n = search_string.count("/")
-            index_list = []
             for index, file in enumerate(all_files):
-                if not False in list(map(lambda str: self.is_file_match(file, str), search_string.replace("/", "").split())):
-                    index_list.append(index)
+                if not False in list(map(lambda str: self.is_file_match(file, str), search_string.split())):
+                    return self.buffer_widget.eval_js('''selectFileByIndex(\"{}\")'''.format(index))
 
-            index_length = len(index_list)
-            if index_length > 0:
-                num = n % index_length
-                if index_length == 1:
-                    pass
-                elif index_length > 1 and n == 0:
-                    eval_in_emacs("message", ["found {} files, type \"/\" to select next file".format(index_length)])
-                else:
-                    eval_in_emacs("message", ["{}/{}".format(num+1, index_length)])
-                self.buffer_widget.eval_js('''selectFileByIndex(\"{}\")'''.format(index_list[num]))
-            else:
-                # Notify user if no match file found.
-                eval_in_emacs("message", ["Did not find a matching file"])
+            # Notify user if no match file found.
+            eval_in_emacs("message", ["Did not find a matching file"])
 
     def is_file_match(self, file, search_word):
         return ((len(search_word) > 0 and search_word[0] != "!" and search_word.lower() in file.lower()) or
