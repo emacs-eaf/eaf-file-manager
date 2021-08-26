@@ -1,3 +1,11 @@
 {
-    "vue_install": true
+  "pip": {
+    "linux": [
+      "pypinyin"
+    ],
+    "win32": [
+      "pypinyin"
+    ]
+  },
+  "vue_install": true
 }

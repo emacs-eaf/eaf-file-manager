@@ -628,7 +628,7 @@ class AppBuffer(BrowserBuffer):
         if search_string == "":
             self.buffer_widget.eval_js('''selectFileByIndex(\"{}\")'''.format(self.search_start_index))
         else:
-            all_files = list(map(lambda f: f["name"], self.vue_get_all_files()))
+            all_files = list(map(self.pick_search_string, self.vue_get_all_files()))
             for index, file in enumerate(all_files):
                 if search_string.lower() in file.lower():
                     self.buffer_widget.eval_js('''selectFileByIndex(\"{}\")'''.format(index))
@@ -638,6 +638,22 @@ class AppBuffer(BrowserBuffer):
 
     def marker_offset_y(self):
         return 4
+
+    def pick_search_string(self, file):
+        from pypinyin import pinyin, Style
+
+        file_name = file["name"]
+
+        if self.is_contains_chinese(file_name):
+            return ''.join(list(map(lambda x: x[0], pinyin(file_name, style=Style.FIRST_LETTER))))
+        else:
+            return file_name
+
+    def is_contains_chinese(self, string):
+        for _char in string:
+            if '\u4e00' <= _char <= '\u9fa5':
+                return True
+        return False
 
 class FetchPreviewInfoThread(QThread):
 
