@@ -629,23 +629,16 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.eval_js('''selectFileByIndex(\"{}\")'''.format(self.search_start_index))
         else:
             all_files = list(map(self.pick_search_string, self.vue_get_all_files()))
-            found_file = False
             for index, file in enumerate(all_files):
-                str_list = search_string.split()
-                file_match = []
-                for str in str_list:
-                    if len(str) > 0 and str[0] != "!" and str.lower() in file.lower():
-                        file_match.append(True)
-                    elif len(str) > 0 and str[0] == "!" and (not str.lower()[1:] in file.lower()):
-                        file_match.append(True)
-                    else:
-                        file_match.append(False)
-                if not False in file_match:
-                    self.buffer_widget.eval_js('''selectFileByIndex(\"{}\")'''.format(index))
-                    found_file = True
-                    break
-            if not found_file:
-                eval_in_emacs("message", ["Not found"])
+                if not False in list(map(lambda str: self.is_file_match(file, str), search_string.split())):
+                    return self.buffer_widget.eval_js('''selectFileByIndex(\"{}\")'''.format(index))
+
+            # Notify user if no match file found.
+            message_to_emacs("Did not find a matching file")
+
+    def is_file_match(self, file, search_word):
+        return ((len(search_word) > 0 and search_word[0] != "!" and search_word.lower() in file.lower()) or
+                (len(search_word) > 0 and search_word[0] == "!" and (not search_word.lower()[1:] in file.lower())))
 
     def marker_offset_x(self):
         return -28
