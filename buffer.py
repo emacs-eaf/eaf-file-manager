@@ -115,7 +115,7 @@ class AppBuffer(BrowserBuffer):
         self.file_infos = []
         for p in Path(os.path.expanduser(dir)).rglob(search_regex):
             if self.filter_file(p.name):
-                self.file_infos.append(self.get_file_info(str(p.absolute())))
+                self.file_infos.append(self.get_file_info(str(p.absolute()), dir))
 
         self.file_infos.sort(key=cmp_to_key(self.file_compare))
 
@@ -161,7 +161,7 @@ class AppBuffer(BrowserBuffer):
 
         return icon_name
 
-    def get_file_info(self, file_path):
+    def get_file_info(self, file_path, current_dir = False):
         file_type = ""
         file_size = ""
 
@@ -175,9 +175,15 @@ class AppBuffer(BrowserBuffer):
             file_type = "symlink"
             file_size = "1"
 
+        if current_dir:
+            current_dir = os.path.abspath(current_dir)
+            name = os.path.abspath(file_path).replace(current_dir, "", 1)[1:]
+        else:
+            name = os.path.basename(file_path)
+
         file_info = {
             "path": file_path,
-            "name": os.path.basename(file_path),
+            "name": name,
             "type": file_type,
             "size": file_size,
             "mark": "",
