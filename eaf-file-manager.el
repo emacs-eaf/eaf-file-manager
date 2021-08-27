@@ -76,6 +76,7 @@
     ("<up>" . "js_select_prev_file")
     ("<right>" . "js_open_current_file")
     ("f" . "js_open_current_file")
+    ("C-m" . "js_open_current_file")
     ("F" . "open_link")
     ("T" . "open_current_file_in_new_tab")
     ("H" . "open_file")
