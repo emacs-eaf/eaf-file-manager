@@ -417,18 +417,17 @@ class AppBuffer(BrowserBuffer):
 
         for [total, index, path, old_file_name, new_file_name] in new_files:
             file_dir = os.path.dirname(path)
-            old_file_path = os.path.join(file_dir, old_file_name)
-            new_file_path = os.path.join(file_dir, new_file_name)
+            # when run find_files, old and new file name may include "/" or "\".
+            old_file_path = os.path.join(file_dir, os.path.basename(old_file_name))
+            new_file_path = os.path.join(file_dir, os.path.basename(new_file_name))
 
             os.rename(old_file_path, new_file_path)
 
-            i = 0
-            for f in self.batch_rename_files:
+            for i, f in enumerate(self.batch_rename_files):
                 if f["index"] == index:
                     self.batch_rename_files[i]["name"] = new_file_name
                     self.batch_rename_files[i]["path"] = new_file_path
                     break
-                i += 1
 
         self.buffer_widget.eval_js('''renameFiles({})'''.format(json.dumps(self.batch_rename_files)))
         self.refresh()
