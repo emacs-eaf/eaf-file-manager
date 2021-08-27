@@ -32,7 +32,6 @@ import json
 import shutil
 import time
 import copy
-import uuid
 
 start_time = time.time()
 
@@ -174,7 +173,6 @@ class AppBuffer(BrowserBuffer):
             file_size = "1"
 
         file_info = {
-            "uuid": str(uuid.uuid1()),
             "path": file_path,
             "name": os.path.basename(file_path),
             "type": file_type,
@@ -334,11 +332,14 @@ class AppBuffer(BrowserBuffer):
 
         all_files = []
         marked_files = []
+        index = 0
 
         for f in self.vue_get_all_files():
+            f["index"] = index
             all_files.append(f)
             if f["mark"] == "mark":
                 marked_files.append(f)
+            index += 1
 
         self.batch_rename_files = all_files
 
@@ -348,7 +349,7 @@ class AppBuffer(BrowserBuffer):
 
         output = []
         for f in pending_files:
-            output.append([len(pending_files), f["uuid"], f["path"], f["name"], f["type"]])
+            output.append([len(pending_files), f["index"], f["path"], f["name"], f["type"]])
         eval_in_emacs("eaf-file-manager-rename-edit-buffer", [self.buffer_id, directory, json.dumps(output)])
 
     @interactive
@@ -405,7 +406,7 @@ class AppBuffer(BrowserBuffer):
     def batch_rename_confirm(self, new_file_string):
         new_files = json.loads(new_file_string)
 
-        for [total, uuid, path, old_file_name, new_file_name] in new_files:
+        for [total, index, path, old_file_name, new_file_name] in new_files:
             file_dir = os.path.dirname(path)
             old_file_path = os.path.join(file_dir, old_file_name)
             new_file_path = os.path.join(file_dir, new_file_name)
@@ -414,7 +415,7 @@ class AppBuffer(BrowserBuffer):
 
             i = 0
             for f in self.batch_rename_files:
-                if f["uuid"] == uuid:
+                if f["index"] == index:
                     self.batch_rename_files[i]["name"] = new_file_name
                     self.batch_rename_files[i]["path"] = new_file_path
                     break
