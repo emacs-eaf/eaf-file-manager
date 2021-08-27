@@ -119,14 +119,17 @@ class AppBuffer(BrowserBuffer):
 
         self.file_infos.sort(key=cmp_to_key(self.file_compare))
 
-        self.select_index = 0
+        if len(self.file_infos):
+            self.select_index = 0
+            self.buffer_widget.eval_js('''changePath(\"{}\", {}, {});'''.format(
+                self.url,
+                json.dumps(self.file_infos),
+                self.select_index))
 
-        self.buffer_widget.eval_js('''changePath(\"{}\", {}, {});'''.format(
-            self.url,
-            json.dumps(self.file_infos),
-            self.select_index))
-
-        self.init_first_file_preview()
+            self.init_first_file_preview()
+        else:
+            self.change_directory(dir, "")
+            message_to_emacs("Can not find files matched \"{}\", show current directory instead.".format(search_regex))
 
     def get_file_mime(self, file_path):
         if os.path.isdir(file_path):
