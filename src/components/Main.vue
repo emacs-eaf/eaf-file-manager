@@ -6,7 +6,11 @@
           class="current-path"
           :style="{ 'color': headerForegroundColor() }">
           <div v-if="searchRegex !== ''">
-            Find files matched '{{ searchRegex }}' in {{ path }}
+            <span :style="{ 'color': warningForegroundColor(), 'font-weight': 'bold' }">
+             ## Find files matched "{{ searchRegex }}" in below directory ##
+            </span>
+            <br>
+            {{ path }}
           </div>
           <div v-else>
             {{ path }}
@@ -136,6 +140,7 @@
        symlinkColor: "",
        selectColor: "",
        searchMatchColor: "",
+       warningColor: "",
 
        previewPath: "",
        previewType: "",
@@ -211,8 +216,8 @@
        })
      },
 
-     init(backgroundColor, foregroundColor, headerColor, directoryColor, symlinkColor, markColor, selectColor, searchMatchColor,
-          iconCacheDir, pathSep, option, themeMode) {
+     init(backgroundColor, foregroundColor, headerColor, directoryColor, symlinkColor, markColor, selectColor, searchMatchColor, 
+          warningColor, iconCacheDir, pathSep, option, themeMode) {
        this.backgroundColor = backgroundColor;
        this.foregroundColor = foregroundColor;
        this.fileColor = foregroundColor;
@@ -222,6 +227,7 @@
        this.markColor = markColor;
        this.selectColor = selectColor;
        this.searchMatchColor = searchMatchColor;
+       this.warningColor = warningColor;
        this.iconCacheDir = iconCacheDir;
        this.pathSep = pathSep;
        this.showPreview = option;
@@ -254,6 +260,10 @@
 
      headerForegroundColor() {
        return this.headerColor;
+     },
+
+     warningForegroundColor() {
+       return this.warningColor;
      },
 
      setSearchMatchFiles(fileIndexes) {

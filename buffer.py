@@ -93,13 +93,14 @@ class AppBuffer(BrowserBuffer):
             self.update_preview(self.file_infos[self.select_index]["path"])
 
     def init_vars(self):
-        (directory_color, symlink_color, header_color, mark_color, search_match_color) = get_emacs_func_result(
+        (directory_color, symlink_color, header_color, mark_color, search_match_color, warning_color) = get_emacs_func_result(
             "get-emacs-face-foregrounds",
             ["font-lock-builtin-face",
              "font-lock-keyword-face",
              "font-lock-function-name-face",
              "error",
-             "font-lock-preprocessor-face"])
+             "font-lock-preprocessor-face",
+             "warning"])
 
         (self.show_hidden_file, self.show_preview) = get_emacs_vars(["eaf-file-manager-show-hidden-file", "eaf-file-manager-show-preview"])
 
@@ -114,8 +115,8 @@ class AppBuffer(BrowserBuffer):
             else:
                 select_color = QColor(self.theme_background_color).darker(110).name()
 
-        self.buffer_widget.eval_js('''init(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
-            self.theme_background_color, self.theme_foreground_color, header_color, directory_color, symlink_color, mark_color, select_color, search_match_color,
+        self.buffer_widget.eval_js('''init(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
+            self.theme_background_color, self.theme_foreground_color, header_color, directory_color, symlink_color, mark_color, select_color, search_match_color, warning_color, 
             self.icon_cache_dir, os.path.sep,
             "true" if self.show_preview else "false",
             self.theme_mode))
