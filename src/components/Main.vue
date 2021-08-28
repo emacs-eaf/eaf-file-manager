@@ -5,7 +5,12 @@
         <div
           class="current-path"
           :style="{ 'color': headerForegroundColor() }">
-          {{ path }}
+          <div v-if="searchRegex !== ''">
+            Find files matched '{{ searchRegex }}' in {{ path }}
+          </div>
+          <div v-else>
+            {{ path }}
+          </div>
         </div>
 
         <div
@@ -103,6 +108,7 @@
    data() {
      return {
        path: "",
+       searchRegex: "",
        files: [],
        fileNumber: 0,
        currentIndex: 0,
@@ -173,12 +179,13 @@
      });
    },
    methods: {
-     changePath(path, files, index) {
+     changePath(path, files, index, searchRegex) {
        this.path = path;
        this.files = files;
        this.currentIndex = index;
        /* Need set currentPath here, watch track will miss update currentPath */
        this.currentPath = this.files[this.currentIndex].path;
+       this.searchRegex = searchRegex;
      },
 
      init(backgroundColor, foregroundColor, headerColor, directoryColor, symlinkColor, markColor, selectColor, searchMatchColor, iconCacheDir, pathSep, option) {
