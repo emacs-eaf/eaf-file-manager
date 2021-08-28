@@ -468,7 +468,7 @@ class AppBuffer(BrowserBuffer):
         if callback_tag == "open_link":
             self.buffer_widget.cleanup_links_dom()
         elif callback_tag == "search_file":
-            self.buffer_widget.eval_js('''selectFileByIndex(\"{}\")'''.format(self.search_start_index))
+            self.buffer_widget.eval_js('''selectFileByIndex({})'''.format(self.search_start_index))
             self.buffer_widget.eval_js('''setSearchMatchFiles({})'''.format(json.dumps([])))
 
     def handle_search_forward(self, callback_tag):
@@ -478,7 +478,7 @@ class AppBuffer(BrowserBuffer):
             else:
                 self.search_files_index += 1
 
-            self.buffer_widget.eval_js('''selectFileByIndex(\"{}\")'''.format(self.search_files[self.search_files_index][0]))
+            self.buffer_widget.eval_js('''selectFileByIndex({})'''.format(self.search_files[self.search_files_index][0]))
 
     def handle_search_backward(self, callback_tag):
         if callback_tag == "search_file":
@@ -487,7 +487,7 @@ class AppBuffer(BrowserBuffer):
             else:
                 self.search_files_index -= 1
 
-            self.buffer_widget.eval_js('''selectFileByIndex(\"{}\")'''.format(self.search_files[self.search_files_index][0]))
+            self.buffer_widget.eval_js('''selectFileByIndex({})'''.format(self.search_files[self.search_files_index][0]))
 
     def handle_search_finish(self, callback_tag):
         if callback_tag == "search_file":
@@ -668,7 +668,7 @@ class AppBuffer(BrowserBuffer):
 
     def handle_search_file(self, search_string):
         if search_string == "":
-            self.buffer_widget.eval_js('''selectFileByIndex(\"{}\")'''.format(self.search_start_index))
+            self.buffer_widget.eval_js('''selectFileByIndex({})'''.format(self.search_start_index))
             self.buffer_widget.eval_js('''setSearchMatchFiles({})'''.format(json.dumps([])))
         else:
             in_minibuffer = get_emacs_func_result("minibufferp", [])
@@ -687,7 +687,7 @@ class AppBuffer(BrowserBuffer):
                 )))
 
                 if len(self.search_files) > 0:
-                    return self.buffer_widget.eval_js('''selectFileByIndex(\"{}\")'''.format(self.search_files[self.search_files_index][0]))
+                    return self.buffer_widget.eval_js('''selectFileByIndex({})'''.format(self.search_files[self.search_files_index][0]))
 
                 # Notify user if no match file found.
                 eval_in_emacs("message", ["Did not find a matching file"])

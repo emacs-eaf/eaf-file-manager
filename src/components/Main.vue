@@ -104,7 +104,6 @@
      files: {
        // eslint-disable-next-line no-unused-vars
        handler: function (val, oldVal) {
-         this.fileNumber = val.length;
          window.pyobject.vue_update_files(val);
        },
        deep: true
@@ -124,7 +123,6 @@
        path: "",
        searchRegex: "",
        files: [],
-       fileNumber: 0,
        currentIndex: 0,
        currentPath: "",
        backgroundColor: "",
@@ -256,8 +254,8 @@
      },
 
      selectFileByIndex(index) {
-       if (index >= this.fileNumber) {
-         this.currentIndex = this.fileNumber - 1;
+       if (index >= this.files.length) {
+         this.currentIndex = this.files.length - 1;
        } else if (index <= 0) {
          this.currentIndex = 0;
        } else {
@@ -282,7 +280,7 @@
      },
 
      selectLastFile() {
-       this.selectFileByIndex(this.fileNumber - 1);
+       this.selectFileByIndex(this.files.length - 1);
      },
 
      scrollUpSelectFile() {
@@ -328,8 +326,8 @@
 
        this.currentIndex -= markNumber;
 
-       if (this.currentIndex > this.fileNumber - 1) {
-         this.currentIndex = this.fileNumber - 1;
+       if (this.currentIndex > this.files.length - 1) {
+         this.currentIndex = this.files.length - 1;
        } else if (this.currentIndex < 0) {
          this.currentIndex = 0;
        }
@@ -340,8 +338,8 @@
      removeSelectFile() {
        this.files = this.files.filter(file => { return file.path != this.currentPath });
 
-       if (this.currentIndex > this.fileNumber - 1) {
-         this.currentIndex = this.fileNumber - 1;
+       if (this.currentIndex > this.files.length - 1) {
+         this.currentIndex = this.files.length - 1;
        } else if (this.currentIndex < 0) {
          this.currentIndex = 0;
        }
@@ -384,7 +382,7 @@
      },
 
      rename(old_file_path, new_file_path, new_file_name) {
-       for (var i=0; i<this.fileNumber; i++) {
+       for (var i=0; i < this.files.length; i++) {
          if (this.files[i]["path"] == old_file_path) {
            this.files[i]["path"] = new_file_path;
            this.files[i]["name"] = new_file_name;
