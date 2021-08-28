@@ -112,6 +112,9 @@ class AppBuffer(BrowserBuffer):
             "true" if self.show_preview else "false"))
 
     def search_directory(self, dir, search_regex):
+        color, = get_emacs_func_result("get-emacs-face-foregrounds", ["warning"])
+        header = '''<span style='color:{};font-weight:bold'>## Find files matched '{}' in below directory ##</span><br>{}'''.format(color, search_regex, dir)
+        self.buffer_widget.eval_js('''setHeader(\"{}\");'''.format(header))
         self.file_infos = []
         for p in Path(os.path.expanduser(dir)).rglob(search_regex):
             if self.filter_file(p.name):
@@ -253,6 +256,7 @@ class AppBuffer(BrowserBuffer):
                 files = list(map(lambda file: file["path"], self.file_infos))
                 self.select_index = files.index(current_dir) if current_dir in files else 0
 
+            self.buffer_widget.eval_js('''setHeader(\"{}\");'''.format(dir))
             self.buffer_widget.eval_js('''changePath(\"{}\", {}, {});'''.format(
                 self.url,
                 json.dumps(self.file_infos),

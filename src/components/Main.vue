@@ -3,9 +3,9 @@
     <div class="content">
       <div class="file-area">
         <div
-          class="current-path"
+          class="header"
           :style="{ 'color': headerForegroundColor() }">
-          {{ path }}
+          <span v-html="header"></span>
         </div>
 
         <div
@@ -109,6 +109,7 @@
        currentPath: "",
        backgroundColor: "",
        foregroundColor: "",
+       header: "",
        headerColor: "",
        markColor: "",
        fileColor: "",
@@ -132,6 +133,7 @@
    mounted() {
      window.changePath = this.changePath;
      window.init = this.init;
+     window.setHeader = this.setHeader;
      window.selectNextFile = this.selectNextFile;
      window.selectPrevFile = this.selectPrevFile;
      window.selectFirstFile = this.selectFirstFile;
@@ -222,6 +224,10 @@
 
      headerForegroundColor() {
        return this.headerColor;
+     },
+
+     setHeader(header) {
+       this.header = header;
      },
 
      setSearchMatchFiles(fileIndexes) {
@@ -501,7 +507,7 @@
    flex-direction: column;
  }
 
- .current-path {
+ .header {
    font-size: 16px;
    padding-left: 20px;
    padding-top: 5px;
