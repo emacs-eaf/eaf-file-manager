@@ -106,10 +106,11 @@ class AppBuffer(BrowserBuffer):
             else:
                 select_color = QColor(self.theme_background_color).darker(110).name()
 
-        self.buffer_widget.eval_js('''init(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
+        self.buffer_widget.eval_js('''init(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
             self.theme_background_color, self.theme_foreground_color, header_color, directory_color, symlink_color, mark_color, select_color, search_match_color,
             self.icon_cache_dir, os.path.sep,
-            "true" if self.show_preview else "false"))
+            "true" if self.show_preview else "false",
+            self.theme_mode))
 
     def search_directory(self, dir, search_regex):
         self.file_infos = []
