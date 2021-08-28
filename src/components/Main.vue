@@ -97,7 +97,9 @@
      currentIndex: {
        // eslint-disable-next-line no-unused-vars
        handler: function(val, oldVal) {
-         this.currentPath = this.files[val].path;
+         if (this.files.length > 0) {
+           this.currentPath = this.files[val].path;
+         }
          window.pyobject.vue_update_current_index(val);
        }
      },
@@ -198,7 +200,9 @@
        this.files = files;
        this.currentIndex = index;
        /* Need set currentPath here, watch track will miss update currentPath */
-       this.currentPath = this.files[this.currentIndex].path;
+       if (this.files.length > 0) {
+         this.currentPath = this.files[this.currentIndex].path;
+       }
        this.searchRegex = searchRegex;
      },
 

@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import QUrl, QThread, QMimeDatabase
+from PyQt5.QtCore import QUrl, QThread, QMimeDatabase, QFileSystemWatcher
 from PyQt5.QtGui import QColor, QIcon
 from PyQt5 import QtCore, QtWidgets
 from core.webengine import BrowserBuffer
@@ -54,6 +54,9 @@ class AppBuffer(BrowserBuffer):
         self.search_files = []
         self.search_files_index = 0
 
+        self.file_changed_wacher = QFileSystemWatcher()
+        self.file_changed_wacher.directoryChanged.connect(lambda path: self.refresh())
+
         self.mime_db = QMimeDatabase()
         self.icon_cache_dir = os.path.join(os.path.dirname(__file__,), "src", "assets", "icon_cache")
         if not os.path.exists(self.icon_cache_dir):
@@ -61,6 +64,11 @@ class AppBuffer(BrowserBuffer):
 
         self.preview_file = None
         self.fetch_preview_info_threads = []
+
+    def monitor_current_dir(self):
+        if len(self.file_changed_wacher.directories()) > 0:
+            self.file_changed_wacher.removePaths(self.file_changed_wacher.directories())
+        self.file_changed_wacher.addPath(self.url)
 
     def init_app(self):
         self.init_vars()
@@ -241,33 +249,37 @@ class AppBuffer(BrowserBuffer):
     def change_directory(self, dir, current_dir):
         self.url = dir
 
+        self.monitor_current_dir()
+
         eval_in_emacs('eaf--change-default-directory', [dir])
         self.change_title(os.path.basename(dir))
 
         self.file_infos = self.get_file_infos(dir)
 
-        if current_dir == "" and len(self.file_infos) == 0:
-            eval_in_emacs("message", ["Nothing in {}, no need to enter directory.".format(dir)])
-        else:
-            self.select_index = 0
+        self.select_index = 0
 
-            if current_dir != "":
-                files = list(map(lambda file: file["path"], self.file_infos))
-                self.select_index = files.index(current_dir) if current_dir in files else 0
+        if current_dir != "":
+            files = list(map(lambda file: file["path"], self.file_infos))
+            self.select_index = files.index(current_dir) if current_dir in files else 0
 
-            self.buffer_widget.eval_js('''changePath(\"{}\", {}, {}, \"{}\");'''.format(
-                self.url,
-                json.dumps(self.file_infos),
-                self.select_index,
-                ""))
+        self.buffer_widget.eval_js('''changePath(\"{}\", {}, {}, \"{}\");'''.format(
+            self.url,
+            json.dumps(self.file_infos),
+            self.select_index,
+            ""))
 
+        if len(self.file_infos) > 0:
             self.init_first_file_preview()
 
     @QtCore.pyqtSlot(str)
     def change_up_directory(self, file):
         current_dir = os.path.dirname(file)
         up_directory_path = str(Path(current_dir).parent.absolute())
-        if up_directory_path != current_dir:
+
+        if file == self.url:
+            # If current directory is empty directory, file will same as current directory.
+            self.change_directory(current_dir, file)
+        elif up_directory_path != current_dir:
             self.change_directory(up_directory_path, current_dir)
         else:
             eval_in_emacs("message", ["Already in root directory"])
