@@ -115,18 +115,21 @@ class AppBuffer(BrowserBuffer):
         self.file_infos = []
         for p in Path(os.path.expanduser(dir)).rglob(search_regex):
             if self.filter_file(p.name):
-                self.file_infos.append(self.get_file_info(str(p.absolute())))
+                self.file_infos.append(self.get_file_info(str(p.absolute()), dir))
 
         self.file_infos.sort(key=cmp_to_key(self.file_compare))
 
-        self.select_index = 0
+        if len(self.file_infos):
+            self.select_index = 0
+            self.buffer_widget.eval_js('''changePath(\"{}\", {}, {});'''.format(
+                self.url,
+                json.dumps(self.file_infos),
+                self.select_index))
 
-        self.buffer_widget.eval_js('''changePath(\"{}\", {}, {});'''.format(
-            self.url,
-            json.dumps(self.file_infos),
-            self.select_index))
-
-        self.init_first_file_preview()
+            self.init_first_file_preview()
+        else:
+            self.change_directory(dir, "")
+            message_to_emacs("Can not find files matched \"{}\", show current directory instead.".format(search_regex))
 
     def get_file_mime(self, file_path):
         if os.path.isdir(file_path):
@@ -158,7 +161,7 @@ class AppBuffer(BrowserBuffer):
 
         return icon_name
 
-    def get_file_info(self, file_path):
+    def get_file_info(self, file_path, current_dir = False):
         file_type = ""
         file_size = ""
 
@@ -172,9 +175,15 @@ class AppBuffer(BrowserBuffer):
             file_type = "symlink"
             file_size = "1"
 
+        if current_dir:
+            current_dir = os.path.abspath(current_dir)
+            name = os.path.abspath(file_path).replace(current_dir, "", 1)[1:]
+        else:
+            name = os.path.basename(file_path)
+
         file_info = {
             "path": file_path,
-            "name": os.path.basename(file_path),
+            "name": name,
             "type": file_type,
             "size": file_size,
             "mark": "",
@@ -408,18 +417,17 @@ class AppBuffer(BrowserBuffer):
 
         for [total, index, path, old_file_name, new_file_name] in new_files:
             file_dir = os.path.dirname(path)
-            old_file_path = os.path.join(file_dir, old_file_name)
-            new_file_path = os.path.join(file_dir, new_file_name)
+            # when run find_files, old and new file name may include "/" or "\".
+            old_file_path = os.path.join(file_dir, os.path.basename(old_file_name))
+            new_file_path = os.path.join(file_dir, os.path.basename(new_file_name))
 
             os.rename(old_file_path, new_file_path)
 
-            i = 0
-            for f in self.batch_rename_files:
+            for i, f in enumerate(self.batch_rename_files):
                 if f["index"] == index:
                     self.batch_rename_files[i]["name"] = new_file_name
                     self.batch_rename_files[i]["path"] = new_file_path
                     break
-                i += 1
 
         self.buffer_widget.eval_js('''renameFiles({})'''.format(json.dumps(self.batch_rename_files)))
         self.refresh()

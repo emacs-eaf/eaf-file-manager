@@ -213,7 +213,8 @@
           (setq orig-files-total-num total))
         (if (or (not orig-file-name)
                 (equal (length new-file-name) 0)
-                (string-match-p "[/\\]" new-file-name))
+                (not (eq (length (replace-regexp-in-string "[^/\\]" "" orig-file-name))
+                         (length (replace-regexp-in-string "[^/\\]" "" new-file-name)))))
             (push orig-file-name rename-failed)
           (setq files-total-num (+ files-total-num 1))
           (push (vector total index path orig-file-name new-file-name) files-info))))
@@ -283,8 +284,10 @@
                    (p (list 'total total 'index index
                             'path path 'name name 'face face
                             'front-sticky nil 'rear-nonsticky '(face))))
-              (insert (apply #'propertize " " 'read-only t 'rear-nonsticky '(read-only) p))
-              (insert (apply #'propertize name p))
+              (insert (apply #'propertize
+                             (concat " " (or (file-name-directory name) ""))
+                             'read-only t 'rear-nonsticky '(read-only) p))
+              (insert (apply #'propertize (file-name-nondirectory name) p))
               (insert "\n")))
           (json-read-from-string files))
     (goto-char (point-min))
