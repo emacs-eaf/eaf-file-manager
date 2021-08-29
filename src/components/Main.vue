@@ -6,7 +6,7 @@
           v-if="searchRegex !== ''"
           class="search-keyword"
           :style="{ 'color': searchKeywordForegroundColor() }">
-          ## Find files matched "{{ searchRegex }}" in below directory ##
+          ## Find {{ files.length }} files matched "{{ searchRegex }}" in below directory ##
         </div>
         <div
           class="current-path"
@@ -155,6 +155,8 @@
    },
    mounted() {
      window.changePath = this.changePath;
+     window.initSearch = this.initSearch;
+     window.appendSearch = this.appendSearch;
      window.init = this.init;
      window.selectNextFile = this.selectNextFile;
      window.selectPrevFile = this.selectPrevFile;
@@ -197,20 +199,34 @@
      });
    },
    methods: {
-     changePath(path, files, index, searchRegex) {
+     changePath(path, files, index) {
        this.path = path;
        this.files = files;
        this.currentIndex = index;
+
        /* Need set currentPath here, watch track will miss update currentPath */
        if (this.files.length > 0) {
          this.currentPath = this.files[this.currentIndex].path;
        }
-       this.searchRegex = searchRegex;
 
        /* Use nextTick wait DOM update, then make sure current file in visible area. */
        this.$nextTick(function(){
          this.keepSelectVisible();
        })
+     },
+
+     initSearch(path, searchRegex, files) {
+       this.path = path;
+       this.files = files
+       this.currentIndex = 0;
+       if (this.files.length > 0) {
+         this.currentPath = this.files[this.currentIndex].path;
+       }
+       this.searchRegex = searchRegex;
+     },
+
+     appendSearch(files) {
+       this.files = this.files.concat(files);
      },
 
      init(backgroundColor, foregroundColor, headerColor, directoryColor, symlinkColor, markColor, selectColor, searchMatchColor,

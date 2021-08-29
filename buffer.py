@@ -64,6 +64,7 @@ class AppBuffer(BrowserBuffer):
 
         self.preview_file = None
         self.fetch_preview_info_threads = []
+        self.search_file_threads = []
 
     def monitor_current_dir(self):
         if len(self.file_changed_wacher.directories()) > 0:
@@ -116,31 +117,28 @@ class AppBuffer(BrowserBuffer):
                 select_color = QColor(self.theme_background_color).darker(110).name()
 
         self.buffer_widget.eval_js('''init(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
-            self.theme_background_color, self.theme_foreground_color, header_color, directory_color, symlink_color, mark_color, select_color, search_match_color, warning_color, 
+            self.theme_background_color, self.theme_foreground_color, header_color, directory_color, symlink_color, mark_color, select_color, search_match_color, warning_color,
             self.icon_cache_dir, os.path.sep,
             "true" if self.show_preview else "false",
             self.theme_mode))
 
+    @PostGui()
+    def init_search(self, dir, search_regex, file_infos):
+        self.buffer_widget.eval_js('''initSearch(\"{}\", \"{}\", {});'''.format(dir, search_regex, json.dumps(file_infos)))
+
+        self.update_preview(file_infos[0]["path"])
+
+    @PostGui()
+    def append_search(self, file_infos):
+        self.buffer_widget.eval_js('''appendSearch({});'''.format(json.dumps(file_infos)))
+
     def search_directory(self, dir, search_regex):
-        self.file_infos = []
-        for p in Path(os.path.expanduser(dir)).rglob(search_regex):
-            if self.filter_file(p.name):
-                self.file_infos.append(self.get_file_info(str(p.absolute()), dir))
+        thread = SearchFileThread(os.path.expanduser(dir), search_regex, self.filter_file, self.get_file_info)
+        thread.init_search.connect(self.init_search)
+        thread.append_search.connect(self.append_search)
 
-        self.file_infos.sort(key=cmp_to_key(self.file_compare))
-
-        if len(self.file_infos):
-            self.select_index = 0
-            self.buffer_widget.eval_js('''changePath(\"{}\", {}, {}, \"{}\");'''.format(
-                self.url,
-                json.dumps(self.file_infos),
-                self.select_index,
-                search_regex))
-
-            self.init_first_file_preview()
-        else:
-            self.change_directory(dir, "")
-            message_to_emacs("Can not find files matched \"{}\", show current directory instead.".format(search_regex))
+        self.search_file_threads.append(thread)
+        thread.start()
 
     def get_file_mime(self, file_path):
         if os.path.isdir(file_path):
@@ -263,11 +261,10 @@ class AppBuffer(BrowserBuffer):
             files = list(map(lambda file: file["path"], self.file_infos))
             self.select_index = files.index(current_dir) if current_dir in files else 0
 
-        self.buffer_widget.eval_js('''changePath(\"{}\", {}, {}, \"{}\");'''.format(
+        self.buffer_widget.eval_js('''changePath(\"{}\", {}, {});'''.format(
             self.url,
             json.dumps(self.file_infos),
-            self.select_index,
-            ""))
+            self.select_index))
 
         if len(self.file_infos) > 0:
             self.init_first_file_preview()
@@ -733,6 +730,21 @@ class AppBuffer(BrowserBuffer):
                 return True
         return False
 
+    def destroy_buffer(self):
+        ''' Destroy buffer.'''
+        for search_file_thread in self.search_file_threads:
+            if search_file_thread.isRunning():
+                search_file_thread.quit()
+                search_file_thread.wait()
+
+        for fetch_preview_info_thread in self.fetch_preview_info_threads:
+            if fetch_preview_info_thread.isRunning():
+                fetch_preview_info_thread.quit()
+                fetch_preview_info_thread.wait()
+
+        if self.buffer_widget is not None:
+            self.buffer_widget.deleteLater()
+
 class FetchPreviewInfoThread(QThread):
 
     fetch_finish = QtCore.pyqtSignal(str, str, str)
@@ -769,3 +781,42 @@ class FetchPreviewInfoThread(QThread):
                     file_type = "symlink"
 
             self.fetch_finish.emit(self.file, file_type, json.dumps(file_infos))
+
+class SearchFileThread(QThread):
+
+    init_search = QtCore.pyqtSignal(str, str, list)
+    append_search = QtCore.pyqtSignal(list)
+
+    def __init__(self, search_dir, search_regex, filter_file_callback, get_file_info_callback):
+        QThread.__init__(self)
+
+        self.search_dir = search_dir
+        self.search_regex = search_regex
+        self.filter_file_callback = filter_file_callback
+        self.get_file_info_callback = get_file_info_callback
+
+        self.search_limit = 10
+        self.first_search = False
+        self.file_infos = []
+
+    def run(self):
+        for p in Path(self.search_dir).rglob(self.search_regex):
+            if self.filter_file_callback(p.name):
+                self.file_infos.append(self.get_file_info_callback(str(p.absolute()), self.search_dir))
+
+                if len(self.file_infos) > self.search_limit:
+                    self.send_files()
+
+        self.send_files()
+
+    def send_files(self):
+        if len(self.file_infos) > 0:
+            if self.first_search:
+                self.append_search.emit(self.file_infos)
+                print("append search")
+            else:
+                self.first_search = True
+                self.init_search.emit(self.search_dir, self.search_regex, self.file_infos)
+                print("init search")
+
+            self.file_infos = []
