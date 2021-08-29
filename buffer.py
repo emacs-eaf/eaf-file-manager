@@ -33,8 +33,6 @@ import shutil
 import time
 import copy
 
-start_time = time.time()
-
 class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, arguments):
         BrowserBuffer.__init__(self, buffer_id, url, arguments, False)
@@ -123,20 +121,27 @@ class AppBuffer(BrowserBuffer):
             self.theme_mode))
 
     @PostGui()
-    def init_search(self, dir, search_regex, file_infos):
-        self.buffer_widget.eval_js('''initSearch(\"{}\", \"{}\", {});'''.format(dir, search_regex, json.dumps(file_infos)))
-
-        self.update_preview(file_infos[0]["path"])
-
-    @PostGui()
-    def append_search(self, file_infos):
+    def handle_append_search(self, file_infos, first_search):
         self.buffer_widget.eval_js('''appendSearch({});'''.format(json.dumps(file_infos)))
 
-    def search_directory(self, dir, search_regex):
-        thread = SearchFileThread(os.path.expanduser(dir), search_regex, self.filter_file, self.get_file_info)
-        thread.init_search.connect(self.init_search)
-        thread.append_search.connect(self.append_search)
+        if first_search:
+            self.update_preview(file_infos[0]["path"])
 
+    @PostGui()
+    def handle_finish_search(self, search_dir, search_regex, match_number):
+        self.buffer_widget.eval_js('''finishSearch()''')
+
+        if match_number > 0:
+            message_to_emacs("Find {} files that matched '{}'".format(match_number, search_regex))
+        else:
+            message_to_emacs("No file matched '{}'".format(search_regex))
+
+    def search_directory(self, dir, search_regex):
+        self.buffer_widget.eval_js('''initSearch(\"{}\", \"{}\");'''.format(dir, search_regex))
+
+        thread = SearchFileThread(os.path.expanduser(dir), search_regex, self.filter_file, self.get_file_info)
+        thread.append_search.connect(self.handle_append_search)
+        thread.finish_search.connect(self.handle_finish_search)
         self.search_file_threads.append(thread)
         thread.start()
 
@@ -784,8 +789,8 @@ class FetchPreviewInfoThread(QThread):
 
 class SearchFileThread(QThread):
 
-    init_search = QtCore.pyqtSignal(str, str, list)
-    append_search = QtCore.pyqtSignal(list)
+    append_search = QtCore.pyqtSignal(list, bool)
+    finish_search = QtCore.pyqtSignal(str, str, int)
 
     def __init__(self, search_dir, search_regex, filter_file_callback, get_file_info_callback):
         QThread.__init__(self)
@@ -795,28 +800,29 @@ class SearchFileThread(QThread):
         self.filter_file_callback = filter_file_callback
         self.get_file_info_callback = get_file_info_callback
 
-        self.search_limit = 10
-        self.first_search = False
+        self.start_time = time.time()
+        self.search_send_duration = 0.3
+        self.first_search = True
         self.file_infos = []
+        self.match_number = 0
 
     def run(self):
         for p in Path(self.search_dir).rglob(self.search_regex):
             if self.filter_file_callback(p.name):
                 self.file_infos.append(self.get_file_info_callback(str(p.absolute()), self.search_dir))
+                self.match_number += 1
 
-                if len(self.file_infos) > self.search_limit:
+                if (time.time() - self.start_time) > self.search_send_duration:
                     self.send_files()
+                    self.start_time = time.time()
 
         self.send_files()
 
+        self.finish_search.emit(self.search_dir, self.search_regex, self.match_number)
+
     def send_files(self):
         if len(self.file_infos) > 0:
-            if self.first_search:
-                self.append_search.emit(self.file_infos)
-                print("append search")
-            else:
-                self.first_search = True
-                self.init_search.emit(self.search_dir, self.search_regex, self.file_infos)
-                print("init search")
+            self.append_search.emit(self.file_infos, self.first_search)
+            self.first_search = False
 
             self.file_infos = []
