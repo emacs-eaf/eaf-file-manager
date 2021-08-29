@@ -3,18 +3,15 @@
     <div class="content">
       <div class="file-area">
         <div
+          v-if="searchRegex !== ''"
+          class="search-keyword"
+          :style="{ 'color': searchKeywordForegroundColor() }">
+          ## Find files matched "{{ searchRegex }}" in below directory ##
+        </div>
+        <div
           class="current-path"
           :style="{ 'color': headerForegroundColor() }">
-          <div v-if="searchRegex !== ''">
-            <span :style="{ 'color': warningForegroundColor(), 'font-weight': 'bold' }">
-             ## Find files matched "{{ searchRegex }}" in below directory ##
-            </span>
-            <br>
-            {{ path }}
-          </div>
-          <div v-else>
-            {{ path }}
-          </div>
+          {{ path }}
         </div>
 
         <div
@@ -140,7 +137,7 @@
        symlinkColor: "",
        selectColor: "",
        searchMatchColor: "",
-       warningColor: "",
+       searchKeywordColor: "",
 
        previewPath: "",
        previewType: "",
@@ -216,8 +213,8 @@
        })
      },
 
-     init(backgroundColor, foregroundColor, headerColor, directoryColor, symlinkColor, markColor, selectColor, searchMatchColor, 
-          warningColor, iconCacheDir, pathSep, option, themeMode) {
+     init(backgroundColor, foregroundColor, headerColor, directoryColor, symlinkColor, markColor, selectColor, searchMatchColor,
+          searchKeywordColor, iconCacheDir, pathSep, option, themeMode) {
        this.backgroundColor = backgroundColor;
        this.foregroundColor = foregroundColor;
        this.fileColor = foregroundColor;
@@ -227,7 +224,7 @@
        this.markColor = markColor;
        this.selectColor = selectColor;
        this.searchMatchColor = searchMatchColor;
-       this.warningColor = warningColor;
+       this.searchKeywordColor = searchKeywordColor;
        this.iconCacheDir = iconCacheDir;
        this.pathSep = pathSep;
        this.showPreview = option;
@@ -262,8 +259,8 @@
        return this.headerColor;
      },
 
-     warningForegroundColor() {
-       return this.warningColor;
+     searchKeywordForegroundColor() {
+       return this.searchKeywordColor;
      },
 
      setSearchMatchFiles(fileIndexes) {
@@ -541,6 +538,12 @@
    height: 100%;
    display: flex;
    flex-direction: column;
+ }
+
+ .search-keyword {
+   padding-left: 20px;
+   padding-top: 5px;
+   font-weight: bold;
  }
 
  .current-path {
