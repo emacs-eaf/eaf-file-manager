@@ -421,7 +421,7 @@ class AppBuffer(BrowserBuffer):
 
     @interactive
     def find_files(self):
-        self.send_input_message("Find file with regexp: ", "find_files", "string")
+        self.send_input_message("Find file with '*?[]' glob pattern: ", "find_files", "string")
 
     @interactive
     def refresh_dir(self):
