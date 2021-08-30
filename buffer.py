@@ -98,7 +98,7 @@ class AppBuffer(BrowserBuffer):
              "font-lock-keyword-face",
              "font-lock-function-name-face",
              "error",
-             "font-lock-preprocessor-face",
+             "font-lock-string-face",
              "warning"])
 
         (self.show_hidden_file, self.show_preview) = get_emacs_vars(["eaf-file-manager-show-hidden-file", "eaf-file-manager-show-preview"])
