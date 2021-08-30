@@ -236,7 +236,7 @@
      },
 
      finishSearch() {
-       this.searchStr = "Find";
+       this.searchStr = "Found";
      },
 
      init(backgroundColor, foregroundColor, headerColor, directoryColor, symlinkColor, markColor, selectColor, searchMatchColor,
