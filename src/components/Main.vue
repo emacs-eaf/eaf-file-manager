@@ -215,6 +215,8 @@
        this.$nextTick(function(){
          this.keepSelectVisible();
        })
+
+       this.searchRegex = "";
      },
 
      initSearch(path, searchRegex) {
