@@ -720,6 +720,7 @@ class AppBuffer(BrowserBuffer):
                 # Notify user if no match file found.
                 eval_in_emacs("message", ["Did not find a matching file"])
             else:
+                message_to_emacs("Select file: {}".format(self.vue_files[self.vue_current_index]['name']))
                 self.buffer_widget.eval_js('''setSearchMatchFiles({})'''.format(json.dumps([])))
 
     def is_file_match(self, file, search_word):
