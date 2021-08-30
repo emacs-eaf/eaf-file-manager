@@ -74,9 +74,9 @@ class AppBuffer(BrowserBuffer):
 
         if self.arguments != "":
             if self.arguments.startswith("search:"):
-                search_regex = self.arguments.split("search:")[1]
-                if search_regex != "":
-                    self.search_directory(self.url, search_regex)
+                self.search_regex = self.arguments.split("search:")[1]
+                if self.search_regex != "":
+                    self.search_directory(self.url, self.search_regex)
                 else:
                     self.change_directory(self.url, "")
             elif self.arguments.startswith("jump:"):
@@ -335,11 +335,17 @@ class AppBuffer(BrowserBuffer):
 
     @interactive
     def new_file(self):
-        self.send_input_message("Create file: ", "create_file")
+        if self.search_regex == "":
+            self.send_input_message("Create file: ", "create_file")
+        else:
+            message_to_emacs("Search page not support new file opeartion.")
 
     @interactive
     def new_directory(self):
-        self.send_input_message("Create directory: ", "create_directory")
+        if self.search_regex == "":
+            self.send_input_message("Create directory: ", "create_directory")
+        else:
+            message_to_emacs("Search page not support new directory opeartion.")
 
     @interactive
     def copy_dir_path(self):
