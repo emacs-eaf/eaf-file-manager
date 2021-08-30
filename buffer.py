@@ -26,6 +26,7 @@ from core.webengine import BrowserBuffer
 from pathlib import Path
 from functools import cmp_to_key
 from core.utils import eval_in_emacs, PostGui, get_emacs_vars, interactive, message_to_emacs, get_emacs_func_result
+from fnmatch import fnmatch
 import codecs
 import os
 import json
@@ -723,8 +724,12 @@ class AppBuffer(BrowserBuffer):
                 self.buffer_widget.eval_js('''setSearchMatchFiles({})'''.format(json.dumps([])))
 
     def is_file_match(self, file, search_word):
-        return ((len(search_word) > 0 and search_word[0] != "!" and search_word.lower() in file.lower()) or
-                (len(search_word) > 0 and search_word[0] == "!" and (not search_word.lower()[1:] in file.lower())))
+        return ((len(search_word) > 0 and
+                 search_word[0] != "!" and
+                 fnmatch(file.lower(), "*{}*".format(search_word.lower()))) or
+                (len(search_word) > 0 and
+                 search_word[0] == "!" and
+                 (not fnmatch(file.lower(), "*{}*".format(search_word.lower()[1])))))
 
     def marker_offset_x(self):
         return -28
