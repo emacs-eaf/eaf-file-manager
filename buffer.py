@@ -461,7 +461,6 @@ class AppBuffer(BrowserBuffer):
                     break
 
         self.buffer_widget.eval_js('''renameFiles({})'''.format(json.dumps(self.batch_rename_files)))
-        self.refresh()
 
     def handle_input_response(self, callback_tag, result_content):
         if callback_tag == "delete_file":
