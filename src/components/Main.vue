@@ -396,13 +396,18 @@
      },
 
      selectFile(file) {
-       this.currentIndex = this.files.map(file => file.path).indexOf(file.path);
+       if (file !== undefined) {
+         this.currentIndex = this.files.map(file => file.path).indexOf(file.path);
 
-       this.updatePreview();
+         this.updatePreview();
+       }
      },
 
      keepSelectVisible() {
-       this.$refs.filelist.children[this.currentIndex].scrollIntoViewIfNeeded(false);
+       var select_file = this.$refs.filelist.children[this.currentIndex]
+       if (select_file !== undefined) {
+         select_file.scrollIntoViewIfNeeded(false);
+       }
      },
 
      openCurrentFile() {
@@ -452,12 +457,8 @@
      },
 
      addNewFile(new_file) {
-       this.files.push(new_file);
-
-       /* Use nextTick wait DOM update, then select last file. */
-       this.$nextTick(function(){
-         this.selectLastFile();
-       })
+       this.currentIndex = this.files.push(new_file) - 1;
+       this.currentPath = new_file.path;
      },
 
      addNewDirectory(new_directory) {

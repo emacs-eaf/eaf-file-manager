@@ -42,6 +42,7 @@ class AppBuffer(BrowserBuffer):
         self.vue_files = []
         self.vue_current_index = 0
 
+        self.search_regex = ""
         self.search_start_index = 0
 
         self.load_index_html(__file__)
@@ -137,6 +138,8 @@ class AppBuffer(BrowserBuffer):
             message_to_emacs("No file matched '{}'".format(search_regex))
 
     def search_directory(self, dir, search_regex):
+        self.url = dir
+
         self.buffer_widget.eval_js('''initSearch(\"{}\", \"{}\");'''.format(dir, search_regex))
 
         thread = SearchFileThread(os.path.expanduser(dir), search_regex, self.filter_file, self.get_file_info)
@@ -360,7 +363,8 @@ class AppBuffer(BrowserBuffer):
             self.send_input_message("Move mark files to: ", "move_files", "file", self.url)
         else:
             self.move_file = self.vue_get_select_file()
-            self.send_input_message("Move '{}' to: ".format(self.move_file["name"]), "move_file", "file", self.url)
+            if self.move_file != None:
+                self.send_input_message("Move '{}' to: ".format(self.move_file["name"]), "move_file", "file", self.url)
 
     @interactive
     def copy_current_or_mark_file(self):
@@ -370,7 +374,8 @@ class AppBuffer(BrowserBuffer):
             self.send_input_message("Copy mark files to: ", "copy_files", "file", self.url)
         else:
             self.copy_file = self.vue_get_select_file()
-            self.send_input_message("Copy '{}' to: ".format(self.copy_file["name"]), "copy_file", "file", self.url)
+            if self.copy_file != None:
+                self.send_input_message("Copy '{}' to: ".format(self.copy_file["name"]), "copy_file", "file", self.url)
 
     @interactive
     def batch_rename(self):
@@ -422,7 +427,7 @@ class AppBuffer(BrowserBuffer):
 
         if self.show_preview:
             current_file = self.vue_get_select_file()
-            if current_file and type(current_file).__name__ == "dict" and "path" in current_file:
+            if current_file != None:
                 self.update_preview(current_file["path"])
 
     @interactive
@@ -437,7 +442,7 @@ class AppBuffer(BrowserBuffer):
     @interactive
     def open_current_file_in_new_tab(self):
         current_file = self.vue_get_select_file()
-        if current_file and type(current_file).__name__ == "dict" and "path" in current_file:
+        if current_file != None:
             eval_in_emacs("eaf-open-in-file-manager", [current_file["path"]])
 
     @interactive
@@ -446,7 +451,7 @@ class AppBuffer(BrowserBuffer):
 
     def refresh(self):
         current_file = self.vue_get_select_file()
-        if current_file and type(current_file).__name__ == "dict" and "path" in current_file:
+        if current_file != None:
             self.change_directory(self.url, current_file["path"])
 
     def batch_rename_confirm(self, new_file_string):
@@ -543,7 +548,10 @@ class AppBuffer(BrowserBuffer):
         return self.vue_files.copy()
 
     def vue_get_select_file(self):
-        return copy.deepcopy(self.vue_files[self.vue_current_index])
+        try:
+            return copy.deepcopy(self.vue_files[self.vue_current_index])
+        except:
+            return None
 
     @QtCore.pyqtSlot(list)
     def vue_update_files(self, vue_files):
@@ -567,10 +575,11 @@ class AppBuffer(BrowserBuffer):
 
     def handle_delete_current_file(self):
         file_info = self.vue_get_select_file()
-        self.delete_file(file_info)
-        self.buffer_widget.eval_js("removeSelectFile();")
+        if file_info != None:
+            self.delete_file(file_info)
+            self.buffer_widget.eval_js("removeSelectFile();")
 
-        message_to_emacs("Delete file {} success.".format(file_info["path"]))
+            message_to_emacs("Delete file {} success.".format(file_info["path"]))
 
     def handle_rename_file(self, new_file_name):
         if new_file_name == self.rename_file_name:
@@ -615,8 +624,6 @@ class AppBuffer(BrowserBuffer):
             try:
                 shutil.move(self.move_file["path"], new_file)
                 self.buffer_widget.eval_js("removeSelectFile();")
-
-                self.refresh()
 
                 message_to_emacs("Move '{}' to '{}'".format(self.move_file["name"], new_file))
             except:
