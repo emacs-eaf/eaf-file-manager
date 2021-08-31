@@ -32,6 +32,7 @@ import json
 import shutil
 import time
 import copy
+import subprocess
 
 class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, arguments):
@@ -122,11 +123,12 @@ class AppBuffer(BrowserBuffer):
             self.theme_mode))
 
     @PostGui()
-    def handle_append_search(self, file_infos, first_search):
-        self.buffer_widget.eval_js('''appendSearch({});'''.format(json.dumps(file_infos)))
+    def handle_append_search(self, file_paths, first_search):
+        self.buffer_widget.eval_js('''appendSearch({});'''.format(
+            json.dumps(list(map(lambda file_path: self.get_file_info(file_path, self.url), file_paths)))))
 
         if first_search:
-            self.update_preview(file_infos[0]["path"])
+            self.update_preview(file_paths[0])
 
     @PostGui()
     def handle_finish_search(self, search_dir, search_regex, match_number):
@@ -140,9 +142,12 @@ class AppBuffer(BrowserBuffer):
     def search_directory(self, dir, search_regex):
         self.url = dir
 
-        self.buffer_widget.eval_js('''initSearch(\"{}\", \"{}\");'''.format(dir, search_regex))
-
-        thread = SearchFileThread(os.path.expanduser(dir), search_regex, self.filter_file, self.get_file_info)
+        if shutil.which("fd") != None:
+            self.buffer_widget.eval_js('''initSearch(\"{}\", \"{}\");'''.format(dir, "fd {}".format(search_regex)))
+            thread = FdSearchThread(os.path.expanduser(dir), search_regex, self.filter_file)
+        else:
+            self.buffer_widget.eval_js('''initSearch(\"{}\", \"{}\");'''.format(dir, search_regex))
+            thread = PythonSearchThread(os.path.expanduser(dir), search_regex, self.filter_file)
         thread.append_search.connect(self.handle_append_search)
         thread.finish_search.connect(self.handle_finish_search)
         self.search_file_threads.append(thread)
@@ -211,17 +216,20 @@ class AppBuffer(BrowserBuffer):
         return file_info
 
     def limit_file_name_length(self, file_name):
-        limit_length = 15
+        if self.search_regex != "":
+            limit_length = 15
 
-        base_name = os.path.basename(file_name)
-        new_base_name = base_name
-        if len(base_name) > limit_length * 2:
-            new_base_name = base_name[:limit_length] + "..." + base_name[len(base_name) - limit_length:]
+            base_name = os.path.basename(file_name)
+            new_base_name = base_name
+            if len(base_name) > limit_length * 2:
+                new_base_name = base_name[:limit_length] + "..." + base_name[len(base_name) - limit_length:]
 
-        if file_name == base_name:
-            return new_base_name
+            if file_name == base_name:
+                return new_base_name
+            else:
+                return os.path.join(os.path.dirname(file_name), new_base_name)
         else:
-            return os.path.join(os.path.dirname(file_name), new_base_name)
+            return file_name
 
     def get_file_infos(self, path):
         file_infos = []
@@ -432,7 +440,10 @@ class AppBuffer(BrowserBuffer):
 
     @interactive
     def find_files(self):
-        self.send_input_message("Find file with '*?[]' glob pattern: ", "find_files", "string")
+        if shutil.which("fd") != None:
+            self.send_input_message("Find file with 'fd': ", "find_files", "string")
+        else:
+            self.send_input_message("Find file with '*?[]' glob pattern: ", "find_files", "string")
 
     @interactive
     def refresh_dir(self):
@@ -815,29 +826,43 @@ class FetchPreviewInfoThread(QThread):
 
             self.fetch_finish.emit(self.file, file_type, json.dumps(file_infos))
 
-class SearchFileThread(QThread):
+class FileSearchThread(QThread):
 
     append_search = QtCore.pyqtSignal(list, bool)
     finish_search = QtCore.pyqtSignal(str, str, int)
 
-    def __init__(self, search_dir, search_regex, filter_file_callback, get_file_info_callback):
+    def __init__(self, search_dir, search_regex, filter_file_callback):
         QThread.__init__(self)
 
         self.search_dir = search_dir
         self.search_regex = search_regex
         self.filter_file_callback = filter_file_callback
-        self.get_file_info_callback = get_file_info_callback
 
         self.start_time = time.time()
         self.search_send_duration = 0.3
         self.first_search = True
-        self.file_infos = []
+        self.file_paths = []
         self.match_number = 0
+
+    def run(self):
+        pass
+
+    def send_files(self):
+        if len(self.file_paths) > 0:
+            self.append_search.emit(self.file_paths, self.first_search)
+            self.first_search = False
+
+            self.file_paths = []
+
+class PythonSearchThread(FileSearchThread):
+
+    def __init__(self, search_dir, search_regex, filter_file_callback):
+        FileSearchThread.__init__(self, search_dir, search_regex, filter_file_callback)
 
     def run(self):
         for p in Path(self.search_dir).rglob(self.search_regex):
             if self.filter_file_callback(p.name):
-                self.file_infos.append(self.get_file_info_callback(str(p.absolute()), self.search_dir))
+                self.file_paths.append(str(p.absolute()))
                 self.match_number += 1
 
                 if (time.time() - self.start_time) > self.search_send_duration:
@@ -848,9 +873,30 @@ class SearchFileThread(QThread):
 
         self.finish_search.emit(self.search_dir, self.search_regex, self.match_number)
 
-    def send_files(self):
-        if len(self.file_infos) > 0:
-            self.append_search.emit(self.file_infos, self.first_search)
-            self.first_search = False
+class FdSearchThread(FileSearchThread):
 
-            self.file_infos = []
+    def __init__(self, search_dir, search_regex, filter_file_callback):
+        FileSearchThread.__init__(self, search_dir, search_regex, filter_file_callback)
+
+    def run(self):
+        process = subprocess.Popen("fd -c never --search-path '{}' {}".format(self.search_dir, self.search_regex),
+                                   shell=True,
+                                   stderr=subprocess.PIPE,
+                                   stdout=subprocess.PIPE)
+        while True:
+            status = process.poll()
+            if status is not None:
+                break
+
+            output = process.stdout.readline()
+            if output:
+                self.file_paths.append(output.strip().decode("utf-8"))
+                self.match_number += 1
+
+                if (time.time() - self.start_time) > self.search_send_duration:
+                    self.send_files()
+                    self.start_time = time.time()
+
+        self.send_files()
+
+        self.finish_search.emit(self.search_dir, "fd {}".format(self.search_regex), self.match_number)
