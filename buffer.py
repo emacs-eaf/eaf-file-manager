@@ -511,21 +511,23 @@ class AppBuffer(BrowserBuffer):
 
     def handle_search_forward(self, callback_tag):
         if callback_tag == "search_file":
-            if self.search_files_index >= len(self.search_files) - 1:
-                self.search_files_index = 0
-            else:
-                self.search_files_index += 1
+            if len(self.search_files) > 0:
+                if self.search_files_index >= len(self.search_files) - 1:
+                    self.search_files_index = 0
+                else:
+                    self.search_files_index += 1
 
-            self.buffer_widget.eval_js('''selectFileByIndex({})'''.format(self.search_files[self.search_files_index][0]))
+                self.buffer_widget.eval_js('''selectFileByIndex({})'''.format(self.search_files[self.search_files_index][0]))
 
     def handle_search_backward(self, callback_tag):
         if callback_tag == "search_file":
-            if self.search_files_index <= 0:
-                self.search_files_index = len(self.search_files) - 1
-            else:
-                self.search_files_index -= 1
+            if len(self.search_files) > 0:
+                if self.search_files_index <= 0:
+                    self.search_files_index = len(self.search_files) - 1
+                else:
+                    self.search_files_index -= 1
 
-            self.buffer_widget.eval_js('''selectFileByIndex({})'''.format(self.search_files[self.search_files_index][0]))
+                self.buffer_widget.eval_js('''selectFileByIndex({})'''.format(self.search_files[self.search_files_index][0]))
 
     def handle_search_finish(self, callback_tag):
         if callback_tag == "search_file":
