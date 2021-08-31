@@ -912,4 +912,4 @@ class FdSearchThread(FileSearchThread):
 
         self.send_files()
 
-        self.finish_search.emit(self.search_dir, "fd {}".format(self.search_regex), self.match_number)
+        self.finish_search.emit(self.search_dir, "{} {}".format(get_fd_command(), self.search_regex), self.match_number)
