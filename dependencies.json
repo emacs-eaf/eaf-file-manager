@@ -1,4 +1,19 @@
 {
+  "pacman": [
+    "fd"
+  ],
+  "apt": [
+    "fd-find"
+  ],
+  "dnf": [
+    "fd-find"
+  ],
+  "pkg": [
+    "fd-find"
+  ],
+  "zypper":[
+    "fd"
+  ],
   "pip": {
     "linux": [
       "pypinyin"
