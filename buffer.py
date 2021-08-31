@@ -73,6 +73,7 @@ class AppBuffer(BrowserBuffer):
         self.preview_file = None
         self.fetch_preview_info_threads = []
         self.search_file_threads = []
+        self.fetch_git_log_threads = []
 
     def monitor_current_dir(self):
         if len(self.file_changed_wacher.directories()) > 0:
@@ -307,6 +308,15 @@ class AppBuffer(BrowserBuffer):
 
         if len(self.file_infos) > 0:
             self.init_first_file_preview()
+
+        thread = GitCommitThread(dir)
+        thread.fetch_command_result.connect(self.update_git_log)
+        self.fetch_git_log_threads.append(thread)
+        thread.start()
+
+    @PostGui()
+    def update_git_log(self, log):
+        self.buffer_widget.eval_js('''updateGitLog(\"{}\");'''.format(log))
 
     @QtCore.pyqtSlot(str)
     def change_up_directory(self, file):
@@ -836,6 +846,28 @@ class FetchPreviewInfoThread(QThread):
                     file_type = "symlink"
 
             self.fetch_finish.emit(self.file, file_type, json.dumps(file_infos))
+
+class GitCommitThread(QThread):
+
+    fetch_command_result = QtCore.pyqtSignal(str)
+
+    def __init__(self, current_dir):
+        QThread.__init__(self)
+
+        self.current_dir = current_dir
+
+    def run(self):
+        process = subprocess.Popen("cd {}; git log -1 --oneline".format(self.current_dir), shell=True, stdout = subprocess.PIPE)
+        process.wait()
+        result = process.stdout.readline().decode("utf-8")
+        git_log = os.linesep.join([s for s in result.splitlines() if s])
+
+        if git_log.startswith("fatal"):
+            git_log = ""
+        else:
+            git_log = (git_log[:50] + '..') if len(git_log) > 50 else git_log
+
+        self.fetch_command_result.emit(git_log)
 
 class FileSearchThread(QThread):
 

@@ -3,15 +3,21 @@
     <div class="content">
       <div class="file-area">
         <div
-          v-if="searchRegex !== ''"
-          class="search-keyword"
-          :style="{ 'color': searchKeywordForegroundColor() }">
-          ## {{ searchStr }} {{ files.length }} files matched "{{ searchRegex }}" in below directory ##
-        </div>
-        <div
           class="current-path"
           :style="{ 'color': headerForegroundColor() }">
           {{ path }}
+        </div>
+        <div
+          v-if="searchRegex !== ''"
+          class="search-keyword"
+          :style="{ 'color': infoForegroundColor() }">
+          ## {{ searchStr }} {{ files.length }} files matched "{{ searchRegex }}" ##
+        </div>
+        <div
+          v-if="gitLog !== ''"
+          class="git-log"
+          :style="{ 'color': infoForegroundColor() }">
+          ## git: {{ gitLog }} ##
         </div>
 
         <div
@@ -125,6 +131,7 @@
      return {
        path: "",
        searchRegex: "",
+       gitLog: "",
        searchStr: "Finding",
        files: [],
        currentIndex: 0,
@@ -156,6 +163,7 @@
    },
    mounted() {
      window.changePath = this.changePath;
+     window.updateGitLog = this.updateGitLog;
      window.initSearch = this.initSearch;
      window.appendSearch = this.appendSearch;
      window.finishSearch = this.finishSearch;
@@ -217,6 +225,10 @@
        })
 
        this.searchRegex = "";
+     },
+
+     updateGitLog(log) {
+       this.gitLog = log;
      },
 
      initSearch(path, searchRegex) {
@@ -287,7 +299,7 @@
        return this.headerColor;
      },
 
-     searchKeywordForegroundColor() {
+     infoForegroundColor() {
        return this.searchKeywordColor;
      },
 
@@ -571,8 +583,18 @@
 
  .search-keyword {
    padding-left: 20px;
-   padding-top: 5px;
+   padding-bottom: 5px;
    font-weight: bold;
+ }
+
+ .git-log {
+   padding-left: 20px;
+   padding-right: 20px;
+   padding-bottom: 5px;
+   font-weight: bold;
+   white-space: nowrap;
+   text-overflow: ellipsis;
+   overflow: hidden;
  }
 
  .current-path {
