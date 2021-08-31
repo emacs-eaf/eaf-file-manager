@@ -34,6 +34,14 @@ import time
 import copy
 import subprocess
 
+def get_fd_command():
+    if shutil.which("fd"):
+        return "fd"
+    elif shutil.which("fdfind"):
+        return "fdfind"
+    else:
+        return ""
+
 class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, arguments):
         BrowserBuffer.__init__(self, buffer_id, url, arguments, False)
@@ -142,8 +150,10 @@ class AppBuffer(BrowserBuffer):
     def search_directory(self, dir, search_regex):
         self.url = dir
 
-        if shutil.which("fd") != None:
-            self.buffer_widget.eval_js('''initSearch(\"{}\", \"{}\");'''.format(dir, "fd {}".format(search_regex)))
+        fd_command = get_fd_command()
+
+        if fd_command != "":
+            self.buffer_widget.eval_js('''initSearch(\"{}\", \"{}\");'''.format(dir, "{} {}".format(fd_command, search_regex)))
             thread = FdSearchThread(os.path.expanduser(dir), search_regex, self.filter_file)
         else:
             self.buffer_widget.eval_js('''initSearch(\"{}\", \"{}\");'''.format(dir, search_regex))
@@ -440,8 +450,9 @@ class AppBuffer(BrowserBuffer):
 
     @interactive
     def find_files(self):
-        if shutil.which("fd") != None:
-            self.send_input_message("Find file with 'fd': ", "find_files", "string")
+        fd_command = get_fd_command()
+        if fd_command != "":
+            self.send_input_message("Find file with '{}': ".format(fd_command), "find_files", "string")
         else:
             self.send_input_message("Find file with '*?[]' glob pattern: ", "find_files", "string")
 
@@ -879,7 +890,9 @@ class FdSearchThread(FileSearchThread):
         FileSearchThread.__init__(self, search_dir, search_regex, filter_file_callback)
 
     def run(self):
-        process = subprocess.Popen("fd -c never --search-path '{}' {}".format(self.search_dir, self.search_regex),
+        fd_command = get_fd_command()
+
+        process = subprocess.Popen("{} -c never --search-path '{}' {}".format(fd_command, self.search_dir, self.search_regex),
                                    shell=True,
                                    stderr=subprocess.PIPE,
                                    stdout=subprocess.PIPE)
