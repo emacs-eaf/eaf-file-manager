@@ -216,7 +216,7 @@ class AppBuffer(BrowserBuffer):
 
         file_info = {
             "path": file_path,
-            "name": self.limit_file_name_length(name),
+            "name": name,
             "type": file_type,
             "size": file_size,
             "mark": "",
@@ -225,22 +225,6 @@ class AppBuffer(BrowserBuffer):
         }
 
         return file_info
-
-    def limit_file_name_length(self, file_name):
-        if self.search_regex != "":
-            limit_length = 15
-
-            base_name = os.path.basename(file_name)
-            new_base_name = base_name
-            if len(base_name) > limit_length * 2:
-                new_base_name = base_name[:limit_length] + "..." + base_name[len(base_name) - limit_length:]
-
-            if file_name == base_name:
-                return new_base_name
-            else:
-                return os.path.join(os.path.dirname(file_name), new_base_name)
-        else:
-            return file_name
 
     def get_file_infos(self, path):
         file_infos = []
