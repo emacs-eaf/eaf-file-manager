@@ -839,7 +839,10 @@ class GitCommitThread(QThread):
         self.current_dir = current_dir
 
     def run(self):
-        process = subprocess.Popen("cd {}; git log -1 --oneline".format(self.current_dir), shell=True, stdout = subprocess.PIPE)
+        process = subprocess.Popen("cd {}; git log -1 --oneline".format(self.current_dir),
+                                   shell=True,
+                                   stdout = subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
         process.wait()
         result = process.stdout.readline().decode("utf-8")
         git_log = os.linesep.join([s for s in result.splitlines() if s])
