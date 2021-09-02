@@ -201,7 +201,7 @@
 
     (dolist (new-file-name new-files)
       (let* ((total (eaf--get-text-property 'total new-file-name))
-             (index (eaf--get-text-property 'index new-file-name))
+             (id (eaf--get-text-property 'id new-file-name))
              (path (eaf--get-text-property 'path new-file-name))
              (orig-file-name (eaf--get-text-property 'name new-file-name))
              (new-file-name (replace-regexp-in-string
@@ -217,7 +217,7 @@
                          (length (replace-regexp-in-string "[^/\\]" "" new-file-name)))))
             (push orig-file-name rename-failed)
           (setq files-total-num (+ files-total-num 1))
-          (push (vector total index path orig-file-name new-file-name) files-info))))
+          (push (vector total id path orig-file-name new-file-name) files-info))))
 
     (setq files-info-json (substring-no-properties (json-encode files-info)))
 
@@ -267,12 +267,12 @@
       (set (make-local-variable 'eaf--buffer-id) buffer-id)
       (set (make-local-variable 'eaf--files-number) (length (split-string files "\n")))
       (set (make-local-variable 'yank-excluded-properties)
-           '(total index path name face))
+           '(total id path name face))
       (eaf-file-manager-rename-edit-set-header-line dir))
     (switch-to-buffer edit-text-buffer)
     (mapc (lambda (file)
             (let* ((total (elt file 0))
-                   (index (elt file 1))
+                   (id (elt file 1))
                    (path (elt file 2))
                    (name (elt file 3))
                    (type (elt file 4))
@@ -281,7 +281,7 @@
                           ((equal type "symlink") 'font-lock-keyword-face)
                           ((equal type "file") 'default)
                           (t 'default)))
-                   (p (list 'total total 'index index
+                   (p (list 'total total 'id id
                             'path path 'name name 'face face
                             'front-sticky nil 'rear-nonsticky '(face))))
               (insert (apply #'propertize

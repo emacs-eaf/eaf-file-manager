@@ -629,6 +629,7 @@
  .eaf-file-manager-file-name {
    flex: 1;
    padding-right: 20px;
+   word-break: break-word;
  }
 
  .file-size {
