@@ -370,24 +370,30 @@ class AppBuffer(BrowserBuffer):
     @interactive
     def move_current_or_mark_file(self):
         mark_number = len(self.vue_get_mark_files())
+
+        other_window_path = get_emacs_func_result("eaf-get-other-window-path", [])
+
         if mark_number > 0:
             self.move_files = self.vue_get_mark_files()
-            self.send_input_message("Move mark files to: ", "move_files", "file", self.url)
+            self.send_input_message("Move mark files to: ", "move_files", "file", other_window_path)
         else:
             self.move_file = self.vue_get_select_file()
             if self.move_file != None:
-                self.send_input_message("Move '{}' to: ".format(self.move_file["name"]), "move_file", "file", self.url)
+                self.send_input_message("Move '{}' to: ".format(self.move_file["name"]), "move_file", "file", other_window_path)
 
     @interactive
     def copy_current_or_mark_file(self):
         mark_number = len(self.vue_get_mark_files())
+
+        other_window_path = get_emacs_func_result("eaf-get-other-window-path", [])
+
         if mark_number > 0:
             self.copy_files = self.vue_get_mark_files()
-            self.send_input_message("Copy mark files to: ", "copy_files", "file", self.url)
+            self.send_input_message("Copy mark files to: ", "copy_files", "file", other_window_path)
         else:
             self.copy_file = self.vue_get_select_file()
             if self.copy_file != None:
-                self.send_input_message("Copy '{}' to: ".format(self.copy_file["name"]), "copy_file", "file", self.url)
+                self.send_input_message("Copy '{}' to: ".format(self.copy_file["name"]), "copy_file", "file", other_window_path)
 
     @interactive
     def batch_rename(self):
