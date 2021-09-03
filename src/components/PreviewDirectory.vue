@@ -84,7 +84,7 @@
    width: 100%;
    height: 100%;
    overflow: scroll;
-   padding-top: 33px;
+   padding-top: 5px;
  }
 
  .file {
