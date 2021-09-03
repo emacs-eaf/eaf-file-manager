@@ -5,7 +5,8 @@
         <div
           class="current-path"
           :style="{ 'color': headerForegroundColor() }">
-          {{ path }}
+          <span class="current-path-first-part">{{ pathFirstPart }}</span>
+          <span class="current-path-second-part">{{ pathSecondPart }}</span>
         </div>
         <div
           v-if="searchRegex !== ''"
@@ -116,6 +117,13 @@
          window.pyobject.vue_update_files(val);
        },
        deep: true
+     },
+     path: {
+       // eslint-disable-next-line no-unused-vars
+       handler: function(val, oldVal) {
+         this.pathFirstPart = val.substring(0, val.length / 2);
+         this.pathSecondPart = val.substring(val.length / 2, val.length);
+       }
      }
    },
    computed: {
@@ -130,6 +138,8 @@
    data() {
      return {
        path: "",
+       pathFirstPart: "",
+       pathSecondPart: "",
        searchRegex: "",
        gitLog: "",
        searchStr: "Finding",
@@ -592,16 +602,27 @@
    padding-right: 20px;
    padding-bottom: 5px;
    font-weight: bold;
-   white-space: nowrap;
-   text-overflow: ellipsis;
-   overflow: hidden;
  }
 
  .current-path {
    font-size: 16px;
    padding-left: 20px;
+   padding-right: 20px;
    padding-top: 5px;
    padding-bottom: 5px;
+
+   display: flex;
+   min-width: 0;
+ }
+
+ .current-path-first-part {
+   text-overflow: ellipsis;
+   white-space: nowrap;
+   overflow: hidden;
+ }
+
+ .current-path-second-part {
+   flex-shrink: 0;
  }
 
  .file-list {
