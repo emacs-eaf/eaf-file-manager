@@ -293,7 +293,10 @@ class AppBuffer(BrowserBuffer):
         if len(self.file_infos) > 0:
             self.init_first_file_preview()
 
-        thread = GitCommitThread(dir)
+        self.fetch_git_log()
+
+    def fetch_git_log(self):
+        thread = GitCommitThread(self.url)
         thread.fetch_command_result.connect(self.update_git_log)
         self.fetch_git_log_threads.append(thread)
         thread.start()
@@ -473,6 +476,8 @@ class AppBuffer(BrowserBuffer):
         current_file = self.vue_get_select_file()
         if current_file != None:
             self.change_directory(self.url, current_file["path"])
+
+        self.fetch_git_log()
 
     def batch_rename_confirm(self, new_file_string):
         new_files = json.loads(new_file_string)
