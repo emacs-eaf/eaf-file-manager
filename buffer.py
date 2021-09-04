@@ -855,8 +855,6 @@ class GitCommitThread(QThread):
 
         if git_log.startswith("fatal"):
             git_log = ""
-        else:
-            git_log = (git_log[:50] + '..') if len(git_log) > 50 else git_log
 
         self.fetch_command_result.emit(git_log)
 

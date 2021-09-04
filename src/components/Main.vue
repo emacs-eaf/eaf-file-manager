@@ -12,13 +12,13 @@
           v-if="searchRegex !== ''"
           class="search-keyword"
           :style="{ 'color': infoForegroundColor() }">
-          ## {{ searchStr }} {{ files.length }} files matched "{{ searchRegex }}" ##
+          search: {{ searchStr }} {{ files.length }} files matched "{{ searchRegex }}"
         </div>
         <div
           v-if="gitLog !== ''"
           class="git-log"
           :style="{ 'color': infoForegroundColor() }">
-          ## git: {{ gitLog }} ##
+          git: {{ gitLog }}
         </div>
 
         <div
@@ -142,7 +142,7 @@
        pathSecondPart: "",
        searchRegex: "",
        gitLog: "",
-       searchStr: "Finding",
+       searchStr: "finding",
        files: [],
        currentIndex: 0,
        currentPath: "",
@@ -248,7 +248,7 @@
 
        this.currentIndex = 0;
        this.currentPath = "";
-       this.searchStr = "Finding";
+       this.searchStr = "finding";
      },
 
      appendSearch(files) {
@@ -260,7 +260,7 @@
      },
 
      finishSearch() {
-       this.searchStr = "Found";
+       this.searchStr = "found";
      },
 
      init(backgroundColor, foregroundColor, headerColor, directoryColor, symlinkColor, markColor, selectColor, searchMatchColor,
@@ -589,6 +589,8 @@
    height: 100%;
    display: flex;
    flex-direction: column;
+
+   overflow: hidden;/* It's import for long git log  */
  }
 
  .search-keyword {
@@ -602,6 +604,10 @@
    padding-right: 20px;
    padding-bottom: 5px;
    font-weight: bold;
+
+   overflow: hidden;
+   white-space: nowrap;
+   text-overflow: ellipsis;
  }
 
  .current-path {
