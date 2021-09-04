@@ -849,17 +849,19 @@ class GitCommitThread(QThread):
 
         self.current_dir = current_dir
 
-    def run(self):
-        process = subprocess.Popen("cd {}; git log -1 --oneline".format(self.current_dir),
-                                   shell=True,
-                                   stdout = subprocess.PIPE,
-                                   stderr=subprocess.PIPE)
+    def get_command_result(self, command_string):
+        process = subprocess.Popen(command_string, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         process.wait()
         result = process.stdout.readline().decode("utf-8")
-        git_log = os.linesep.join([s for s in result.splitlines() if s])
+        return os.linesep.join([s for s in result.splitlines() if s])
 
-        if git_log.startswith("fatal"):
-            git_log = ""
+    def run(self):
+        git_log = ""
+        git_last_commit = self.get_command_result("cd {}; git log -1 --oneline".format(self.current_dir))
+
+        if not git_last_commit.startswith("fatal"):
+            git_current_branch = self.get_command_result("cd {}; git branch --show-current".format(self.current_dir))
+            git_log = "[{}] {}".format(git_current_branch, git_last_commit)
 
         self.fetch_command_result.emit(git_log)
 
