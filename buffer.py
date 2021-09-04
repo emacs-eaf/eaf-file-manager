@@ -859,7 +859,7 @@ class GitCommitThread(QThread):
         git_log = ""
         git_last_commit = self.get_command_result("cd {}; git log -1 --oneline".format(self.current_dir))
 
-        if not git_last_commit.startswith("fatal"):
+        if git_last_commit != "" and not git_last_commit.startswith("fatal"):
             git_current_branch = self.get_command_result("cd {}; git branch --show-current".format(self.current_dir))
             git_log = "[{}] {}".format(git_current_branch, git_last_commit)
 
