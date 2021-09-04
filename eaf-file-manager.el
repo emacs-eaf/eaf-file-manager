@@ -189,6 +189,17 @@
     (when (= (length values) 1)
       (car values))))
 
+(defun eaf-file-browser-get-destination-path ()
+  "Get a destination path, which is used for copy or move command."
+  (save-window-excursion
+    (other-window 1)
+    (let ((window-path (if (derived-mode-p 'eaf-mode)
+                           (eaf-call-sync "call_function" eaf--buffer-id "get_url")
+                         default-directory)))
+      (if (file-regular-p window-path)
+          (file-name-directory window-path)
+        window-path))))
+
 (defun eaf-file-manager-rename-edit-buffer-confirm ()
   "Confirm input text and send the text to corresponding EAF app."
   (interactive)
