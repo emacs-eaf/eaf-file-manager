@@ -189,8 +189,13 @@
     (when (= (length values) 1)
       (car values))))
 
-(defun eaf-file-browser-get-destination-path ()
-  "Get a destination path, which is used for copy or move command."
+(defun eaf-file-browser-get-destination-paths ()
+  "Get a list of destination paths, user will select one of which
+for copy or move command."
+  (list (eaf-file-browser-get-other-window-path)))
+
+(defun eaf-file-browser-get-other-window-path ()
+  "Get the directory of eaf app in other window."
   (save-window-excursion
     (other-window 1)
     (let ((window-path (if (derived-mode-p 'eaf-mode)
