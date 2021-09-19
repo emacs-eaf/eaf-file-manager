@@ -58,6 +58,7 @@ class AppBuffer(BrowserBuffer):
 
         self.show_hidden_file = None
         self.show_preview = None
+        self.hide_preview_by_width = False
 
         self.search_files = []
         self.search_files_index = 0
@@ -802,6 +803,17 @@ class AppBuffer(BrowserBuffer):
 
         if self.buffer_widget is not None:
             self.buffer_widget.deleteLater()
+
+    def resize_view(self):
+        (frame_width, _) = get_emacs_func_result("eaf-get-render-size", [])
+        if self.buffer_widget.width() <= int(frame_width) / 2:
+            if self.show_preview:
+                self.buffer_widget.eval_js('''setPreviewOption(\"{}\")'''.format("false"))
+                self.hide_preview_by_width = True
+        else:
+            if self.show_preview and self.hide_preview_by_width:
+                self.buffer_widget.eval_js('''setPreviewOption(\"{}\")'''.format("true"))
+                self.hide_preview_by_width = False
 
 class FetchPreviewInfoThread(QThread):
 
