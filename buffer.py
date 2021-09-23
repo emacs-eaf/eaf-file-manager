@@ -375,7 +375,7 @@ class AppBuffer(BrowserBuffer):
     def move_current_or_mark_file(self):
         mark_number = len(self.vue_get_mark_files())
 
-        destination_path = get_emacs_func_result("eaf-file-browser-get-destination-path", [])
+        destination_path = os.path.join(get_emacs_func_result("eaf-file-browser-get-destination-path", []), "")
 
         if mark_number > 0:
             self.move_files = self.vue_get_mark_files()
@@ -389,7 +389,7 @@ class AppBuffer(BrowserBuffer):
     def copy_current_or_mark_file(self):
         mark_number = len(self.vue_get_mark_files())
 
-        destination_path = get_emacs_func_result("eaf-file-browser-get-destination-path", [])
+        destination_path = os.path.join(get_emacs_func_result("eaf-file-browser-get-destination-path", []), "")
 
         if mark_number > 0:
             self.copy_files = self.vue_get_mark_files()
