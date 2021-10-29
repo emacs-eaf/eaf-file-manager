@@ -386,31 +386,11 @@
      },
 
      removeMarkFiles() {
-       var markNumber = this.getMarkFileNumber();
-
        this.files = this.files.filter(file => { return file.mark != "mark" });
-
-       this.currentIndex -= markNumber;
-
-       if (this.currentIndex > this.files.length - 1) {
-         this.currentIndex = this.files.length - 1;
-       } else if (this.currentIndex < 0) {
-         this.currentIndex = 0;
-       }
-
-       this.selectFile(this.files[this.currentIndex]);
      },
 
      removeSelectFile() {
        this.files = this.files.filter(file => { return file.path != this.currentPath });
-
-       if (this.currentIndex > this.files.length - 1) {
-         this.currentIndex = this.files.length - 1;
-       } else if (this.currentIndex < 0) {
-         this.currentIndex = 0;
-       }
-
-       this.selectFile(this.files[this.currentIndex]);
      },
 
      getSceenElementNumber() {

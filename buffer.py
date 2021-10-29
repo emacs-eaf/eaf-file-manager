@@ -579,6 +579,26 @@ class AppBuffer(BrowserBuffer):
     def vue_get_mark_files(self):
         return list(filter(lambda file: file["mark"] == "mark", self.vue_files)).copy()
 
+    def vue_get_file_next_to_last_mark(self):
+        mark_indexes = []
+        for id, f in enumerate(self.vue_files):
+            if f["mark"] == "mark":
+                mark_indexes.append(id)
+
+        reverse_mark_indexes = copy.deepcopy(mark_indexes)
+        reverse_mark_indexes.reverse()
+        for i, mark_id in enumerate(reverse_mark_indexes):
+            if i < len(reverse_mark_indexes) - 1:
+                if reverse_mark_indexes[i] - reverse_mark_indexes[i + 1] > 1:
+                    return self.vue_files[reverse_mark_indexes[i] - 1]
+
+        if mark_indexes[0] > 0:
+            return self.vue_files[mark_indexes[0] - 1]
+        elif mark_indexes[-1] < len(self.vue_files) - 1:
+            return self.vue_files[mark_indexes[-1] + 1]
+        else:
+            return None
+
     def vue_get_all_files(self):
         return self.vue_files.copy()
 
@@ -603,6 +623,10 @@ class AppBuffer(BrowserBuffer):
         self.send_input_message("Rename file name '{}' to: ".format(self.rename_file_name), "rename_file", "string", self.rename_file_name)
 
     def handle_delete_file(self):
+        next_to_file = self.vue_get_file_next_to_last_mark()
+        if next_to_file != None:
+            self.new_select_file = next_to_file["path"]
+
         self.delete_files(self.vue_get_mark_files())
         self.buffer_widget.eval_js("removeMarkFiles();")
 
@@ -611,6 +635,9 @@ class AppBuffer(BrowserBuffer):
     def handle_delete_current_file(self):
         file_info = self.vue_get_select_file()
         if file_info != None:
+            if self.vue_current_index > 0:
+                self.new_select_file = self.vue_files[self.vue_current_index - 1]["path"]
+
             self.delete_file(file_info)
             self.buffer_widget.eval_js("removeSelectFile();")
 
@@ -661,6 +688,9 @@ class AppBuffer(BrowserBuffer):
             message_to_emacs("The directory has not changed, file '{}' not moved.".format(self.move_file["name"]))
         else:
             try:
+                if self.vue_current_index > 0:
+                    self.new_select_file = self.vue_files[self.vue_current_index - 1]["path"]
+
                 shutil.move(self.move_file["path"], new_file)
                 self.buffer_widget.eval_js("removeSelectFile();")
 
@@ -674,6 +704,10 @@ class AppBuffer(BrowserBuffer):
             message_to_emacs("The directory has not changed, mark files not moved.")
         elif os.path.isdir(new_dir):
             try:
+                next_to_file = self.vue_get_file_next_to_last_mark()
+                if next_to_file != None:
+                    self.new_select_file = next_to_file["path"]
+
                 for move_file in self.move_files:
                     shutil.move(move_file["path"], new_dir)
 
