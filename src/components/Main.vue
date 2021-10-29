@@ -189,6 +189,7 @@
      window.setPreview = this.setPreview;
      window.setPreviewOption = this.setPreviewOption;
      window.markFile = this.markFile;
+     window.markChangeFiles = this.markChangeFiles;
      window.unmarkFile = this.unmarkFile;
      window.unmarkAllFiles = this.unmarkAllFiles;
      window.toggleMarkFile = this.toggleMarkFile;
@@ -360,6 +361,10 @@
      markFile() {
        this.files[this.currentIndex].mark = "mark";
        this.selectNextFile();
+     },
+
+     markChangeFiles(indexes) {
+       indexes.forEach(index => {this.files[index].mark = "mark"});
      },
 
      unmarkFile() {

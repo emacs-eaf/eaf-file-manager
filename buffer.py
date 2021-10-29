@@ -61,6 +61,7 @@ class AppBuffer(BrowserBuffer):
         self.hide_preview_by_width = False
 
         self.new_select_file = None
+        self.inhibit_mark_change_file = False
 
         self.search_files = []
         self.search_files_index = 0
@@ -224,7 +225,8 @@ class AppBuffer(BrowserBuffer):
             "size": file_size,
             "mark": "",
             "match": "",
-            "icon": self.generate_file_icon(file_path)
+            "icon": self.generate_file_icon(file_path),
+            "mtime": os.path.getmtime(file_path)
         }
 
         return file_info
@@ -476,6 +478,11 @@ class AppBuffer(BrowserBuffer):
         self.send_input_message("Open file: ", "open_file", "file", self.url)
 
     def refresh(self):
+        if not self.inhibit_mark_change_file:
+            old_file_info_dict = {}
+            for file_info in self.file_infos:
+                old_file_info_dict[file_info["path"]] = file_info
+
         if self.new_select_file != None:
             # Select new file if self.new_select_file is not None.
             self.change_directory(self.url, self.new_select_file)
@@ -484,6 +491,18 @@ class AppBuffer(BrowserBuffer):
             current_file = self.vue_get_select_file()
             if current_file != None:
                 self.change_directory(self.url, current_file["path"])
+
+        if self.inhibit_mark_change_file:
+            self.inherit_mark_change_file = False
+        else:
+            change_file_indexes = []
+            for index, new_file in enumerate(self.file_infos):
+                if new_file["path"] in old_file_info_dict:
+                    if new_file["mtime"] != old_file_info_dict[new_file["path"]]["mtime"]:
+                        change_file_indexes.append(index)
+                else:
+                    change_file_indexes.append(index)
+            self.buffer_widget.eval_js("markChangeFiles({});".format(change_file_indexes))
 
         self.fetch_git_log()
 
@@ -664,6 +683,8 @@ class AppBuffer(BrowserBuffer):
         if new_file in os.listdir(os.path.dirname(self.url)):
             self.send_input_message("File '{}' exists, choose different name: ".format(new_file), "create_file")
         else:
+            self.inhibit_mark_change_file = True
+
             new_file_path = os.path.join(self.url, new_file)
             self.new_select_file = new_file_path # make sure select new file
 
@@ -676,6 +697,8 @@ class AppBuffer(BrowserBuffer):
         if new_directory in os.listdir(os.path.dirname(self.url)):
             self.send_input_message("Directory '{}' exists, choose different name: ".format(new_directory), "create_directory")
         else:
+            self.inhibit_mark_change_file = True
+
             new_directory_path = os.path.join(self.url, new_directory)
             self.new_select_file = new_directory_path # make sure select new directory
 
