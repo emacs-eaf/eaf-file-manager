@@ -60,6 +60,8 @@ class AppBuffer(BrowserBuffer):
         self.show_preview = None
         self.hide_preview_by_width = False
 
+        self.new_select_file = None
+
         self.search_files = []
         self.search_files_index = 0
 
@@ -474,9 +476,14 @@ class AppBuffer(BrowserBuffer):
         self.send_input_message("Open file: ", "open_file", "file", self.url)
 
     def refresh(self):
-        current_file = self.vue_get_select_file()
-        if current_file != None:
-            self.change_directory(self.url, current_file["path"])
+        if self.new_select_file != None:
+            # Select new file if self.new_select_file is not None.
+            self.change_directory(self.url, self.new_select_file)
+            self.new_select_file = None
+        else:
+            current_file = self.vue_get_select_file()
+            if current_file != None:
+                self.change_directory(self.url, current_file["path"])
 
         self.fetch_git_log()
 
@@ -631,6 +638,8 @@ class AppBuffer(BrowserBuffer):
             self.send_input_message("File '{}' exists, choose different name: ".format(new_file), "create_file")
         else:
             new_file_path = os.path.join(self.url, new_file)
+            self.new_select_file = new_file_path # make sure select new file
+
             with open(new_file_path, "a"):
                 os.utime(new_file_path)
 
@@ -641,6 +650,8 @@ class AppBuffer(BrowserBuffer):
             self.send_input_message("Directory '{}' exists, choose different name: ".format(new_directory), "create_directory")
         else:
             new_directory_path = os.path.join(self.url, new_directory)
+            self.new_select_file = new_directory_path # make sure select new directory
+
             os.makedirs(new_directory_path)
 
             self.buffer_widget.eval_js('''addNewDirectory({})'''.format(json.dumps(self.get_file_info(new_directory_path))))
