@@ -72,9 +72,11 @@ File manager application for the [Emacs Application Framework](https://github.co
 | `Q` | close_buffer |
 | `g` | refresh_dir |
 | `G` | find_files |
+| `*` | mark_file_by_extension |
 | `v` | js_preview_toggle |
 | `,` | js_preview_scroll_up_line |
 | `.` | js_preview_scroll_down_line |
 | `<` | js_preview_scroll_up |
 | `>` | js_preview_scroll_down |
 | `C-s` | search_file |
+
