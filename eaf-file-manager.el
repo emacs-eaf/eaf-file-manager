@@ -104,6 +104,7 @@
     ("Q" . "close_buffer")
     ("g" . "refresh_dir")
     ("G" . "find_files")
+    ("*" . "mark_file_by_extension")
     ("v" . "js_preview_toggle")
     ("," . "js_preview_scroll_up_line")
     ("." . "js_preview_scroll_down_line")

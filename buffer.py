@@ -477,6 +477,10 @@ class AppBuffer(BrowserBuffer):
     def open_file(self):
         self.send_input_message("Open file: ", "open_file", "file", self.url)
 
+    @interactive
+    def mark_file_by_extension(self):
+        self.send_input_message("Mark file by extension: ", "mark_file_by_extension", "string")
+
     def refresh(self):
         if not self.inhibit_mark_change_file:
             old_file_info_dict = {}
@@ -552,6 +556,8 @@ class AppBuffer(BrowserBuffer):
             self.handle_open_file(result_content)
         elif callback_tag == "search_file":
             self.handle_search_file(result_content)
+        elif callback_tag == "mark_file_by_extension":
+            self.handle_mark_file_by_extension(result_content)
 
     def cancel_input_response(self, callback_tag):
         ''' Cancel input message.'''
@@ -830,6 +836,9 @@ class AppBuffer(BrowserBuffer):
             else:
                 message_to_emacs("Select file: {}".format(self.vue_files[self.vue_current_index]['name']))
                 self.buffer_widget.eval_js('''setSearchMatchFiles({})'''.format(json.dumps([])))
+
+    def handle_mark_file_by_extension(self, extension):
+        self.buffer_widget.eval_js('''markFileByExtension(\"{}\")'''.format(extension))
 
     def is_file_match(self, file, search_word):
         return ((len(search_word) > 0 and search_word[0] != "!" and search_word.lower() in file.lower()) or

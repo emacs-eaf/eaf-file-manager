@@ -189,6 +189,7 @@
      window.setPreview = this.setPreview;
      window.setPreviewOption = this.setPreviewOption;
      window.markFile = this.markFile;
+     window.markFileByExtension = this.markFileByExtension;
      window.markChangeFiles = this.markChangeFiles;
      window.unmarkFile = this.unmarkFile;
      window.unmarkAllFiles = this.unmarkAllFiles;
@@ -361,6 +362,16 @@
      markFile() {
        this.files[this.currentIndex].mark = "mark";
        this.selectNextFile();
+     },
+
+     markFileByExtension(extension) {
+       for (var i=0; i < this.files.length; i++) {
+         var fileExtension = this.files[i]["path"].split('.').pop();
+
+         if (fileExtension == extension) {
+           this.files[i].mark = "mark";
+         }
+       }
      },
 
      markChangeFiles(indexes) {
