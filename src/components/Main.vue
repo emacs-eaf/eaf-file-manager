@@ -30,7 +30,9 @@
             @click="selectFile(file)"
             :key="file.path"
             :style="{ 'background': itemBackgroundColor(file), 'color': itemForegroundColor(file) }">
-            <img class="file-icon" :src="fileIconPath(file.icon)"/>
+            <img
+              v-if="showIcon === 'true'"
+              class="file-icon" :src="fileIconPath(file.icon)"/>
             <div class="eaf-file-manager-file-name">
               {{ file.name }}
             </div>
@@ -62,7 +64,8 @@
           :openFile="openFile"
           :itemBackgroundColor="itemBackgroundColor"
           :itemForegroundColor="itemForegroundColor"
-          :fileIconPath="fileIconPath"/>
+          :fileIconPath="fileIconPath"
+          :showIcon="showIcon"/>
         <PreviewEmpty v-if="previewType == 'directory' && previewFiles.length == 0"/>
         <PreviewSymlink v-if="previewType == 'symlink'"/>
       </div>
@@ -167,6 +170,7 @@
        iconCacheDir: "",
 
        showPreview: "false",
+       showIcon: "false",
 
        themeMode: ""
      }
@@ -266,7 +270,7 @@
      },
 
      init(backgroundColor, foregroundColor, headerColor, directoryColor, symlinkColor, markColor, selectColor, searchMatchColor,
-          searchKeywordColor, iconCacheDir, pathSep, option, themeMode) {
+          searchKeywordColor, iconCacheDir, pathSep, showPreview, showIcon, themeMode) {
        this.backgroundColor = backgroundColor;
        this.foregroundColor = foregroundColor;
        this.fileColor = foregroundColor;
@@ -279,7 +283,8 @@
        this.searchKeywordColor = searchKeywordColor;
        this.iconCacheDir = iconCacheDir;
        this.pathSep = pathSep;
-       this.showPreview = option;
+       this.showPreview = showPreview;
+       this.showIcon = showIcon;
        this.themeMode = themeMode;
      },
 

@@ -58,6 +58,7 @@ class AppBuffer(BrowserBuffer):
 
         self.show_hidden_file = None
         self.show_preview = None
+        self.show_icon = None
         self.hide_preview_by_width = False
 
         self.new_select_file = None
@@ -116,7 +117,10 @@ class AppBuffer(BrowserBuffer):
              "font-lock-string-face",
              "warning"])
 
-        (self.show_hidden_file, self.show_preview) = get_emacs_vars(["eaf-file-manager-show-hidden-file", "eaf-file-manager-show-preview"])
+        (self.show_hidden_file, self.show_preview, self.show_icon) = get_emacs_vars([
+            "eaf-file-manager-show-hidden-file",
+            "eaf-file-manager-show-preview",
+            "eaf-file-manager-show-icon"])
 
         if self.theme_mode == "dark":
             if self.theme_background_color == "#000000":
@@ -133,6 +137,7 @@ class AppBuffer(BrowserBuffer):
             self.theme_background_color, self.theme_foreground_color, header_color, directory_color, symlink_color, mark_color, select_color, search_match_color, search_keyword_color,
             self.icon_cache_dir, os.path.sep,
             "true" if self.show_preview else "false",
+            "true" if self.show_icon else "false",
             self.theme_mode))
 
     @PostGui()
@@ -845,7 +850,10 @@ class AppBuffer(BrowserBuffer):
                 (len(search_word) > 0 and search_word[0] == "!" and (not search_word.lower()[1:] in file.lower())))
 
     def marker_offset_x(self):
-        return -28
+        if self.show_icon:
+            return -28
+        else:
+            return -16
 
     def marker_offset_y(self):
         return 4

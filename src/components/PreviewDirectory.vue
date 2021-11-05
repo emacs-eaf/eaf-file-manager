@@ -6,7 +6,9 @@
       @click="openFile(file)"
       :key="file.path"
       :style="{ 'background': itemBackgroundColor(file), 'color': itemForegroundColor(file) }">
-      <img class="file-icon" :src="fileIconPath(file.icon)"/>
+      <img
+        v-if="showIcon === 'true'"
+        class="file-icon" :src="fileIconPath(file.icon)"/>
       <div class="eaf-file-manager-preview-file-name">
         {{ file.name }}
       </div>
@@ -26,6 +28,7 @@
      itemBackgroundColor: Function,
      itemForegroundColor: Function,
      fileIconPath: Function,
+     showIcon: String
    },
    watch: {
    },

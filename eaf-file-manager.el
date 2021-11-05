@@ -57,8 +57,6 @@
 
 (require 'json)
 
-;;; Customize:
-
 (defcustom eaf-file-manager-keybinding
   '(("<f12>" . "open_devtools")
     ("h" . "js_up_directory")
@@ -134,31 +132,9 @@
   "If non-nil, opening the EAF File Manager will default to display file preview."
   :type 'boolean)
 
-;;
-;; All of the above can customize by:
-;;      M-x customize-group RET eaf-file-manager RET
-;;
-
-;;; Change log:
-;;
-;; 2021/07/31
-;;      * First released.
-;;
-
-;;; Acknowledgements:
-;;
-;;
-;;
-
-;;; TODO
-;;
-;;
-;;
-
-;;; Require
-
-;;; Code:
-
+(defcustom eaf-file-manager-show-icon t
+  "If non-nil, opening the EAF File Manager will default to display file icon."
+  :type 'boolean)
 
 (defvar eaf-file-manager-rename-edit-mode-map
   (let ((map (make-sparse-keymap)))
