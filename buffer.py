@@ -681,6 +681,8 @@ class AppBuffer(BrowserBuffer):
         else:
             try:
                 new_file_path = os.path.join(os.path.dirname(self.rename_file_path), new_file_name)
+                self.new_select_file = new_file_path
+
                 os.rename(self.rename_file_path, new_file_path)
 
                 self.buffer_widget.eval_js("rename(\"{}\", \"{}\", \"{}\");".format(self.rename_file_path, new_file_path, new_file_name))
