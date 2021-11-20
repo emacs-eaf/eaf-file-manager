@@ -231,10 +231,16 @@ class AppBuffer(BrowserBuffer):
             "mark": "",
             "match": "",
             "icon": self.generate_file_icon(file_path),
-            "mtime": os.path.getmtime(file_path)
+            "mtime": self.get_file_mtime(file_path)
         }
 
         return file_info
+
+    def get_file_mtime(self, file_path):
+        try:
+            return os.path.getmtime(file_path)
+        except:
+            return 0
 
     def get_file_infos(self, path):
         file_infos = []
