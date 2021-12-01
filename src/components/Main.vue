@@ -46,7 +46,7 @@
       <div
         v-if="showPreview === 'true'"
         class="preview">
-        <PreviewImage v-if="previewType == 'file' && previewMime == 'image'" :file="previewPath"/>
+        <PreviewImage v-if="previewType == 'file' && previewMime == 'image'" :file="previewPath + '?' + Math.random().toString()"/>
         <PreviewHtml v-if="previewType == 'file' && previewMime == 'html'" :file="previewPath"/>
         <PreviewCode
           v-if="previewType == 'file' && previewMime == 'text'"
