@@ -547,7 +547,9 @@
            this.previewMime = "image"
          } else if (mime == "text-html") {
            this.previewMime = "html"
-         } else if (mime.startsWith("text-") || mime == "application-json") {
+         } else if (mime.startsWith("text-")
+                    || mime == "application-json"
+                    || mime == "application-x-yaml") {
            this.previewMime = "text"
          } else if (mime == "application-pdf") {
            this.previewMime = "pdf"
