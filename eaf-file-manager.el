@@ -171,7 +171,7 @@
   (save-window-excursion
     (other-window 1)
     (let ((window-path (if (derived-mode-p 'eaf-mode)
-                           (eaf-call-sync "call_function" eaf--buffer-id "get_url")
+                           (eaf-call-sync "execute_function" eaf--buffer-id "get_url")
                          default-directory)))
       (if (file-regular-p window-path)
           (file-name-directory window-path)
@@ -214,7 +214,7 @@
             (message "Error: find extra lines in edit buffer, do nothing.")
           (progn
             (when (> (length files-info) 0)
-              (eaf-call-async "call_function_with_args"
+              (eaf-call-async "execute_function_with_args"
                               eaf--buffer-id
                               "batch_rename_confirm"
                               files-info-json))
