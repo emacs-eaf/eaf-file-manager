@@ -699,7 +699,7 @@ class AppBuffer(BrowserBuffer):
                 message_to_emacs("Error in rename file: " + str(traceback.print_exc()))
 
     def handle_create_file(self, new_file):
-        if new_file in os.listdir(os.path.dirname(self.url)):
+        if new_file in os.listdir(self.url):
             self.send_input_message("File '{}' exists, choose different name: ".format(new_file), "create_file")
         else:
             self.inhibit_mark_change_file = True
@@ -713,7 +713,7 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.eval_js('''addNewFile({})'''.format(json.dumps(self.get_file_info(new_file_path))))
 
     def handle_create_directory(self, new_directory):
-        if new_directory in os.listdir(os.path.dirname(self.url)):
+        if new_directory in os.listdir(self.url):
             self.send_input_message("Directory '{}' exists, choose different name: ".format(new_directory), "create_directory")
         else:
             self.inhibit_mark_change_file = True
