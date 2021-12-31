@@ -443,6 +443,7 @@ class AppBuffer(BrowserBuffer):
         if self.show_hidden_file:
             message_to_emacs("Hide hidden file")
         else:
+            self.inhibit_mark_change_file = True
             message_to_emacs("Show hidden file")
 
         self.show_hidden_file = not self.show_hidden_file
