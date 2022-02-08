@@ -523,6 +523,8 @@ class AppBuffer(BrowserBuffer):
         self.fetch_git_log()
 
     def batch_rename_confirm(self, new_file_string):
+        self.inhibit_mark_change_file = True
+        
         new_files = json.loads(new_file_string)
 
         for [total, id, path, old_file_name, new_file_name] in new_files:
