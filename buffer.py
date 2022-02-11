@@ -19,20 +19,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import QUrl, QThread, QMimeDatabase, QFileSystemWatcher
+from PyQt5 import QtCore
+from PyQt5.QtCore import QThread, QMimeDatabase, QFileSystemWatcher
 from PyQt5.QtGui import QColor, QIcon
-from PyQt5 import QtCore, QtWidgets
+from core.utils import eval_in_emacs, PostGui, get_emacs_vars, interactive, message_to_emacs, get_emacs_func_result
 from core.webengine import BrowserBuffer
 from pathlib import Path
-from functools import cmp_to_key
-from core.utils import eval_in_emacs, PostGui, get_emacs_vars, interactive, message_to_emacs, get_emacs_func_result
-import codecs
-import os
-import json
-import shutil
-import time
 import copy
+import json
+import os
+import shutil
 import subprocess
+import time
 
 def get_fd_command():
     if shutil.which("fd"):
@@ -248,6 +246,7 @@ class AppBuffer(BrowserBuffer):
             if self.filter_file(p.name):
                 file_infos.append(self.get_file_info(str(p.absolute())))
 
+        from functools import cmp_to_key
         file_infos.sort(key=cmp_to_key(self.file_compare))
 
         return file_infos
