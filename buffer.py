@@ -229,7 +229,7 @@ class AppBuffer(BrowserBuffer):
             "name": name,
             "type": file_type,
             "bytes": file_bytes,
-            "size": file_size,
+            "info": file_size,
             "mark": "",
             "match": "",
             "icon": self.generate_file_icon(file_path),
@@ -330,31 +330,34 @@ class AppBuffer(BrowserBuffer):
         
     @interactive
     def sort_by_created_time(self):
-        self.sort_by_file_key("ctime")
+        self.sort_by_file_key("ctime", "ctime")
         message_to_emacs("Sort file by created time.")
         
     @interactive
     def sort_by_modified_time(self): 
-        self.sort_by_file_key("mtime")
+        self.sort_by_file_key("mtime", "mtime")
         message_to_emacs("Sort file by modified time.")
     
     @interactive
     def sort_by_access_time(self): 
-        self.sort_by_file_key("atime")
+        self.sort_by_file_key("atime", "atime")
         message_to_emacs("Sort file by access time.")
     
     @interactive
     def sort_by_size(self):
-        self.sort_by_file_key("bytes")
+        self.sort_by_file_key("bytes", "bytes")
         message_to_emacs("Sort file by size.")
         
     @interactive
     def sort_by_name(self):
-        self.sort_by_file_key("name")
+        self.sort_by_file_key("name", "bytes")
         message_to_emacs("Sort file by name.")
         
-    def sort_by_file_key(self, key):
+    def sort_by_file_key(self, key, info_key):
         select_path = self.file_infos[self.select_index]["path"]
+        
+        for file_info in self.file_infos:
+            file_info["info"] = self.get_file_sort_info(file_info, info_key)
         
         from functools import cmp_to_key
         self.file_infos.sort(key=cmp_to_key(lambda a, b: self.sort_file_by_key(a, b, key)))
@@ -365,6 +368,18 @@ class AppBuffer(BrowserBuffer):
             self.url,
             json.dumps(self.file_infos),
             self.select_index))
+        
+    def get_file_sort_info(self, file_info, info_key):
+        if info_key == "bytes":
+            if file_info["type"] == "file":
+                return self.file_size_format(file_info["bytes"])
+            elif file_info["type"] == "directory":
+                return str(self.get_dir_file_number(file_info["path"]))
+            elif file_info["type"] == "symlink":
+                return "1"
+        else:
+            import time
+            return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(file_info[info_key]))
 
     def fetch_git_log(self):
         thread = GitCommitThread(self.url)

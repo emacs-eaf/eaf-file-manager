@@ -36,8 +36,8 @@
             <div class="eaf-file-manager-file-name">
               {{ file.name }}
             </div>
-            <div class="file-size">
-              {{ file.size }}
+            <div class="file-info">
+              {{ file.info }}
             </div>
           </div>
         </div>
@@ -654,7 +654,7 @@
    word-break: break-word;
  }
 
- .file-size {
+ .file-info {
    padding-right: 20px;
    display: flex;
    flex-direction: column;
