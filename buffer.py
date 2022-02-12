@@ -204,13 +204,16 @@ class AppBuffer(BrowserBuffer):
     def get_file_info(self, file_path, current_dir = False):
         file_type = ""
         file_size = ""
+        file_bytes = 0
 
         if os.path.isfile(file_path):
             file_type = "file"
-            file_size = self.file_size_format(os.path.getsize(file_path))
+            file_bytes = os.path.getsize(file_path)
+            file_size = self.file_size_format(file_bytes)
         elif os.path.isdir(file_path):
             file_type = "directory"
-            file_size = str(self.get_dir_file_number(file_path))
+            file_bytes = self.get_dir_file_number(file_path)
+            file_size = str(file_bytes)
         elif os.path.islink(file_path):
             file_type = "symlink"
             file_size = "1"
@@ -225,11 +228,14 @@ class AppBuffer(BrowserBuffer):
             "path": file_path,
             "name": name,
             "type": file_type,
+            "bytes": file_bytes,
             "size": file_size,
             "mark": "",
             "match": "",
             "icon": self.generate_file_icon(file_path),
-            "mtime": self.get_file_mtime(file_path)
+            "mtime": self.get_file_mtime(file_path),
+            "ctime": self.get_file_ctime(file_path),
+            "atime": self.get_file_atime(file_path)
         }
 
         return file_info
@@ -240,6 +246,18 @@ class AppBuffer(BrowserBuffer):
         except:
             return 0
 
+    def get_file_ctime(self, file_path):
+        try:
+            return os.path.getctime(file_path)
+        except:
+            return 0
+
+    def get_file_atime(self, file_path):
+        try:
+            return os.path.getatime(file_path)
+        except:
+            return 0
+
     def get_file_infos(self, path):
         file_infos = []
         for p in Path(os.path.expanduser(path)).glob("*"):
@@ -247,7 +265,7 @@ class AppBuffer(BrowserBuffer):
                 file_infos.append(self.get_file_info(str(p.absolute())))
 
         from functools import cmp_to_key
-        file_infos.sort(key=cmp_to_key(self.file_compare))
+        file_infos.sort(key=cmp_to_key(lambda a, b: self.sort_file_by_key(a, b, "name")))
 
         return file_infos
 
@@ -267,16 +285,16 @@ class AppBuffer(BrowserBuffer):
         except PermissionError:
             return 0
 
-    def file_compare(self, a, b):
+    def sort_file_by_key(self, a, b, key):
         type_sort_weights = ["directory", "file", "symlink", ""]
 
         a_type_weights = type_sort_weights.index(a["type"])
         b_type_weights = type_sort_weights.index(b["type"])
 
         if a_type_weights == b_type_weights:
-            if a["name"] < b["name"]:
+            if a[key] < b[key]:
                 return -1
-            elif a["name"] > b["name"]:
+            elif a[key] > b[key]:
                 return 1
             else:
                 return 0
@@ -309,6 +327,44 @@ class AppBuffer(BrowserBuffer):
             self.init_first_file_preview()
 
         self.fetch_git_log()
+        
+    @interactive
+    def sort_by_created_time(self):
+        self.sort_by_file_key("ctime")
+        message_to_emacs("Sort file by created time.")
+        
+    @interactive
+    def sort_by_modified_time(self): 
+        self.sort_by_file_key("mtime")
+        message_to_emacs("Sort file by modified time.")
+    
+    @interactive
+    def sort_by_access_time(self): 
+        self.sort_by_file_key("atime")
+        message_to_emacs("Sort file by access time.")
+    
+    @interactive
+    def sort_by_size(self):
+        self.sort_by_file_key("bytes")
+        message_to_emacs("Sort file by size.")
+        
+    @interactive
+    def sort_by_name(self):
+        self.sort_by_file_key("name")
+        message_to_emacs("Sort file by name.")
+        
+    def sort_by_file_key(self, key):
+        select_path = self.file_infos[self.select_index]["path"]
+        
+        from functools import cmp_to_key
+        self.file_infos.sort(key=cmp_to_key(lambda a, b: self.sort_file_by_key(a, b, key)))
+        files = list(map(lambda file: file["path"], self.file_infos))
+        self.select_index = files.index(select_path)
+        
+        self.buffer_widget.eval_js('''changePath(\"{}\", {}, {});'''.format(
+            self.url,
+            json.dumps(self.file_infos),
+            self.select_index))
 
     def fetch_git_log(self):
         thread = GitCommitThread(self.url)
