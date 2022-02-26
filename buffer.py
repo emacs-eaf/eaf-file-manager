@@ -687,6 +687,16 @@ class AppBuffer(BrowserBuffer):
 
     def vue_get_mark_files(self):
         return list(filter(lambda file: file["mark"] == "mark", self.vue_files)).copy()
+    
+    def get_mark_file_names(self):
+        return list(map(lambda file: file["path"], self.vue_get_mark_files()))
+    
+    def get_select_file_name(self):
+        current_file = self.vue_get_select_file()
+        if current_file != None:
+            return current_file["path"]
+        else:
+            return ""
 
     def vue_get_file_next_to_last_mark(self):
         mark_indexes = []
