@@ -116,6 +116,7 @@
     ("!" . "eaf-file-manager-run-command-for-mark-files")
     ("z" . "eaf-file-manager-compress-file")
     ("Z" . "eaf-file-manager-uncompress-file")
+    ("B" . "eaf-file-manager-byte-compile-file")
     ("C-s" . "search_file")
     )
   "The keybinding of EAF File Manager."
@@ -331,6 +332,23 @@
     (if (string-equal current-file "")
         (message "No file in current directory.")
       (shell-command (format "tar -xvf %s" current-file)))))
+
+(defun eaf-file-manager-byte-compile-file ()
+  (interactive)
+  (let* ((mark-files (eaf-call-sync "execute_function" eaf--buffer-id "get_mark_file_names"))
+         (current-file (eaf-call-sync "execute_function" eaf--buffer-id "get_select_file_name")))
+    (cond ((> (length mark-files) 0)
+           (dolist (mark-file mark-files)
+             (eaf-file-manager-compile-file mark-file)))
+          ((string-equal current-file "")
+           (message "No file need to compile."))
+          (t
+           (eaf-file-manager-compile-file current-file)))))
+
+(defun eaf-file-manager-compile-file (file)
+  (if (string-suffix-p ".el" file)
+      (byte-compile-file file t)
+    (message (format "%s is not elisp file" file))))
 
 (provide 'eaf-file-manager)
 

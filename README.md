@@ -31,6 +31,8 @@ File manager application for the [Emacs Application Framework](https://github.co
 
 ### The keybinding of EAF File Manager.
 
+### The keybinding of EAF File Manager.
+
 | Key   | Event   |
 | :---- | :------ |
 | `<f12>` | open_devtools |
@@ -91,5 +93,6 @@ File manager application for the [Emacs Application Framework](https://github.co
 | `!` | eaf-file-manager-run-command-for-mark-files |
 | `z` | eaf-file-manager-compress-file |
 | `Z` | eaf-file-manager-uncompress-file |
+| `B` | eaf-file-manager-byte-compile-file |
 | `C-s` | search_file |
 
