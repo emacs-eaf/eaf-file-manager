@@ -2,6 +2,9 @@
   "pacman": [
     "fd"
   ],
+  "emerge": [
+    "sys-apps/fd"
+  ],
   "apt": [
     "fd-find"
   ],
