@@ -91,7 +91,7 @@
  }
 
  .file {
-   font-size: 20px;
+   font-size: 18px;
    padding-left: 20px;
    padding-top: 4px;
    padding-bottom: 4px;
