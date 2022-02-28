@@ -91,10 +91,10 @@
  }
 
  .file {
-   font-size: 16px;
+   font-size: 20px;
    padding-left: 20px;
-   padding-top: 2px;
-   padding-bottom: 2px;
+   padding-top: 4px;
+   padding-bottom: 4px;
 
    display: flex;
    flex-direction: row;

@@ -599,6 +599,7 @@
    padding-right: 20px;
    padding-bottom: 5px;
    font-weight: bold;
+   font-size: 18px;
 
    overflow: hidden;
    white-space: nowrap;
@@ -606,7 +607,7 @@
  }
 
  .current-path {
-   font-size: 16px;
+   font-size: 20px;
    padding-left: 20px;
    padding-right: 20px;
    padding-top: 5px;
@@ -633,10 +634,10 @@
  }
 
  .file {
-   font-size: 16px;
+   font-size: 20px;
    padding-left: 20px;
-   padding-top: 2px;
-   padding-bottom: 2px;
+   padding-top: 4px;
+   padding-bottom: 4px;
 
    display: flex;
    flex-direction: row;

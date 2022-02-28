@@ -95,6 +95,6 @@
 
  .code {
    margin: 0;
-   font-size: 16px;
+   font-size: 20px;
  }
 </style>
