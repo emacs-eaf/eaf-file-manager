@@ -69,6 +69,7 @@
     ("K" . "js_select_first_file")
     ("r" . "js_rename_file")
     ("e" . "batch_rename")
+    ("y" . "change_path")
     ("<left>" . "js_up_directory")
     ("<down>" . "js_select_next_file")
     ("<up>" . "js_select_prev_file")

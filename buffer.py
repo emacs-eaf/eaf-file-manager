@@ -309,7 +309,7 @@ class AppBuffer(BrowserBuffer):
 
         eval_in_emacs('eaf--change-default-directory', [self.buffer_id, dir])
         self.change_title(os.path.basename(dir))
-
+        
         self.file_infos = self.get_file_infos(dir)
 
         self.select_index = 0
@@ -485,6 +485,13 @@ class AppBuffer(BrowserBuffer):
                 self.send_input_message("Copy '{}' to: ".format(self.copy_file["name"]), "copy_file", "file", destination_path)
 
     @interactive
+    def change_path(self):
+        self.send_input_message("Change path: ", "change_path", "file", self.url)
+        
+    def handle_change_path(self, new_path):
+        self.change_directory(new_path, "")
+        
+    @interactive
     def batch_rename(self):
         directory = os.path.basename(os.path.normpath(self.url))
 
@@ -642,6 +649,8 @@ class AppBuffer(BrowserBuffer):
             self.handle_search_file(result_content)
         elif callback_tag == "mark_file_by_extension":
             self.handle_mark_file_by_extension(result_content)
+        elif callback_tag == "change_path":
+            self.handle_change_path(result_content)
 
     def cancel_input_response(self, callback_tag):
         ''' Cancel input message.'''

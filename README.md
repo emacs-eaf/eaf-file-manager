@@ -26,11 +26,6 @@ File manager application for the [Emacs Application Framework](https://github.co
 (require 'eaf)
 (require 'eaf-file-manager)
 ```
-
-### The keybinding of EAF File Manager.
-
-### The keybinding of EAF File Manager.
-
 ### The keybinding of EAF File Manager.
 
 | Key   | Event   |
@@ -46,6 +41,7 @@ File manager application for the [Emacs Application Framework](https://github.co
 | `K` | js_select_first_file |
 | `r` | js_rename_file |
 | `e` | batch_rename |
+| `y` | change_path |
 | `<left>` | js_up_directory |
 | `<down>` | js_select_next_file |
 | `<up>` | js_select_prev_file |
@@ -95,4 +91,3 @@ File manager application for the [Emacs Application Framework](https://github.co
 | `Z` | eaf-file-manager-uncompress-file |
 | `B` | eaf-file-manager-byte-compile-file |
 | `C-s` | search_file |
-
