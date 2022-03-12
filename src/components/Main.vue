@@ -559,8 +559,10 @@
            this.previewMime = "audio"
          } else if (mime == "application-wps-office.docx") {
            this.previewMime = "office"
-         } else if (mime == "application-x-sharedlib") {
-           this.previewMime = "sharedlib"
+         } else if (mime == "application-x-sharedlib" || 
+                    mime == "application-xmind"
+         ) {
+           this.previewMime = "ignore"
          }
 
          this.previewSize = fileInfos[0]["size"]
