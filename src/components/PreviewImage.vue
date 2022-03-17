@@ -41,7 +41,7 @@
  }
 
  .image {
-   max-width: 100%;
-   max-height: 100%;
+   max-width: 95%;
+   max-height: 95%;
  }
 </style>
