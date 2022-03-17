@@ -89,6 +89,6 @@
    height: 100%;
    background-color: #FFFFFF;
    overflow: scroll;
-   padding: 20px;
+   padding-left: 15px;
  }
 </style>
