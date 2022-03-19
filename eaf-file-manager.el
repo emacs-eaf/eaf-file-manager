@@ -178,14 +178,31 @@
 
 (defun eaf-file-browser-get-destination-path ()
   "Get a destination path, which is used for copy or move command."
-  (save-window-excursion
-    (other-window 1)
-    (let ((window-path (if (derived-mode-p 'eaf-mode)
-                           (eaf-call-sync "execute_function" eaf--buffer-id "get_url")
-                         default-directory)))
-      (if (file-regular-p window-path)
-          (file-name-directory window-path)
-        window-path))))
+  (let ((window-number (length (cl-remove-if #'window-dedicated-p (window-list)))))
+    (cond
+     ;; Use other window path if other window is also EAF file-manager.
+     ((and (>= window-number 2)
+           (save-window-excursion
+             (other-window 1)
+             (and (derived-mode-p 'eaf-mode)
+                  (string-equal eaf--buffer-app-name "file-manager"))))
+      (save-window-excursion
+        (other-window 1)
+        (eaf-file-browser-get-window-path)))
+     ;; Otherwise got current EAF file-manager path.
+     (t
+      (eaf-file-browser-get-path-dir (eaf-call-sync "execute_function" eaf--buffer-id "get_url"))))))
+
+(defun eaf-file-browser-get-window-path ()
+  (let ((window-path (if (derived-mode-p 'eaf-mode)
+                         (eaf-call-sync "execute_function" eaf--buffer-id "get_url")
+                       default-directory)))
+    (eaf-file-browser-get-path-dir window-path)))
+
+(defun eaf-file-browser-get-path-dir (path)
+  (if (file-regular-p path)
+      (file-name-directory path)
+    path))
 
 (defun eaf-file-manager-rename-edit-buffer-confirm ()
   "Confirm input text and send the text to corresponding EAF app."
