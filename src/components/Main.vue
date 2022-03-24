@@ -225,10 +225,7 @@
          this.currentPath = this.files[this.currentIndex].path;
        }
 
-       /* Use nextTick wait DOM update, then make sure current file in visible area. */
-       this.$nextTick(function(){
-         this.keepSelectVisible();
-       })
+       setTimeout(this.keepSelectVisible, 300);
 
        this.searchRegex = "";
      },
