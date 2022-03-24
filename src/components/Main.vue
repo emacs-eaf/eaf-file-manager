@@ -417,9 +417,9 @@
      },
 
      keepSelectVisible() {
-       var select_file = this.$refs.filelist.children[this.currentIndex]
-       if (select_file !== undefined) {
-         select_file.scrollIntoViewIfNeeded(false);
+       var selectFile = this.$refs.filelist.children[this.currentIndex]
+       if (selectFile !== undefined) {
+         selectFile.scrollIntoViewIfNeeded(false);
        }
      },
 
@@ -475,11 +475,11 @@
      },
 
      addNewDirectory(new_directory) {
-       var insert_index = this.files.filter(file => { return file.type == "directory" }).length;
-       this.files.splice(insert_index, 0, new_directory);
-       this.currentIndex = insert_index;
+       var insertIndex = this.files.filter(file => { return file.type == "directory" }).length;
+       this.files.splice(insertIndex, 0, new_directory);
+       this.currentIndex = insertIndex;
 
-       this.selectFileByIndex(insert_index);
+       this.selectFileByIndex(insertIndex);
      },
 
      openFileByName(fileName) {
