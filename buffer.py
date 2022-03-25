@@ -227,6 +227,7 @@ class AppBuffer(BrowserBuffer):
         file_info = {
             "path": file_path,
             "name": name,
+            "extension": os.path.splitext(name)[1],
             "type": file_type,
             "bytes": file_bytes,
             "info": file_size,
@@ -352,6 +353,11 @@ class AppBuffer(BrowserBuffer):
     def sort_by_name(self):
         self.sort_by_file_key("name", "bytes")
         message_to_emacs("Sort file by name.")
+
+    @interactive
+    def sort_by_type(self):
+        self.sort_by_file_key("extension", "bytes")
+        message_to_emacs("Sort file by type.")
         
     def sort_by_file_key(self, key, info_key):
         select_path = self.file_infos[self.select_index]["path"]

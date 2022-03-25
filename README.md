@@ -82,12 +82,14 @@ File manager application for the [Emacs Application Framework](https://github.co
 | `<` | js_preview_scroll_up |
 | `>` | js_preview_scroll_down |
 | `1` | sort_by_name |
-| `2` | sort_by_size |
-| `3` | sort_by_modified_time |
-| `4` | sort_by_created_time |
-| `5` | sort_by_access_time |
+| `2` | sort_by_type |
+| `3` | sort_by_size |
+| `4` | sort_by_modified_time |
+| `5` | sort_by_created_time |
+| `6` | sort_by_access_time |
 | `!` | eaf-file-manager-run-command-for-mark-files |
 | `z` | eaf-file-manager-compress-file |
 | `Z` | eaf-file-manager-uncompress-file |
 | `B` | eaf-file-manager-byte-compile-file |
 | `C-s` | search_file |
+
