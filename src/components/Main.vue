@@ -49,10 +49,16 @@
         <PreviewImage v-if="previewType == 'file' && previewMime == 'image'" :file="previewPath + '?' + Math.random().toString()"/>
         <PreviewHtml v-if="previewType == 'file' && previewMime == 'html'" :file="previewPath"/>
         <PreviewCode
-          v-if="previewType == 'file' && previewMime == 'text'"
+          v-if="previewType == 'file' && previewMime == 'code'"
           :file="previewPath"
           :size="previewSize"
           :backgroundColor="backgroundColor"/>
+        <PreviewCodeHtml
+          v-if="previewType == 'file' && previewMime == 'code-html'"
+          :file="previewPath"
+          :size="previewSize"
+          :backgroundColor="backgroundColor"
+          :content="previewHtmlContent"/>
         <PreviewPdf v-if="previewType == 'file' && previewMime == 'pdf'" :file="previewPath"/>
         <PreviewVideo v-if="previewType == 'file' && previewMime == 'video'" :file="previewPath"/>
         <PreviewAudio v-if="previewType == 'file' && previewMime == 'audio'" :file="previewPath" :barColor="foregroundColor"/>
@@ -79,6 +85,7 @@
  import PreviewAudio from "./PreviewAudio.vue"
  import PreviewPdf from "./PreviewPdf.vue"
  import PreviewCode from "./PreviewCode.vue"
+ import PreviewCodeHtml from "./PreviewCodeHtml.vue"
  import PreviewHtml from "./PreviewHtml.vue"
  import PreviewImage from "./PreviewImage.vue"
  import PreviewEmpty from "./PreviewEmpty.vue"
@@ -93,6 +100,7 @@
      PreviewAudio,
      PreviewPdf,
      PreviewCode,
+     PreviewCodeHtml,
      PreviewHtml,
      PreviewImage,
      PreviewEmpty,
@@ -154,6 +162,7 @@
        previewType: "",
        previewFiles: [],
        previewMime: "",
+       previewHtmlContent: "",
        previewSize: "",
 
        pathSep: "",
@@ -531,34 +540,32 @@
        this.showPreview = option;
      },
 
-     setPreview(filePath, fileType, fileInfos) {
+     setPreview(filePath, fileType, fileMime, fileHtmlContent, fileInfos) {
        this.previewPath = filePath;
        this.previewType = fileType;
        this.previewFiles = fileInfos;
+       this.previewHtmlContent = fileHtmlContent;
 
        if (fileType == "file") {
-         var mime = fileInfos[0]["mime"]
-         console.log("***** ", filePath, mime)
+         console.log("***** ", filePath, fileMime)
 
-         if (mime.startsWith("image-")) {
+         if (fileMime.startsWith("image-")) {
            this.previewMime = "image"
-         } else if (mime == "text-html") {
+         } else if (fileMime == "text-html") {
            this.previewMime = "html"
-         } else if (mime.startsWith("text-")
-                    || mime == "application-json"
-                    || mime == "application-x-yaml") {
-           this.previewMime = "text"
-         } else if (mime == "application-pdf") {
+         } else if (fileMime == "eaf-mime-type-code") {
+           this.previewMime = "code"
+         } else if (fileMime == "eaf-mime-type-code-html") {
+           this.previewMime = "code-html"
+         } else if (fileMime == "application-pdf") {
            this.previewMime = "pdf"
-         } else if (mime.startsWith("video-")) {
+         } else if (fileMime.startsWith("video-")) {
            this.previewMime = "video"
-         } else if (mime.startsWith("audio-")) {
+         } else if (fileMime.startsWith("audio-")) {
            this.previewMime = "audio"
-         } else if (mime == "application-wps-office.docx") {
+         } else if (fileMime == "application-wps-office.docx") {
            this.previewMime = "office"
-         } else if (mime == "application-x-sharedlib" || 
-                    mime == "application-xmind"
-         ) {
+         } else if (fileMime == "eaf-mime-type-ignore") {
            this.previewMime = "ignore"
          }
 

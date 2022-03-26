@@ -19,10 +19,16 @@
   ],
   "pip": {
     "linux": [
-      "pypinyin"
+      "pypinyin",
+      "pygments"
     ],
     "win32": [
-      "pypinyin"
+      "pypinyin",
+      "pygments"
+    ],
+    "darwin": [
+      "pypinyin",
+      "pygments"
     ]
   },
   "vue_install": true

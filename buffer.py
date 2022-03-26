@@ -179,7 +179,17 @@ class AppBuffer(BrowserBuffer):
             if file_path.endswith(".vue"):
                 return "text-plain"
             else:
-                return self.mime_db.mimeTypeForFile(file_info).name().replace("/", "-")
+                mime = self.mime_db.mimeTypeForFile(file_info).name().replace("/", "-")
+                
+                if (mime.startswith("text-") or
+                    mime == "application-json" or
+                    mime == "application-x-yaml" or
+                    mime == "application-javascript"):
+                    mime = "eaf-mime-type-code-html"
+                elif mime == "application-x-sharedlib" or mime == "application-xmind":
+                    mime = "eaf-mime-type-ignore"
+                
+                return mime
 
     def generate_file_icon(self, file_path):
         file_mime = self.get_file_mime(file_path)
@@ -424,8 +434,34 @@ class AppBuffer(BrowserBuffer):
     def get_preview_file(self):
         return self.preview_file
 
-    def update_preview_info(self, file, file_type, file_infos):
-        self.buffer_widget.eval_js('''setPreview(\"{}\", \"{}\", {});'''.format(file, file_type, file_infos))
+    def update_preview_info(self, file, file_type, file_mime, file_infos):
+        file_html_content = ""
+        
+        if file_type == "file":
+            if file_mime == "eaf-mime-type-code-html":
+                
+                file_size = os.path.getsize(file)
+                if file_size < 100000:
+                    from pygments import highlight
+                    from pygments.styles import get_all_styles
+                    from pygments.lexers import PythonLexer, get_lexer_for_filename
+                    from pygments.formatters import HtmlFormatter
+                        
+                    with open(file) as f:
+                        content = f.read()
+                        
+                        try:
+                            # All styles please look: https://pygments.org/styles/
+                            style_name = "monokai" if self.theme_mode == "dark" else "stata-light"
+                            
+                            file_html_content = highlight(content, get_lexer_for_filename(file), HtmlFormatter(full=True, style=style_name))
+                            print(content, file_html_content)
+                        except:
+                            file_html_content = highlight(content, PythonLexer(), HtmlFormatter())
+                else:
+                    file_mime = "eaf-mime-type-code"
+        
+        self.buffer_widget.eval_js('''setPreview(\"{}\", \"{}\", \"{}\", {}, {});'''.format(file, file_type, file_mime, json.dumps(file_html_content), file_infos))
 
     @interactive
     def search_file(self):
@@ -1008,7 +1044,7 @@ class AppBuffer(BrowserBuffer):
 
 class FetchPreviewInfoThread(QThread):
 
-    fetch_finish = QtCore.pyqtSignal(str, str, str)
+    fetch_finish = QtCore.pyqtSignal(str, str, str, str)
 
     def __init__(self, file, get_preview_file_callback, get_files_callback, get_file_mime_callback):
         QThread.__init__(self)
@@ -1028,11 +1064,12 @@ class FetchPreviewInfoThread(QThread):
 
             if self.file != "":
                 path = Path(self.file)
+                mime = self.get_file_mime_callback(str(path.absolute()))
 
                 if path.is_file():
                     file_type = "file"
                     file_infos = [{
-                        "mime": self.get_file_mime_callback(str(path.absolute())),
+                        "mime": mime,
                         "size": os.path.getsize(str(path.absolute()))
                     }]
                 elif path.is_dir():
@@ -1041,7 +1078,7 @@ class FetchPreviewInfoThread(QThread):
                 elif path.is_symlink():
                     file_type = "symlink"
 
-            self.fetch_finish.emit(self.file, file_type, json.dumps(file_infos))
+            self.fetch_finish.emit(self.file, file_type, mime, json.dumps(file_infos))
 
 class GitCommitThread(QThread):
 
