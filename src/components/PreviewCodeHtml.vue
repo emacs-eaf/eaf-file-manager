@@ -1,6 +1,8 @@
 <template>
   <div ref="scrollArea" class="code-box">
-    <div v-html="content"/>
+    <div 
+      v-html="content"
+      class="code-area"/>
   </div>
 </template>
 
@@ -73,5 +75,10 @@
    overflow: scroll;
    padding-left: 15px;
    font-size: 18px;
+ }
+ 
+ .code-area {
+   display: inline-table;
+   padding-top: 5px;
  }
 </style>
