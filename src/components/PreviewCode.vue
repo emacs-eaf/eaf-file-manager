@@ -1,5 +1,7 @@
 <template>
-  <div ref="scrollArea" class="code-box">
+  <div 
+    ref="scrollArea"
+    class="code-box">
     <pre class="code">{{content}}</pre>
   </div>
 </template>
@@ -96,5 +98,6 @@
  .code {
    margin: 0;
    font-size: 18px;
+   padding-top: 5px;
  }
 </style>
