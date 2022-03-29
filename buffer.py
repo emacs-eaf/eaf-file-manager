@@ -177,7 +177,7 @@ class AppBuffer(BrowserBuffer):
         else:
             file_info = QtCore.QFileInfo(file_path)
             if file_path.endswith(".vue"):
-                return "text-plain"
+                return "eaf-mime-type-code-html"
             else:
                 mime = self.mime_db.mimeTypeForFile(file_info).name().replace("/", "-")
                 
@@ -444,7 +444,7 @@ class AppBuffer(BrowserBuffer):
                 if file_size < 100000:
                     from pygments import highlight
                     from pygments.styles import get_all_styles
-                    from pygments.lexers import PythonLexer, get_lexer_for_filename
+                    from pygments.lexers import PythonLexer, get_lexer_for_filename, html
                     from pygments.formatters import HtmlFormatter
                         
                     with open(file) as f:
@@ -454,7 +454,10 @@ class AppBuffer(BrowserBuffer):
                             # All styles please look: https://pygments.org/styles/
                             style_name = "monokai" if self.theme_mode == "dark" else "stata-light"
                             
-                            file_html_content = highlight(content, get_lexer_for_filename(file), HtmlFormatter(full=True, style=style_name))
+                            if file.endswith(".vue"):
+                                file_html_content = highlight(content, html.HtmlLexer(), HtmlFormatter(full=True, style=style_name))
+                            else:
+                                file_html_content = highlight(content, get_lexer_for_filename(file), HtmlFormatter(full=True, style=style_name))
                         except:
                             file_html_content = highlight(content, PythonLexer(), HtmlFormatter())
                 else:

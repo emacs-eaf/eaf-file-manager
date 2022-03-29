@@ -551,7 +551,7 @@
 
          if (fileMime.startsWith("image-")) {
            this.previewMime = "image"
-         } else if (fileMime == "text-html") {
+         } else if (fileMime == "text-html" || fileMime == "application-xhtml+xml") {
            this.previewMime = "html"
          } else if (fileMime == "eaf-mime-type-code") {
            this.previewMime = "code"
