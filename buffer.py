@@ -177,10 +177,10 @@ class AppBuffer(BrowserBuffer):
         else:
             file_info = QtCore.QFileInfo(file_path)
             if file_path.endswith(".vue"):
-                return "text-plain"
+                return "eaf-mime-type-code-html"
             else:
                 mime = self.mime_db.mimeTypeForFile(file_info).name().replace("/", "-")
-                
+
                 if (mime.startswith("text-") or
                     mime == "application-json" or
                     mime == "application-x-yaml" or
@@ -188,7 +188,7 @@ class AppBuffer(BrowserBuffer):
                     mime = "eaf-mime-type-code-html"
                 elif mime == "application-x-sharedlib" or mime == "application-xmind":
                     mime = "eaf-mime-type-ignore"
-                
+
                 return mime
 
     def generate_file_icon(self, file_path):
@@ -320,7 +320,7 @@ class AppBuffer(BrowserBuffer):
 
         eval_in_emacs('eaf--change-default-directory', [self.buffer_id, dir])
         self.change_title(os.path.basename(dir))
-        
+
         self.file_infos = self.get_file_infos(dir)
 
         self.select_index = 0
@@ -338,27 +338,27 @@ class AppBuffer(BrowserBuffer):
             self.init_first_file_preview()
 
         self.fetch_git_log()
-        
+
     @interactive
     def sort_by_created_time(self):
         self.sort_by_file_key("ctime", "ctime")
         message_to_emacs("Sort file by created time.")
-        
+
     @interactive
-    def sort_by_modified_time(self): 
+    def sort_by_modified_time(self):
         self.sort_by_file_key("mtime", "mtime")
         message_to_emacs("Sort file by modified time.")
-    
+
     @interactive
-    def sort_by_access_time(self): 
+    def sort_by_access_time(self):
         self.sort_by_file_key("atime", "atime")
         message_to_emacs("Sort file by access time.")
-    
+
     @interactive
     def sort_by_size(self):
         self.sort_by_file_key("bytes", "bytes")
         message_to_emacs("Sort file by size.")
-        
+
     @interactive
     def sort_by_name(self):
         self.sort_by_file_key("name", "bytes")
@@ -368,23 +368,23 @@ class AppBuffer(BrowserBuffer):
     def sort_by_type(self):
         self.sort_by_file_key("extension", "bytes")
         message_to_emacs("Sort file by type.")
-        
+
     def sort_by_file_key(self, key, info_key):
         select_path = self.file_infos[self.select_index]["path"]
-        
+
         for file_info in self.file_infos:
             file_info["info"] = self.get_file_sort_info(file_info, info_key)
-        
+
         from functools import cmp_to_key
         self.file_infos.sort(key=cmp_to_key(lambda a, b: self.sort_file_by_key(a, b, key)))
         files = list(map(lambda file: file["path"], self.file_infos))
         self.select_index = files.index(select_path)
-        
+
         self.buffer_widget.eval_js('''changePath(\"{}\", {}, {});'''.format(
             self.url,
             json.dumps(self.file_infos),
             self.select_index))
-        
+
     def get_file_sort_info(self, file_info, info_key):
         if info_key == "bytes":
             if file_info["type"] == "file":
@@ -436,26 +436,29 @@ class AppBuffer(BrowserBuffer):
 
     def update_preview_info(self, file, file_type, file_mime, file_infos):
         file_html_content = ""
-        
+
         if file_type == "file":
             if file_mime == "eaf-mime-type-code-html":
-                
+
                 file_size = os.path.getsize(file)
                 if file_size < 100000:
                     from pygments import highlight
                     from pygments.styles import get_all_styles
-                    from pygments.lexers import PythonLexer, get_lexer_for_filename
+                    from pygments.lexers import PythonLexer, get_lexer_for_filename, html
                     from pygments.formatters import HtmlFormatter
-                        
+
                     with open(file) as f:
                         content = f.read()
-                        
+
                         try:
                             # All styles please look: https://pygments.org/styles/
                             style_name = "monokai" if self.theme_mode == "dark" else "stata-light"
-                            
-                            file_html_content = highlight(content, get_lexer_for_filename(file), HtmlFormatter(full=True, style=style_name))
-                            print(content, file_html_content)
+
+
+                            if file.endswith(".vue"):
+                                file_html_content = highlight(content, html.HtmlLexer(), HtmlFormatter(full=True, style=style_name))
+                            else:
+                                file_html_content = highlight(content, get_lexer_for_filename(file), HtmlFormatter(full=True, style=style_name))
                         except:
                             file_html_content = highlight(content, PythonLexer(), HtmlFormatter())
                 else:
@@ -529,10 +532,10 @@ class AppBuffer(BrowserBuffer):
     @interactive
     def change_path(self):
         self.send_input_message("Change path: ", "change_path", "file", self.url)
-        
+
     def handle_change_path(self, new_path):
         self.change_directory(new_path, "")
-        
+
     @interactive
     def batch_rename(self):
         directory = os.path.basename(os.path.normpath(self.url))
@@ -643,7 +646,7 @@ class AppBuffer(BrowserBuffer):
 
     def batch_rename_confirm(self, new_file_string):
         self.inhibit_mark_change_file = True
-        
+
         new_files = json.loads(new_file_string)
 
         for [total, id, path, old_file_name, new_file_name] in new_files:
@@ -738,10 +741,10 @@ class AppBuffer(BrowserBuffer):
 
     def vue_get_mark_files(self):
         return list(filter(lambda file: file["mark"] == "mark", self.vue_files)).copy()
-    
+
     def get_mark_file_names(self):
         return list(map(lambda file: file["path"], self.vue_get_mark_files()))
-    
+
     def get_select_file_name(self):
         current_file = self.vue_get_select_file()
         if current_file != None:
