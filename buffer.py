@@ -19,9 +19,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5 import QtCore
-from PyQt5.QtCore import QThread, QMimeDatabase, QFileSystemWatcher
-from PyQt5.QtGui import QColor, QIcon
+from PyQt6 import QtCore
+from PyQt6.QtCore import QThread, QMimeDatabase, QFileSystemWatcher
+from PyQt6.QtGui import QColor, QIcon
 from core.utils import eval_in_emacs, PostGui, get_emacs_vars, interactive, message_to_emacs, get_emacs_func_result
 from core.webengine import BrowserBuffer
 from pathlib import Path
@@ -455,7 +455,6 @@ class AppBuffer(BrowserBuffer):
                             style_name = "monokai" if self.theme_mode == "dark" else "stata-light"
                             
                             file_html_content = highlight(content, get_lexer_for_filename(file), HtmlFormatter(full=True, style=style_name))
-                            print(content, file_html_content)
                         except:
                             file_html_content = highlight(content, PythonLexer(), HtmlFormatter())
                 else:
