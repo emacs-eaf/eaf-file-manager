@@ -959,33 +959,28 @@ class AppBuffer(BrowserBuffer):
             message_to_emacs("File '{}' not exists".format(new_file))
 
     def handle_search_file(self, search_string):
-        if search_string == "":
-            self.buffer_widget.eval_js('''selectFileByIndex({})'''.format(self.search_start_index))
-            self.buffer_widget.eval_js('''setSearchMatchFiles({})'''.format(json.dumps([])))
+        in_minibuffer = get_emacs_func_result("minibufferp", [])
+
+        if in_minibuffer:
+            all_files = list(map(self.pick_search_string, self.vue_get_all_files()))
+            self.search_files = list(filter(
+                lambda args: not False in list(map(lambda str: self.is_file_match(args[1], str), search_string.split())),
+                enumerate(all_files)
+            ))
+            self.search_files_index = 0
+
+            self.buffer_widget.eval_js('''setSearchMatchFiles({})'''.format(json.dumps(
+                list(map(lambda args: args[0], self.search_files))
+            )))
+
+            if len(self.search_files) > 0:
+                return self.buffer_widget.eval_js('''selectFileByIndex({})'''.format(self.search_files[self.search_files_index][0]))
+
+            # Notify user if no match file found.
+            eval_in_emacs("message", ["Did not find a matching file"])
         else:
-            in_minibuffer = get_emacs_func_result("minibufferp", [])
-
-            if in_minibuffer:
-
-                all_files = list(map(self.pick_search_string, self.vue_get_all_files()))
-                self.search_files = list(filter(
-                    lambda args: not False in list(map(lambda str: self.is_file_match(args[1], str), search_string.split())),
-                    enumerate(all_files)
-                ))
-                self.search_files_index = 0
-
-                self.buffer_widget.eval_js('''setSearchMatchFiles({})'''.format(json.dumps(
-                    list(map(lambda args: args[0], self.search_files))
-                )))
-
-                if len(self.search_files) > 0:
-                    return self.buffer_widget.eval_js('''selectFileByIndex({})'''.format(self.search_files[self.search_files_index][0]))
-
-                # Notify user if no match file found.
-                eval_in_emacs("message", ["Did not find a matching file"])
-            else:
-                message_to_emacs("Select file: {}".format(self.vue_files[self.vue_current_index]['name']))
-                self.buffer_widget.eval_js('''setSearchMatchFiles({})'''.format(json.dumps([])))
+            message_to_emacs("Select file: {}".format(self.vue_files[self.vue_current_index]['name']))
+            self.buffer_widget.eval_js('''setSearchMatchFiles({})'''.format(json.dumps([])))
 
     def handle_mark_file_by_extension(self, extension):
         self.buffer_widget.eval_js('''markFileByExtension(\"{}\")'''.format(extension))
