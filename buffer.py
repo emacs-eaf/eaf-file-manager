@@ -531,9 +531,16 @@ class AppBuffer(BrowserBuffer):
     @interactive
     def change_path(self):
         self.send_input_message("Change path: ", "change_path", "file", self.url)
+
+    @interactive
+    def open_path(self):
+        self.send_input_message("Open path: ", "open_path", "file", self.url)
         
     def handle_change_path(self, new_path):
         self.change_directory(new_path, "")
+
+    def handle_open_path(self, new_path):
+        eval_in_emacs('eaf-open-in-file-manager', [new_path])
         
     @interactive
     def batch_rename(self):
@@ -695,6 +702,8 @@ class AppBuffer(BrowserBuffer):
             self.handle_mark_file_by_extension(result_content)
         elif callback_tag == "change_path":
             self.handle_change_path(result_content)
+        elif callback_tag == "open_path":
+            self.handle_open_path(result_content)
 
     def cancel_input_response(self, callback_tag):
         ''' Cancel input message.'''
