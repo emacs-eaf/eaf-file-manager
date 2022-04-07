@@ -20,7 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore
-from PyQt5.QtCore import QThread, QMimeDatabase, QFileSystemWatcher
+from PyQt5.QtCore import QThread, QMimeDatabase, QFileSystemWatcher, QTimer
 from PyQt5.QtGui import QColor, QIcon
 from core.utils import eval_in_emacs, PostGui, get_emacs_vars, interactive, message_to_emacs, get_emacs_func_result
 from core.webengine import BrowserBuffer
@@ -242,6 +242,7 @@ class AppBuffer(BrowserBuffer):
             "bytes": file_bytes,
             "info": file_size,
             "mark": "",
+            "changed": "",
             "match": "",
             "icon": self.generate_file_icon(file_path),
             "mtime": self.get_file_mtime(file_path),
@@ -649,6 +650,8 @@ class AppBuffer(BrowserBuffer):
                 else:
                     change_file_indexes.append(index)
             self.buffer_widget.eval_js("markChangeFiles({});".format(change_file_indexes))
+
+            QTimer().singleShot(10000, lambda : self.buffer_widget.eval_js("cleanChangeFiles({});".format(change_file_indexes)))
 
         self.fetch_git_log()
 

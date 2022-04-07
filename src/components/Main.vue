@@ -39,6 +39,11 @@
             <div class="file-info">
               {{ file.info }}
             </div>
+            <div 
+              class="file-flag"
+              :style="{ 'background': itemFlagBackgroundColor(file) }
+              ">
+            </div>
           </div>
         </div>
       </div>
@@ -194,6 +199,7 @@
      window.markFile = this.markFile;
      window.markFileByExtension = this.markFileByExtension;
      window.markChangeFiles = this.markChangeFiles;
+     window.cleanChangeFiles = this.cleanChangeFiles;
      window.unmarkFile = this.unmarkFile;
      window.unmarkAllFiles = this.unmarkAllFiles;
      window.toggleMarkFile = this.toggleMarkFile;
@@ -308,6 +314,16 @@
        }
      },
 
+     itemFlagBackgroundColor(item) {
+       if (item.path == this.currentPath) {
+         return this.selectColor;
+       } else if (item.changed == "changed") {
+         return this.markColor;
+       } else {
+         return this.backgroundColor;
+       }
+     },
+     
      headerForegroundColor() {
        return this.headerColor;
      },
@@ -376,9 +392,13 @@
      },
 
      markChangeFiles(indexes) {
-       indexes.forEach(index => {this.files[index].mark = "mark"});
+       indexes.forEach(index => {this.files[index].changed = "changed"});
      },
 
+     cleanChangeFiles(indexes) {
+       indexes.forEach(index => {this.files[index].changed = ""});
+     },
+     
      unmarkFile() {
        this.files[this.currentIndex].mark = "";
        this.selectNextFile();
@@ -644,6 +664,8 @@
    padding-left: 20px;
    padding-top: 4px;
    padding-bottom: 4px;
+   
+   height: 24px;
 
    display: flex;
    flex-direction: row;
@@ -662,7 +684,7 @@
  }
 
  .file-info {
-   padding-right: 20px;
+   padding-right: 5px;
    display: flex;
    flex-direction: column;
    justify-content: center;
@@ -683,5 +705,11 @@
 
    display: flex;
    flex-direction: row;
+ }
+ 
+ .file-flag {
+   width: 6px;
+   height: 100%;
+   margin-right: 5px;
  }
 </style>
