@@ -51,7 +51,7 @@ File manager application for the [Emacs Application Framework](https://github.co
 | `C-m` | js_open_current_file |
 | `F` | open_link |
 | `T` | open_current_file_in_new_tab |
-| `H` | open_file |
+| `H` | open_file_with_external_app |
 | `SPC` | js_scroll_up_select_file |
 | `b` | js_scroll_down_select_file |
 | `<return>` | js_open_current_file |
