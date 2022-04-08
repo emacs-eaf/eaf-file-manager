@@ -617,12 +617,15 @@ class AppBuffer(BrowserBuffer):
             eval_in_emacs("eaf-open-in-file-manager", [current_file["path"]])
 
     @interactive
-    def open_file(self):
-        self.send_input_message("Open file: ", "open_file", "file", self.url)
-
-    @interactive
     def mark_file_by_extension(self):
         self.send_input_message("Mark file by extension: ", "mark_file_by_extension", "string")
+        
+    @interactive
+    def open_file_with_external_app(self):
+        file_info = self.vue_get_select_file()
+        if file_info != None:
+            subprocess.Popen("xdg-open '{}'".format(file_info["path"]), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            message_to_emacs("Open file by external app '{}'".format(file_info["path"]))
 
     def refresh(self):
         if not self.inhibit_mark_change_file:
@@ -699,8 +702,6 @@ class AppBuffer(BrowserBuffer):
             self.handle_open_link(result_content)
         elif callback_tag == "find_files":
             self.handle_find_files(result_content)
-        elif callback_tag == "open_file":
-            self.handle_open_file(result_content)
         elif callback_tag == "search_file":
             self.handle_search_file(result_content)
         elif callback_tag == "mark_file_by_extension":
@@ -961,15 +962,6 @@ class AppBuffer(BrowserBuffer):
 
     def handle_find_files(self, regex):
         eval_in_emacs("eaf-open", [self.url, "file-manager", "search:{}".format(regex), "always-new"])
-
-    def handle_open_file(self, new_file):
-        if os.path.exists(new_file):
-            if os.path.isfile(new_file):
-                eval_in_emacs("find-file", [new_file])
-            elif os.path.isdir(new_file):
-                eval_in_emacs("eaf-open-in-file-manager", [new_file])
-        else:
-            message_to_emacs("File '{}' not exists".format(new_file))
 
     def handle_search_file(self, search_string):
         in_minibuffer = get_emacs_func_result("minibufferp", [])
