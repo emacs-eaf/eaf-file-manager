@@ -665,8 +665,6 @@
    padding-top: 4px;
    padding-bottom: 4px;
    
-   height: 24px;
-
    display: flex;
    flex-direction: row;
    align-items: center;
