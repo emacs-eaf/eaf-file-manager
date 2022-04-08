@@ -1,5 +1,7 @@
 <template>
-  <div ref="scrollArea" class="office-box">
+  <div
+    ref="scrollArea" 
+    class="office-box">
     <div v-html="wordText"/>
   </div>
 </template>
@@ -91,7 +93,6 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
  .office-box {
-   width: 100%;
    height: 100%;
    overflow: scroll;
    padding: 15px;
