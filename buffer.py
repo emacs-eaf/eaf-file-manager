@@ -622,7 +622,8 @@ class AppBuffer(BrowserBuffer):
     def open_file_with_external_app(self):
         file_info = self.vue_get_select_file()
         if file_info != None:
-            subprocess.Popen("xdg-open '{}'".format(file_info["path"]), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            # Don't sue subprocess, otherwise external application will exit when you call eaf-stop-process.
+            eval_in_emacs("eaf-file-manager-open-file-with-external-app", [file_info["path"]])
             message_to_emacs("Open file by external app '{}'".format(file_info["path"]))
 
     def refresh(self):

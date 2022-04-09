@@ -370,6 +370,17 @@
       (byte-compile-file file t)
     (message (format "%s is not elisp file" file))))
 
+(defun eaf-file-manager-open-file-with-external-app (path)
+  (interactive)
+  (cond
+   ((string-equal system-type "windows-nt")
+    (w32-shell-execute "open" (replace-regexp-in-string "/" "\\" path t t)))
+   ((string-equal system-type "darwin")
+    (shell-command (format "open \"%s\"" path)))
+   ((string-equal system-type "gnu/linux")
+    (let ((process-connection-type nil)) (start-process "" nil "xdg-open" path))
+    )))
+
 (provide 'eaf-file-manager)
 
 ;;; eaf-file-manager.el ends here
