@@ -406,7 +406,7 @@ class AppBuffer(BrowserBuffer):
 
     @PostGui()
     def update_git_log(self, log):
-        self.buffer_widget.eval_js('''updateGitLog(\"{}\");'''.format(log))
+        self.buffer_widget.eval_js('''updateGitLog({});'''.format(json.dumps({"log": log})))
 
     @QtCore.pyqtSlot(str)
     def change_up_directory(self, file):

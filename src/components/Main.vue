@@ -246,7 +246,7 @@
      },
 
      updateGitLog(log) {
-       this.gitLog = log;
+       this.gitLog = log["log"];
      },
 
      initSearch(path, searchRegex) {
