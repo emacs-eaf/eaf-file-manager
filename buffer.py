@@ -131,24 +131,25 @@ class AppBuffer(BrowserBuffer):
             else:
                 select_color = QColor(self.theme_background_color).darker(110).name()
 
-        self.buffer_widget.eval_js('''init(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
-            self.theme_background_color, self.theme_foreground_color, header_color, directory_color, symlink_color, mark_color, select_color, search_match_color, search_keyword_color,
+        self.buffer_widget.eval_js_function(
+            '''init''', 
+            self.theme_background_color, self.theme_foreground_color, 
+            header_color, directory_color, symlink_color, mark_color, select_color, search_match_color, search_keyword_color,
             self.icon_cache_dir, os.path.sep,
             "true" if self.show_preview else "false",
             "true" if self.show_icon else "false",
-            self.theme_mode))
+            self.theme_mode)
 
     @PostGui()
     def handle_append_search(self, file_paths, first_search):
-        self.buffer_widget.eval_js('''appendSearch({});'''.format(
-            json.dumps(list(map(lambda file_path: self.get_file_info(file_path, self.url), file_paths)))))
+        self.buffer_widget.eval_js_function('''appendSearch''', list(map(lambda file_path: self.get_file_info(file_path, self.url), file_paths)))
 
         if first_search:
             self.update_preview(file_paths[0])
 
     @PostGui()
     def handle_finish_search(self, search_dir, search_regex, match_number):
-        self.buffer_widget.eval_js('''finishSearch()''')
+        self.buffer_widget.eval_js_function('''finishSearch''')
 
         if match_number > 0:
             message_to_emacs("Find {} files that matched '{}'".format(match_number, search_regex))
@@ -161,10 +162,10 @@ class AppBuffer(BrowserBuffer):
         fd_command = get_fd_command()
 
         if fd_command != "":
-            self.buffer_widget.eval_js('''initSearch(\"{}\", \"{}\");'''.format(dir, "{} {}".format(fd_command, search_regex)))
+            self.buffer_widget.eval_js_function('''initSearch''', dir, "{} {}".format(fd_command, search_regex))
             thread = FdSearchThread(os.path.expanduser(dir), search_regex, self.filter_file)
         else:
-            self.buffer_widget.eval_js('''initSearch(\"{}\", \"{}\");'''.format(dir, search_regex))
+            self.buffer_widget.eval_js_function('''initSearch''', dir, search_regex)
             thread = PythonSearchThread(os.path.expanduser(dir), search_regex, self.filter_file)
         thread.append_search.connect(self.handle_append_search)
         thread.finish_search.connect(self.handle_finish_search)
@@ -330,10 +331,7 @@ class AppBuffer(BrowserBuffer):
             files = list(map(lambda file: file["path"], self.file_infos))
             self.select_index = files.index(current_dir) if current_dir in files else 0
 
-        self.buffer_widget.eval_js('''changePath(\"{}\", {}, {});'''.format(
-            self.url,
-            json.dumps(self.file_infos),
-            self.select_index))
+        self.buffer_widget.eval_js_function('''changePath''', self.url, self.file_infos, self.select_index)
 
         if len(self.file_infos) > 0:
             self.init_first_file_preview()
@@ -381,10 +379,7 @@ class AppBuffer(BrowserBuffer):
         files = list(map(lambda file: file["path"], self.file_infos))
         self.select_index = files.index(select_path)
         
-        self.buffer_widget.eval_js('''changePath(\"{}\", {}, {});'''.format(
-            self.url,
-            json.dumps(self.file_infos),
-            self.select_index))
+        self.buffer_widget.eval_js_function('''changePath''', self.url, self.file_infos, self.select_index)
         
     def get_file_sort_info(self, file_info, info_key):
         if info_key == "bytes":
@@ -406,7 +401,7 @@ class AppBuffer(BrowserBuffer):
 
     @PostGui()
     def update_git_log(self, log):
-        self.buffer_widget.eval_js('''updateGitLog({});'''.format(json.dumps({"log": log})))
+        self.buffer_widget.eval_js_function('''updateGitLog''', {"log": log})
 
     @QtCore.pyqtSlot(str)
     def change_up_directory(self, file):
@@ -464,7 +459,7 @@ class AppBuffer(BrowserBuffer):
                 else:
                     file_mime = "eaf-mime-type-code"
         
-        self.buffer_widget.eval_js('''setPreview(\"{}\", \"{}\", \"{}\", {}, {});'''.format(file, file_type, file_mime, json.dumps(file_html_content), file_infos))
+        self.buffer_widget.eval_js_function('''setPreview''', file, file_type, file_mime, {"content": file_html_content}, file_infos)
 
     @interactive
     def search_file(self):
@@ -588,7 +583,7 @@ class AppBuffer(BrowserBuffer):
 
         self.show_preview = not self.show_preview
 
-        self.buffer_widget.eval_js('''setPreviewOption(\"{}\")'''.format("true" if self.show_preview else "false"))
+        self.buffer_widget.eval_js_function('''setPreviewOption''', "true" if self.show_preview else "false")
 
         if self.show_preview:
             current_file = self.vue_get_select_file()
@@ -651,9 +646,9 @@ class AppBuffer(BrowserBuffer):
                         change_file_indexes.append(index)
                 else:
                     change_file_indexes.append(index)
-            self.buffer_widget.eval_js("markChangeFiles({});".format(change_file_indexes))
+            self.buffer_widget.eval_js_function("markChangeFiles", change_file_indexes)
             
-            QTimer().singleShot(10000, lambda : self.buffer_widget.eval_js("cleanChangeFiles({});".format(change_file_indexes)))
+            QTimer().singleShot(10000, lambda : self.buffer_widget.eval_js_function("cleanChangeFiles", change_file_indexes))
 
         self.fetch_git_log()
 
@@ -676,7 +671,7 @@ class AppBuffer(BrowserBuffer):
                     self.batch_rename_files[i]["path"] = new_file_path
                     break
 
-        self.buffer_widget.eval_js('''renameFiles({})'''.format(json.dumps(self.batch_rename_files)))
+        self.buffer_widget.eval_js_function('''renameFiles''', self.batch_rename_files)
 
     def handle_input_response(self, callback_tag, result_content):
         if callback_tag == "delete_file":
@@ -715,8 +710,8 @@ class AppBuffer(BrowserBuffer):
         if callback_tag == "open_link":
             self.buffer_widget.cleanup_links_dom()
         elif callback_tag == "search_file":
-            self.buffer_widget.eval_js('''selectFileByIndex({})'''.format(self.search_start_index))
-            self.buffer_widget.eval_js('''setSearchMatchFiles({})'''.format(json.dumps([])))
+            self.buffer_widget.eval_js_function('''selectFileByIndex''', self.search_start_index)
+            self.buffer_widget.eval_js_function('''setSearchMatchFiles''', [])
 
     def handle_search_forward(self, callback_tag):
         if callback_tag == "search_file":
@@ -726,7 +721,7 @@ class AppBuffer(BrowserBuffer):
                 else:
                     self.search_files_index += 1
 
-                self.buffer_widget.eval_js('''selectFileByIndex({})'''.format(self.search_files[self.search_files_index][0]))
+                self.buffer_widget.eval_js_function('''selectFileByIndex''', self.search_files[self.search_files_index][0])
 
     def handle_search_backward(self, callback_tag):
         if callback_tag == "search_file":
@@ -736,11 +731,11 @@ class AppBuffer(BrowserBuffer):
                 else:
                     self.search_files_index -= 1
 
-                self.buffer_widget.eval_js('''selectFileByIndex({})'''.format(self.search_files[self.search_files_index][0]))
+                self.buffer_widget.eval_js_function('''selectFileByIndex''', self.search_files[self.search_files_index][0])
 
     def handle_search_finish(self, callback_tag):
         if callback_tag == "search_file":
-            self.buffer_widget.eval_js('''setSearchMatchFiles({})'''.format(json.dumps([])))
+            self.buffer_widget.eval_js_function('''setSearchMatchFiles''', [])
 
     def delete_files(self, file_infos):
         for file_info in file_infos:
@@ -814,7 +809,7 @@ class AppBuffer(BrowserBuffer):
             self.new_select_file = next_to_file["path"]
 
         self.delete_files(self.vue_get_mark_files())
-        self.buffer_widget.eval_js("removeMarkFiles();")
+        self.buffer_widget.eval_js_function("removeMarkFiles")
 
         message_to_emacs("Delete selected files success.")
 
@@ -825,7 +820,7 @@ class AppBuffer(BrowserBuffer):
                 self.new_select_file = self.vue_files[self.vue_current_index - 1]["path"]
 
             self.delete_file(file_info)
-            self.buffer_widget.eval_js("removeSelectFile();")
+            self.buffer_widget.eval_js_function("removeSelectFile")
 
             message_to_emacs("Delete file {} success.".format(file_info["path"]))
 
@@ -841,7 +836,7 @@ class AppBuffer(BrowserBuffer):
 
                 os.rename(self.rename_file_path, new_file_path)
 
-                self.buffer_widget.eval_js("rename(\"{}\", \"{}\", \"{}\");".format(self.rename_file_path, new_file_path, new_file_name))
+                self.buffer_widget.eval_js_function("rename", self.rename_file_path, new_file_path, new_file_name)
 
                 message_to_emacs("Rename to '{}'".format(new_file_name))
             except:
@@ -860,7 +855,7 @@ class AppBuffer(BrowserBuffer):
             with open(new_file_path, "a"):
                 os.utime(new_file_path)
 
-            self.buffer_widget.eval_js('''addNewFile({})'''.format(json.dumps(self.get_file_info(new_file_path))))
+            self.buffer_widget.eval_js_function('''addNewFile''', self.get_file_info(new_file_path))
 
     def handle_create_directory(self, new_directory):
         if new_directory in os.listdir(self.url):
@@ -873,7 +868,7 @@ class AppBuffer(BrowserBuffer):
 
             os.makedirs(new_directory_path)
 
-            self.buffer_widget.eval_js('''addNewDirectory({})'''.format(json.dumps(self.get_file_info(new_directory_path))))
+            self.buffer_widget.eval_js_function('''addNewDirectory''', self.get_file_info(new_directory_path))
 
     def handle_move_file(self, new_file):
         if new_file == self.url:
@@ -884,7 +879,7 @@ class AppBuffer(BrowserBuffer):
                     self.new_select_file = self.vue_files[self.vue_current_index - 1]["path"]
 
                 shutil.move(self.move_file["path"], new_file)
-                self.buffer_widget.eval_js("removeSelectFile();")
+                self.buffer_widget.eval_js_function("removeSelectFile")
 
                 message_to_emacs("Move '{}' to '{}'".format(self.move_file["name"], new_file))
             except:
@@ -903,7 +898,7 @@ class AppBuffer(BrowserBuffer):
                 for move_file in self.move_files:
                     shutil.move(move_file["path"], new_dir)
 
-                self.buffer_widget.eval_js("removeMarkFiles();")
+                self.buffer_widget.eval_js_function("removeMarkFiles")
 
                 message_to_emacs("Move mark files to '{}'".format(new_dir))
             except:
@@ -953,9 +948,9 @@ class AppBuffer(BrowserBuffer):
         class_name = self.buffer_widget.execute_js("Marker.getMarkerClass('%s')" % str(marker))
 
         if class_name == "eaf-file-manager-file-name":
-            self.buffer_widget.eval_js('''openFileByName(\"{}\")'''.format(file_name))
+            self.buffer_widget.eval_js_function('''openFileByName''', file_name)
         elif class_name == "eaf-file-manager-preview-file-name":
-            self.buffer_widget.eval_js('''openPreviewFileByName(\"{}\")'''.format(file_name))
+            self.buffer_widget.eval_js_function('''openPreviewFileByName''', file_name)
 
         self.buffer_widget.cleanup_links_dom()
 
@@ -973,21 +968,19 @@ class AppBuffer(BrowserBuffer):
             ))
             self.search_files_index = 0
 
-            self.buffer_widget.eval_js('''setSearchMatchFiles({})'''.format(json.dumps(
-                list(map(lambda args: args[0], self.search_files))
-            )))
+            self.buffer_widget.eval_js_function('''setSearchMatchFiles''', list(map(lambda args: args[0], self.search_files)))
 
             if len(self.search_files) > 0:
-                return self.buffer_widget.eval_js('''selectFileByIndex({})'''.format(self.search_files[self.search_files_index][0]))
+                return self.buffer_widget.eval_js_function('''selectFileByIndex''', self.search_files[self.search_files_index][0])
 
             # Notify user if no match file found.
             eval_in_emacs("message", ["Did not find a matching file"])
         else:
             message_to_emacs("Select file: {}".format(self.vue_files[self.vue_current_index]['name']))
-            self.buffer_widget.eval_js('''setSearchMatchFiles({})'''.format(json.dumps([])))
+            self.buffer_widget.eval_js_function('''setSearchMatchFiles''', [])
 
     def handle_mark_file_by_extension(self, extension):
-        self.buffer_widget.eval_js('''markFileByExtension(\"{}\")'''.format(extension))
+        self.buffer_widget.eval_js_function('''markFileByExtension''', extension)
 
     def is_file_match(self, file, search_word):
         return ((len(search_word) > 0 and search_word[0] != "!" and search_word.lower() in file.lower()) or
@@ -1037,16 +1030,16 @@ class AppBuffer(BrowserBuffer):
         (frame_width, _) = get_emacs_func_result("eaf-get-render-size", [])
         if self.buffer_widget.width() <= int(frame_width) / 2:
             if self.show_preview:
-                self.buffer_widget.eval_js('''setPreviewOption(\"{}\")'''.format("false"))
+                self.buffer_widget.eval_js_function('''setPreviewOption''', "false")
                 self.hide_preview_by_width = True
         else:
             if self.show_preview and self.hide_preview_by_width:
-                self.buffer_widget.eval_js('''setPreviewOption(\"{}\")'''.format("true"))
+                self.buffer_widget.eval_js_function('''setPreviewOption''', "true")
                 self.hide_preview_by_width = False
 
 class FetchPreviewInfoThread(QThread):
 
-    fetch_finish = QtCore.pyqtSignal(str, str, str, str)
+    fetch_finish = QtCore.pyqtSignal(str, str, str, list)
 
     def __init__(self, file, get_preview_file_callback, get_files_callback, get_file_mime_callback):
         QThread.__init__(self)
@@ -1080,7 +1073,7 @@ class FetchPreviewInfoThread(QThread):
                 elif path.is_symlink():
                     file_type = "symlink"
 
-            self.fetch_finish.emit(self.file, file_type, mime, json.dumps(file_infos))
+            self.fetch_finish.emit(self.file, file_type, mime, file_infos)
 
 class GitCommitThread(QThread):
 

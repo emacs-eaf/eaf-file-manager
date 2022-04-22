@@ -564,7 +564,7 @@
        this.previewPath = filePath;
        this.previewType = fileType;
        this.previewFiles = fileInfos;
-       this.previewHtmlContent = fileHtmlContent;
+       this.previewHtmlContent = fileHtmlContent["content"];
 
        if (fileType == "file") {
          console.log("***** ", filePath, fileMime)
