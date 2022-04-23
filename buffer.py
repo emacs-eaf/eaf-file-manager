@@ -321,7 +321,7 @@ class AppBuffer(BrowserBuffer):
         self.monitor_current_dir()
 
         eval_in_emacs('eaf--change-default-directory', [self.buffer_id, dir])
-        self.change_title("Dir [{}]".format(os.path.basename(dir)))
+        self.change_title("Dir [{}]".format(os.path.sep.join(list(filter(lambda x: x != '', dir.split(os.path.sep)))[-1:])))
         
         self.file_infos = self.get_file_infos(dir)
 
