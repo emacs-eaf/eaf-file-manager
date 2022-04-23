@@ -917,6 +917,7 @@ class AppBuffer(BrowserBuffer):
                 else:
                     shutil.copy(self.copy_file["path"], new_file)
 
+                self.new_select_file = new_file
                 self.refresh()
 
                 message_to_emacs("Copy '{}' to '{}'".format(self.copy_file["name"], new_file))
