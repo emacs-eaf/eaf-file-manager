@@ -185,6 +185,7 @@ class AppBuffer(BrowserBuffer):
                 if (mime.startswith("text-") or
                     mime == "application-json" or
                     mime == "application-x-yaml" or
+                    mime == "application-x-shellscript" or
                     mime == "application-javascript"):
                     mime = "eaf-mime-type-code-html"
                 elif mime == "application-x-sharedlib" or mime == "application-xmind":
