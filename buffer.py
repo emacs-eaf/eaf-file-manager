@@ -869,9 +869,11 @@ class AppBuffer(BrowserBuffer):
             new_directory_path = os.path.join(self.url, new_directory)
             self.new_select_file = new_directory_path # make sure select new directory
 
-            os.makedirs(new_directory_path)
-
-            self.buffer_widget.eval_js_function('''addNewDirectory''', self.get_file_info(new_directory_path))
+            try:
+                os.makedirs(new_directory_path)
+                self.buffer_widget.eval_js_function('''addNewDirectory''', self.get_file_info(new_directory_path))
+            except PermissionError:
+                message_to_emacs("Insufficient permissions to create directory: {}".format(new_directory))
 
     def handle_move_file(self, new_file):
         if new_file == self.url:
