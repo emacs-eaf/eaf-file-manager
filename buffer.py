@@ -636,6 +636,8 @@ class AppBuffer(BrowserBuffer):
             current_file = self.vue_get_select_file()
             if current_file != None:
                 self.change_directory(self.url, current_file["path"])
+            else:
+                self.change_directory(self.url, "")
 
         if self.inhibit_mark_change_file:
             self.inherit_mark_change_file = False
