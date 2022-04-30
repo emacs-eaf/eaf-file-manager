@@ -76,6 +76,8 @@
           :itemForegroundColor="itemForegroundColor"
           :fileIconPath="fileIconPath"
           :showIcon="showIcon"/>
+        <PreviewNotSupport v-if="previewType == 'file' && previewMime == 'not-support'"/>
+        <PreviewTooBig v-if="previewType == 'file' && previewMime == 'too-big'"/>
         <PreviewEmpty v-if="previewType == 'directory' && previewFiles.length == 0"/>
         <PreviewSymlink v-if="previewType == 'symlink'"/>
       </div>
@@ -94,6 +96,8 @@
  import PreviewHtml from "./PreviewHtml.vue"
  import PreviewImage from "./PreviewImage.vue"
  import PreviewEmpty from "./PreviewEmpty.vue"
+ import PreviewNotSupport from "./PreviewNotSupport.vue"
+ import PreviewTooBig from "./PreviewTooBig.vue"
  import PreviewSymlink from "./PreviewSymlink.vue"
  import PreviewDirectory from "./PreviewDirectory.vue"
  import PreviewOffice from "./PreviewOffice.vue"
@@ -109,6 +113,8 @@
      PreviewHtml,
      PreviewImage,
      PreviewEmpty,
+     PreviewNotSupport,
+     PreviewTooBig,
      PreviewSymlink,
      PreviewDirectory,
      PreviewOffice,
@@ -569,7 +575,11 @@
        if (fileType == "file") {
          console.log("***** ", filePath, fileMime)
 
-         if (fileMime.startsWith("image-")) {
+         if (fileMime == "eaf-mime-type-not-support") {
+           this.previewMime = "not-support"
+         } else if (fileMime == "eaf-mime-type-too-big") {
+           this.previewMime = "too-big"
+         } else if (fileMime.startsWith("image-")) {
            this.previewMime = "image"
          } else if (fileMime == "text-html" || fileMime == "application-xhtml+xml") {
            this.previewMime = "html"
@@ -585,8 +595,6 @@
            this.previewMime = "audio"
          } else if (fileMime == "application-wps-office.docx") {
            this.previewMime = "office"
-         } else if (fileMime == "eaf-mime-type-ignore") {
-           this.previewMime = "ignore"
          }
 
          this.previewSize = fileInfos[0]["size"]

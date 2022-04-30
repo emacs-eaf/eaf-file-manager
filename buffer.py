@@ -176,8 +176,12 @@ class AppBuffer(BrowserBuffer):
         if os.path.isdir(file_path):
             return "directory"
         else:
+            file_size = os.path.getsize(file_path)
             file_info = QtCore.QFileInfo(file_path)
-            if file_path.endswith(".vue"):
+            
+            if file_size > 1000000:
+                return "eaf-mime-type-too-big"
+            elif file_path.endswith(".vue"):
                 return "eaf-mime-type-code-html"
             else:
                 mime = self.mime_db.mimeTypeForFile(file_info).name().replace("/", "-")
@@ -189,7 +193,7 @@ class AppBuffer(BrowserBuffer):
                     mime == "application-javascript"):
                     mime = "eaf-mime-type-code-html"
                 elif mime == "application-x-sharedlib" or mime == "application-xmind":
-                    mime = "eaf-mime-type-ignore"
+                    mime = "eaf-mime-type-not-support"
                 
                 return mime
 
