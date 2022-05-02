@@ -948,12 +948,15 @@ class AppBuffer(BrowserBuffer):
             
     def copy_to(self, src, dst):
         if os.path.isdir(src):
-            # shutil.copytree is copy content **under** src to dst,
-            # so we need create subdirectory at dst directory before copy content.
-            dst_dir = os.path.join(dst, os.path.basename(src))
-            if not os.path.exists(dst_dir):
-                os.makedirs(dst_dir)
-            shutil.copytree(src=src, dst=dst_dir, dirs_exist_ok=True)
+            if os.path.exists(dst):
+                # shutil.copytree is copy content **under** src to dst,
+                # so we need create subdirectory at dst directory before copy content.
+                dst_dir = os.path.join(dst, os.path.basename(src))
+                if not os.path.exists(dst_dir):
+                    os.makedirs(dst_dir)
+                shutil.copytree(src=src, dst=dst_dir, dirs_exist_ok=True)
+            else:
+                shutil.copytree(src=src, dst=dst, dirs_exist_ok=True)
         else:
             shutil.copy(src, dst)
 
