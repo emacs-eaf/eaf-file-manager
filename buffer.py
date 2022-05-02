@@ -921,10 +921,7 @@ class AppBuffer(BrowserBuffer):
             message_to_emacs("The directory has not changed, file '{}' not copyd.".format(self.copy_file["name"]))
         else:
             try:
-                if os.path.isdir(self.copy_file["path"]):
-                    shutil.copytree(src=self.copy_file["path"], dst=new_file, dirs_exist_ok=True)
-                else:
-                    shutil.copy(self.copy_file["path"], new_file)
+                self.copy_to(self.copy_file["path"], new_file)
 
                 self.new_select_file = new_file
                 self.refresh()
@@ -940,10 +937,7 @@ class AppBuffer(BrowserBuffer):
         elif os.path.isdir(new_dir):
             try:
                 for copy_file in self.copy_files:
-                    if os.path.isdir(copy_file["path"]):
-                        shutil.copytree(src=copy_file["path"], dst=new_dir, dirs_exist_ok=True)
-                    else:
-                        shutil.copy(copy_file["path"], new_dir)
+                    self.copy_to(copy_file["path"], new_dir)
 
                 message_to_emacs("Copy mark files to '{}'".format(new_dir))
             except:
@@ -951,6 +945,17 @@ class AppBuffer(BrowserBuffer):
                 message_to_emacs("Error in copy files: " + str(traceback.print_exc()))
         else:
             message_to_emacs("'{}' is not directory, abandon copy.")
+            
+    def copy_to(self, src, dst):
+        if os.path.isdir(src):
+            # shutil.copytree is copy content **under** src to dst,
+            # so we need create subdirectory at dst directory before copy content.
+            dst_dir = os.path.join(dst, os.path.basename(src))
+            if not os.path.exists(dst_dir):
+                os.makedirs(dst_dir)
+            shutil.copytree(src=src, dst=dst_dir, dirs_exist_ok=True)
+        else:
+            shutil.copy(src, dst)
 
     def handle_open_link(self, result_content):
         marker = result_content.strip()
