@@ -130,15 +130,20 @@ class AppBuffer(BrowserBuffer):
                 select_color = "#EEEEEE"
             else:
                 select_color = QColor(self.theme_background_color).darker(110).name()
-
+                
+        
         self.buffer_widget.eval_js_function(
             '''init''', 
             self.theme_background_color, self.theme_foreground_color, 
             header_color, directory_color, symlink_color, mark_color, select_color, search_match_color, search_keyword_color,
             self.icon_cache_dir, os.path.sep,
-            "true" if self.show_preview else "false",
+            "true" if self.show_preview and self.width_enough_to_show_preview() else "false",
             "true" if self.show_icon else "false",
             self.theme_mode)
+        
+    def width_enough_to_show_preview(self): 
+        (frame_width, _) = get_emacs_func_result("eaf-get-render-size", [])                
+        return self.buffer_widget.width() > int(frame_width) * 2 / 3
 
     @PostGui()
     def handle_append_search(self, file_paths, first_search):
@@ -1045,15 +1050,14 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.deleteLater()
 
     def resize_view(self):
-        (frame_width, _) = get_emacs_func_result("eaf-get-render-size", [])
-        if self.buffer_widget.width() <= int(frame_width) / 2:
-            if self.show_preview:
-                self.buffer_widget.eval_js_function('''setPreviewOption''', "false")
-                self.hide_preview_by_width = True
-        else:
+        if self.width_enough_to_show_preview():
             if self.show_preview and self.hide_preview_by_width:
                 self.buffer_widget.eval_js_function('''setPreviewOption''', "true")
                 self.hide_preview_by_width = False
+        else:
+            if self.show_preview:
+                self.buffer_widget.eval_js_function('''setPreviewOption''', "false")
+                self.hide_preview_by_width = True
 
 class FetchPreviewInfoThread(QThread):
 
