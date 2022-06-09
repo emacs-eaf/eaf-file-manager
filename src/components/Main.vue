@@ -198,7 +198,6 @@
      window.selectLastFile = this.selectLastFile;
      window.scrollUpSelectFile = this.scrollUpSelectFile;
      window.scrollDownSelectFile = this.scrollDownSelectFile;
-     window.openCurrentFile = this.openCurrentFile;
      window.upDirectory = this.upDirectory;
      window.setPreview = this.setPreview;
      window.setPreviewOption = this.setPreviewOption;
@@ -453,10 +452,6 @@
        if (selectFile !== undefined) {
          selectFile.scrollIntoViewIfNeeded(false);
        }
-     },
-
-     openCurrentFile() {
-       this.openFile(this.files[this.currentIndex]);
      },
 
      upDirectory() {

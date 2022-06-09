@@ -324,6 +324,23 @@ class AppBuffer(BrowserBuffer):
         else:
             return a_type_weights - b_type_weights
 
+    @QtCore.pyqtSlot()
+    def open_select_files(self):
+        mark_files = list(filter(lambda f: f["mark"] == "mark", self.vue_get_all_files()))
+        if len(mark_files) == 0:
+            current_select_file = self.vue_files[self.vue_current_index]["path"]
+            if os.path.isdir(current_select_file):
+                self.change_directory(current_select_file, "")
+            else:
+                eval_in_emacs("find-file", [current_select_file])
+        else:
+            for mark_file in mark_files:
+                mark_file_path = mark_file["path"]
+                if os.path.isdir(mark_file_path):
+                    eval_in_emacs("eaf-open-in-file-manager", [mark_file_path])
+                else:
+                    eval_in_emacs("find-file", [mark_file_path])
+    
     @QtCore.pyqtSlot(str, str)
     def change_directory(self, dir, current_dir):
         self.url = dir
