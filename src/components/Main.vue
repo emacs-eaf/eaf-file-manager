@@ -17,6 +17,7 @@
         <div
           v-if="gitLog !== ''"
           class="git-log"
+          :key="gitLog"
           :style="{ 'color': infoForegroundColor() }">
           git: {{ gitLog }}
         </div>
