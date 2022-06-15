@@ -222,7 +222,7 @@ class AppBuffer(BrowserBuffer):
 
         return icon_name
 
-    def get_file_info(self, file_path, current_dir = False):
+    def get_file_info(self, file_path, current_dir = None):
         file_type = ""
         file_size = ""
         file_bytes = 0
@@ -239,7 +239,7 @@ class AppBuffer(BrowserBuffer):
             file_type = "symlink"
             file_size = "1"
 
-        if current_dir:
+        if current_dir != None:
             current_dir = os.path.abspath(current_dir)
             name = os.path.abspath(file_path).replace(current_dir, "", 1)[1:]
         else:
@@ -649,8 +649,9 @@ class AppBuffer(BrowserBuffer):
             message_to_emacs("Open file by external app '{}'".format(file_info["path"]))
 
     def refresh(self):
+        old_file_info_dict = {}
+        
         if not self.inhibit_mark_change_file:
-            old_file_info_dict = {}
             for file_info in self.file_infos:
                 old_file_info_dict[file_info["path"]] = file_info
 
@@ -902,20 +903,21 @@ class AppBuffer(BrowserBuffer):
                 message_to_emacs("Insufficient permissions to create directory: {}".format(new_directory))
 
     def handle_move_file(self, new_file):
-        if new_file == self.url:
-            message_to_emacs("The directory has not changed, file '{}' not moved.".format(self.move_file["name"]))
-        else:
-            try:
-                if self.vue_current_index > 0:
-                    self.new_select_file = self.vue_files[self.vue_current_index - 1]["path"]
-
-                shutil.move(self.move_file["path"], new_file)
-                self.buffer_widget.eval_js_function("removeSelectFile")
-
-                message_to_emacs("Move '{}' to '{}'".format(self.move_file["name"], new_file))
-            except:
-                import traceback
-                message_to_emacs("Error in move file: " + str(traceback.print_exc()))
+        if self.move_file != None:
+            if new_file == self.url:
+                message_to_emacs("The directory has not changed, file '{}' not moved.".format(self.move_file["name"]))
+            else:
+                try:
+                    if self.vue_current_index > 0:
+                        self.new_select_file = self.vue_files[self.vue_current_index - 1]["path"]
+            
+                    shutil.move(self.move_file["path"], new_file)
+                    self.buffer_widget.eval_js_function("removeSelectFile")
+            
+                    message_to_emacs("Move '{}' to '{}'".format(self.move_file["name"], new_file))
+                except:
+                    import traceback
+                    message_to_emacs("Error in move file: " + str(traceback.print_exc()))
 
     def handle_move_files(self, new_dir):
         if new_dir == self.url:
@@ -939,19 +941,20 @@ class AppBuffer(BrowserBuffer):
             message_to_emacs("'{}' is not directory, abandon movement.")
 
     def handle_copy_file(self, new_file):
-        if new_file == self.url:
-            message_to_emacs("The directory has not changed, file '{}' not copyd.".format(self.copy_file["name"]))
-        else:
-            try:
-                self.copy_to(self.copy_file["path"], new_file)
-
-                self.new_select_file = new_file
-                self.refresh()
-
-                message_to_emacs("Copy '{}' to '{}'".format(self.copy_file["name"], new_file))
-            except:
-                import traceback
-                message_to_emacs("Error in copy file: " + str(traceback.print_exc()))
+        if self.copy_file != None:
+            if new_file == self.url:
+                message_to_emacs("The directory has not changed, file '{}' not copyd.".format(self.copy_file["name"]))
+            else:
+                try:
+                    self.copy_to(self.copy_file["path"], new_file)
+            
+                    self.new_select_file = new_file
+                    self.refresh()
+            
+                    message_to_emacs("Copy '{}' to '{}'".format(self.copy_file["name"], new_file))
+                except:
+                    import traceback
+                    message_to_emacs("Error in copy file: " + str(traceback.print_exc()))
 
     def handle_copy_files(self, new_dir):
         if new_dir == self.url:
@@ -1093,6 +1096,7 @@ class FetchPreviewInfoThread(QThread):
         time.sleep(0.3)
         if self.get_preview_file_callback() == self.file:
             path = ""
+            mime = ""
             file_type = ""
             file_infos = []
 
@@ -1126,7 +1130,7 @@ class GitCommitThread(QThread):
     def get_command_result(self, command_string):
         process = subprocess.Popen(command_string, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         process.wait()
-        result = process.stdout.readline().decode("utf-8")
+        result = process.stdout.readline().decode("utf-8")    # type: ignore
         return os.linesep.join([s for s in result.splitlines() if s])
 
     def run(self):
@@ -1203,7 +1207,7 @@ class FdSearchThread(FileSearchThread):
             if status is not None:
                 break
 
-            output = process.stdout.readline()
+            output = process.stdout.readline()    # type: ignore
             if output:
                 self.file_paths.append(output.strip().decode("utf-8"))
                 self.match_number += 1
