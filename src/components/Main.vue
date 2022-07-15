@@ -562,7 +562,7 @@
        this.showPreview = option;
      },
 
-     setPreview(filePath, fileType, fileMime, fileHtmlContent, fileInfos) {
+     setPreview(filePath, fileType, fileSize, fileMime, fileHtmlContent, fileInfos) {
        this.previewPath = filePath;
        this.previewType = fileType;
        this.previewFiles = fileInfos;
@@ -573,16 +573,22 @@
 
          if (fileMime == "eaf-mime-type-not-support") {
            this.previewMime = "not-support"
-         } else if (fileMime == "eaf-mime-type-too-big") {
-           this.previewMime = "too-big"
          } else if (fileMime.startsWith("image-")) {
            this.previewMime = "image"
          } else if (fileMime == "text-html" || fileMime == "application-xhtml+xml") {
            this.previewMime = "html"
          } else if (fileMime == "eaf-mime-type-code") {
-           this.previewMime = "code"
+           if (fileSize > 100000) {
+             this.previewMime = "too-big"
+           } else {
+             this.previewMime = "code"
+           }
          } else if (fileMime == "eaf-mime-type-code-html") {
-           this.previewMime = "code-html"
+           if (fileSize > 100000) {
+             this.previewMime = "too-big"
+           } else {
+             this.previewMime = "code-html"
+           }
          } else if (fileMime == "application-pdf") {
            this.previewMime = "pdf"
          } else if (fileMime.startsWith("video-")) {

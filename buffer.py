@@ -181,12 +181,9 @@ class AppBuffer(BrowserBuffer):
         if os.path.isdir(file_path):
             return "directory"
         else:
-            file_size = os.path.getsize(file_path)
             file_info = QtCore.QFileInfo(file_path)
             
-            if file_size > 1000000:
-                return "eaf-mime-type-too-big"
-            elif file_path.endswith(".vue"):
+            if file_path.endswith(".vue"):
                 return "eaf-mime-type-code-html"
             else:
                 mime = self.mime_db.mimeTypeForFile(file_info).name().replace("/", "-")
@@ -460,10 +457,12 @@ class AppBuffer(BrowserBuffer):
     def update_preview_info(self, file, file_type, file_mime, file_infos):
         file_html_content = ""
         
+        file_size = 0
+        
         if file_type == "file":
+            file_size = os.path.getsize(file)
+            
             if file_mime == "eaf-mime-type-code-html":
-                
-                file_size = os.path.getsize(file)
                 if file_size < 100000:
                     from pygments import highlight
                     from pygments.styles import get_all_styles
@@ -486,7 +485,7 @@ class AppBuffer(BrowserBuffer):
                 else:
                     file_mime = "eaf-mime-type-code"
         
-        self.buffer_widget.eval_js_function('''setPreview''', file, file_type, file_mime, {"content": file_html_content}, file_infos)
+        self.buffer_widget.eval_js_function('''setPreview''', file, file_type, file_size, file_mime, {"content": file_html_content}, file_infos)
 
     @interactive
     def search_file(self):
