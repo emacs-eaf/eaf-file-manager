@@ -469,7 +469,7 @@ class AppBuffer(BrowserBuffer):
                     from pygments.lexers import PythonLexer, get_lexer_for_filename, html
                     from pygments.formatters import HtmlFormatter
                         
-                    with open(file) as f:
+                    with open(file, "r", encoding="utf-8", errors="ignore") as f:
                         content = f.read()
                         
                         try:
