@@ -5,6 +5,7 @@
         <div
           class="current-path"
           :style="{ 'color': headerForegroundColor() }">
+          <span class="current-path-file-number">[{{ files.length }}]</span>
           <span class="current-path-first-part">{{ pathFirstPart }}</span>
           <span class="current-path-second-part">{{ pathSecondPart }}</span>
         </div>
@@ -653,6 +654,10 @@
    min-width: 0;
  }
 
+ .current-path-file-number {
+   margin-right: 5px;
+ }
+ 
  .current-path-first-part {
    text-overflow: ellipsis;
    white-space: nowrap;
