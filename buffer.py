@@ -77,6 +77,9 @@ class AppBuffer(BrowserBuffer):
         self.fetch_preview_info_threads = []
         self.search_file_threads = []
         self.fetch_git_log_threads = []
+        
+        self.sort_key = "name"
+        self.sort_reverse = False
 
     def monitor_current_dir(self):
         if len(self.file_changed_wacher.directories()) > 0:
@@ -393,13 +396,22 @@ class AppBuffer(BrowserBuffer):
         message_to_emacs("Sort file by type.")
         
     def sort_by_file_key(self, key, info_key):
+        if key == self.sort_key:
+            # If the sorting type is the same as the last time, then the order is reversed.
+            self.sort_reverse = not self.sort_reverse
+        else:
+            # Keep sort order as default value if sorting type is not same as the last time.
+            self.sort_reverse = False
+            
+        self.sort_key = key
+        
         select_path = self.file_infos[self.select_index]["path"]
         
         for file_info in self.file_infos:
             file_info["info"] = self.get_file_sort_info(file_info, info_key)
         
         from functools import cmp_to_key
-        self.file_infos.sort(key=cmp_to_key(lambda a, b: self.sort_file_by_key(a, b, key)))
+        self.file_infos.sort(key=cmp_to_key(lambda a, b: self.sort_file_by_key(a, b, key)), reverse=self.sort_reverse)
         files = list(map(lambda file: file["path"], self.file_infos))
         self.select_index = files.index(select_path)
         
