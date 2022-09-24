@@ -185,9 +185,16 @@ class AppBuffer(BrowserBuffer):
             return "directory"
         else:
             file_info = QtCore.QFileInfo(file_path)
+            file_suffix = file_info.suffix()
             
-            if file_path.endswith(".vue"):
+            if file_suffix == "vue":
                 return "eaf-mime-type-code-html"
+            elif file_suffix in ["xls", "xlsx"]:
+                return "application-vnd.oasis.opendocument.spreadsheet"
+            elif file_suffix in ["ppt", "pptx"]:
+                return "application-vnd.oasis.opendocument.presentation"
+            elif file_suffix in ["doc", "docx"]:
+                return "application-vnd.oasis.opendocument.text"
             else:
                 mime = self.mime_db.mimeTypeForFile(file_info).name().replace("/", "-")
                 
@@ -206,7 +213,7 @@ class AppBuffer(BrowserBuffer):
         file_mime = self.get_file_mime(file_path)
         icon_name = "{}.{}".format(file_mime, "png")
         icon_path = os.path.join(self.icon_cache_dir, icon_name)
-
+        
         if not os.path.exists(icon_path):
             if file_mime == "directory":
                 icon = QIcon.fromTheme("folder")
@@ -219,7 +226,7 @@ class AppBuffer(BrowserBuffer):
                     icon = QIcon.fromTheme("text-plain")
 
             icon.pixmap(64, 64).save(icon_path)
-
+            
         return icon_name
 
     def get_file_info(self, file_path, current_dir = None):
