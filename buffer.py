@@ -197,6 +197,8 @@ class AppBuffer(BrowserBuffer):
                 return "application-vnd.oasis.opendocument.text"
             elif file_suffix in ["org"]:
                 return "application-emacs-org"
+            elif file_suffix in ["md"]:
+                return "text-markdown"
             else:
                 mime = self.mime_db.mimeTypeForFile(file_info).name().replace("/", "-")
                 
