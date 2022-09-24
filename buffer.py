@@ -199,6 +199,8 @@ class AppBuffer(BrowserBuffer):
                 return "application-emacs-org"
             elif file_suffix in ["md"]:
                 return "text-markdown"
+            elif file_suffix in ["xmind"]:
+                return "application-xmind"
             else:
                 mime = self.mime_db.mimeTypeForFile(file_info).name().replace("/", "-")
                 
