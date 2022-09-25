@@ -741,6 +741,8 @@ class AppBuffer(BrowserBuffer):
             self.handle_create_directory(result_content)
         elif callback_tag == "move_file":
             self.handle_move_file(result_content)
+        elif callback_tag == "move_cover_file":
+            self.handle_move_cover_file()
         elif callback_tag == "move_files":
             self.handle_move_files(result_content)
         elif callback_tag == "copy_file":
@@ -936,14 +938,31 @@ class AppBuffer(BrowserBuffer):
                     if self.vue_current_index > 0:
                         self.new_select_file = self.vue_files[self.vue_current_index - 1]["path"]
             
-                    shutil.move(self.move_file["path"], new_file)
-                    self.buffer_widget.eval_js_function("removeSelectFile")
-            
-                    message_to_emacs("Move '{}' to '{}'".format(self.move_file["name"], new_file))
+                    new_path = new_file
+                    if os.path.isdir(new_file):
+                        new_path = os.path.join(new_file, self.move_file["name"])
+                        
+                    if os.path.exists(new_path):
+                        self.move_original_filename = self.move_file["name"]
+                        self.move_original_path = self.move_file["path"]
+                        self.move_destination_path = new_path
+                        
+                        self.send_input_message("Destination path {} already exists, need to cover the it?".format(new_file), "move_cover_file", "yes-or-no")
+                    else:
+                        shutil.move(self.move_file["path"], new_file)
+                        self.buffer_widget.eval_js_function("removeSelectFile")
+                        
+                        message_to_emacs("Move '{}' to '{}'".format(self.move_file["name"], new_file))
                 except:
                     import traceback
                     message_to_emacs("Error in move file: " + str(traceback.print_exc()))
-
+                    
+    def handle_move_cover_file(self):
+        os.remove(self.move_destination_path)
+        shutil.move(self.move_original_path, self.move_destination_path)
+        self.buffer_widget.eval_js_function("removeSelectFile")
+        message_to_emacs("Move '{}' to '{}'".format(self.move_original_filename, os.path.dirname(self.move_destination_path)))
+                    
     def handle_move_files(self, new_dir):
         if new_dir == self.url:
             message_to_emacs("The directory has not changed, mark files not moved.")
