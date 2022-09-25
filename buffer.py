@@ -22,8 +22,8 @@
 from PyQt6 import QtCore
 from PyQt6.QtCore import QThread, QMimeDatabase, QFileSystemWatcher, QTimer
 from PyQt6.QtGui import QColor, QIcon
-from core.utils import eval_in_emacs, PostGui, get_emacs_vars, interactive, message_to_emacs, get_emacs_func_result
-from core.webengine import BrowserBuffer
+from core.utils import eval_in_emacs, PostGui, get_emacs_vars, interactive, message_to_emacs, get_emacs_func_result    # type: ignore
+from core.webengine import BrowserBuffer    # type: ignore
 from pathlib import Path
 import copy
 import json
@@ -31,6 +31,22 @@ import os
 import shutil
 import subprocess
 import time
+
+FILE_MIME_DICT = {
+    "vue": ["eaf-mime-type-code-html", "application-javascript"],
+    "xls": ["eaf-mime-type-not-support", "application-vnd.oasis.opendocument.spreadsheet"],
+    "xlsx": ["eaf-mime-type-not-support", "application-vnd.oasis.opendocument.spreadsheet"],
+    "ppt": ["eaf-mime-type-not-support", "application-vnd.oasis.opendocument.presentation"],
+    "pptx": ["eaf-mime-type-not-support", "application-vnd.oasis.opendocument.presentation"],
+    "doc": ["eaf-mime-type-office-word", "application-vnd.oasis.opendocument.text"],
+    "docx": ["eaf-mime-type-office-word", "application-vnd.oasis.opendocument.text"],
+    "org": ["eaf-mime-type-code-html", "application-emacs-org"],
+    "js": ["eaf-mime-type-code-html", "application-javascript"],
+    "xmind": ["eaf-mime-type-not-support", "application-xmind"],
+    "emm": ["eaf-mime-type-not-support", "application-xmind"]
+}
+
+FILE_CODE_HTML_MIMES = ["application-json", "application-x-yaml", "application-x-shellscript"]
 
 def get_fd_command():
     if shutil.which("fd"):
@@ -187,28 +203,13 @@ class AppBuffer(BrowserBuffer):
             file_info = QtCore.QFileInfo(file_path)
             file_suffix = file_info.suffix()
             
-            if file_suffix == "vue":
-                return "eaf-mime-type-code-html" if use_preview else "application-javascript" 
-            elif file_suffix in ["xls", "xlsx"]:
-                return "eaf-mime-type-not-support" if use_preview else "application-vnd.oasis.opendocument.spreadsheet"
-            elif file_suffix in ["ppt", "pptx"]:
-                return "eaf-mime-type-not-support" if use_preview else "application-vnd.oasis.opendocument.presentation"
-            elif file_suffix in ["doc", "docx"]:
-                return "eaf-mime-type-office-word" if use_preview else "application-vnd.oasis.opendocument.text"
-            elif file_suffix in ["org"]:
-                return "eaf-mime-type-code-html" if use_preview else "application-emacs-org" 
-            elif file_suffix in ["xmind"]:
-                return "eaf-mime-type-not-support" if use_preview else "application-xmind" 
-            elif file_suffix in ["js"]:
-                return "eaf-mime-type-code-html" if use_preview else "application-javascript" 
+            if file_suffix in FILE_MIME_DICT:
+                return FILE_MIME_DICT[file_suffix][0] if use_preview else FILE_MIME_DICT[file_suffix][1]
             else:
                 mime = self.mime_db.mimeTypeForFile(file_info).name().replace("/", "-")
                 
                 if use_preview:
-                    if (mime.startswith("text-") or
-                        mime == "application-json" or
-                        mime == "application-x-yaml" or
-                        mime == "application-x-shellscript"):
+                    if (mime.startswith("text-") or mime in FILE_CODE_HTML_MIMES):
                         mime = "eaf-mime-type-code-html"
                     elif mime == "application-x-sharedlib":
                         mime = "eaf-mime-type-not-support"
