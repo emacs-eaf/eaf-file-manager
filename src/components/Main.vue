@@ -596,7 +596,7 @@
            this.previewMime = "video"
          } else if (fileMime.startsWith("audio-")) {
            this.previewMime = "audio"
-         } else if (fileMime == "application-wps-office.docx") {
+         } else if (fileMime == "eaf-mime-type-office-word") {
            this.previewMime = "office"
          }
 

@@ -188,19 +188,19 @@ class AppBuffer(BrowserBuffer):
             file_suffix = file_info.suffix()
             
             if file_suffix == "vue":
-                return "eaf-mime-type-code-html"
+                return "eaf-mime-type-code-html" if use_preview else "application-javascript" 
             elif file_suffix in ["xls", "xlsx"]:
-                return "application-vnd.oasis.opendocument.spreadsheet"
+                return "eaf-mime-type-not-support" if use_preview else "application-vnd.oasis.opendocument.spreadsheet"
             elif file_suffix in ["ppt", "pptx"]:
-                return "application-vnd.oasis.opendocument.presentation"
+                return "eaf-mime-type-not-support" if use_preview else "application-vnd.oasis.opendocument.presentation"
             elif file_suffix in ["doc", "docx"]:
-                return "application-vnd.oasis.opendocument.text"
+                return "eaf-mime-type-office-word" if use_preview else "application-vnd.oasis.opendocument.text"
             elif file_suffix in ["org"]:
-                return "application-emacs-org"
+                return "eaf-mime-type-code-html" if use_preview else "application-emacs-org" 
             elif file_suffix in ["xmind"]:
-                return "application-xmind"
+                return "eaf-mime-type-not-support" if use_preview else "application-xmind" 
             elif file_suffix in ["js"]:
-                return "application-javascript"
+                return "eaf-mime-type-code-html" if use_preview else "application-javascript" 
             else:
                 mime = self.mime_db.mimeTypeForFile(file_info).name().replace("/", "-")
                 
@@ -208,10 +208,9 @@ class AppBuffer(BrowserBuffer):
                     if (mime.startswith("text-") or
                         mime == "application-json" or
                         mime == "application-x-yaml" or
-                        mime == "application-x-shellscript" or
-                        mime == "application-javascript"):
+                        mime == "application-x-shellscript"):
                         mime = "eaf-mime-type-code-html"
-                    elif mime == "application-x-sharedlib" or mime == "application-xmind":
+                    elif mime == "application-x-sharedlib":
                         mime = "eaf-mime-type-not-support"
                 
                 return mime
