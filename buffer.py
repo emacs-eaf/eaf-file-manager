@@ -180,7 +180,7 @@ class AppBuffer(BrowserBuffer):
         self.search_file_threads.append(thread)
         thread.start()
 
-    def get_file_mime(self, file_path):
+    def get_file_mime(self, file_path, use_preview=True):
         if os.path.isdir(file_path):
             return "directory"
         else:
@@ -197,26 +197,27 @@ class AppBuffer(BrowserBuffer):
                 return "application-vnd.oasis.opendocument.text"
             elif file_suffix in ["org"]:
                 return "application-emacs-org"
-            elif file_suffix in ["md"]:
-                return "text-markdown"
             elif file_suffix in ["xmind"]:
                 return "application-xmind"
+            elif file_suffix in ["js"]:
+                return "application-javascript"
             else:
                 mime = self.mime_db.mimeTypeForFile(file_info).name().replace("/", "-")
                 
-                if (mime.startswith("text-") or
-                    mime == "application-json" or
-                    mime == "application-x-yaml" or
-                    mime == "application-x-shellscript" or
-                    mime == "application-javascript"):
-                    mime = "eaf-mime-type-code-html"
-                elif mime == "application-x-sharedlib" or mime == "application-xmind":
-                    mime = "eaf-mime-type-not-support"
+                if use_preview:
+                    if (mime.startswith("text-") or
+                        mime == "application-json" or
+                        mime == "application-x-yaml" or
+                        mime == "application-x-shellscript" or
+                        mime == "application-javascript"):
+                        mime = "eaf-mime-type-code-html"
+                    elif mime == "application-x-sharedlib" or mime == "application-xmind":
+                        mime = "eaf-mime-type-not-support"
                 
                 return mime
 
     def generate_file_icon(self, file_path):
-        file_mime = self.get_file_mime(file_path)
+        file_mime = self.get_file_mime(file_path, False)
         icon_name = "{}.{}".format(file_mime, "png")
         icon_path = os.path.join(self.icon_cache_dir, icon_name)
         
