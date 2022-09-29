@@ -36,7 +36,7 @@ File manager application for the [Emacs Application Framework](https://github.co
 | `C-n` | js_select_next_file |
 | `k` | js_select_prev_file |
 | `C-p` | js_select_prev_file |
-| `l` | js_open_select_files |
+| `l` | open_select_files |
 | `J` | js_select_last_file |
 | `K` | js_select_first_file |
 | `r` | js_rename_file |
@@ -46,15 +46,15 @@ File manager application for the [Emacs Application Framework](https://github.co
 | `<left>` | js_up_directory |
 | `<down>` | js_select_next_file |
 | `<up>` | js_select_prev_file |
-| `<right>` | js_open_select_files |
-| `f` | js_open_select_files |
-| `C-m` | js_open_select_files |
+| `<right>` | open_select_files |
+| `f` | open_select_files |
+| `C-m` | open_select_files |
 | `F` | open_link |
 | `T` | open_current_file_in_new_tab |
 | `H` | open_file_with_external_app |
 | `SPC` | js_scroll_up_select_file |
 | `b` | js_scroll_down_select_file |
-| `<return>` | js_open_select_files |
+| `<return>` | open_select_files |
 | `w` | js_copy_file_name |
 | `W` | js_copy_file_path |
 | `/` | copy_dir_path |
@@ -77,6 +77,7 @@ File manager application for the [Emacs Application Framework](https://github.co
 | `g` | refresh_dir |
 | `G` | find_files |
 | `*` | mark_file_by_extension |
+| `&` | narrow_file |
 | `v` | js_preview_toggle |
 | `,` | js_preview_scroll_up_line |
 | `.` | js_preview_scroll_down_line |
