@@ -31,6 +31,7 @@ import os
 import shutil
 import subprocess
 import time
+import re
 
 FILE_MIME_DICT = {
     "vue": ["eaf-mime-type-code-html", "application-javascript"],
@@ -666,6 +667,10 @@ class AppBuffer(BrowserBuffer):
         self.send_input_message("Mark file by extension: ", "mark_file_by_extension", "string")
         
     @interactive
+    def narrow_file(self):
+        self.send_input_message("Narrow file: ", "narrow_file", "string")
+        
+    @interactive
     def open_file_with_external_app(self):
         file_info = self.vue_get_select_file()
         if file_info != None:
@@ -757,6 +762,8 @@ class AppBuffer(BrowserBuffer):
             self.handle_search_file(result_content)
         elif callback_tag == "mark_file_by_extension":
             self.handle_mark_file_by_extension(result_content)
+        elif callback_tag == "narrow_file":
+            self.handle_narrow_file(result_content)
         elif callback_tag == "change_path":
             self.handle_change_path(result_content)
         elif callback_tag == "open_path":
@@ -1068,6 +1075,17 @@ class AppBuffer(BrowserBuffer):
 
     def handle_mark_file_by_extension(self, extension):
         self.buffer_widget.eval_js_function('''markFileByExtension''', extension)
+        
+    def handle_narrow_file(self, rule):
+        self.file_infos = list(filter(lambda f: re.search(rule, f["name"]), self.get_file_infos(self.url)))
+        self.select_index = 0
+        
+        self.buffer_widget.eval_js_function('''changePath''', self.url, self.file_infos, self.select_index)
+        
+        if len(self.file_infos) > 0:
+            self.init_first_file_preview()
+            
+        message_to_emacs("Narrow files with rule: {}".format(rule))
 
     def is_file_match(self, file, search_word):
         return ((len(search_word) > 0 and search_word[0] != "!" and search_word.lower() in file.lower()) or

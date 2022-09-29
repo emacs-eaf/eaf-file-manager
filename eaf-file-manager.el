@@ -105,6 +105,7 @@
     ("g" . "refresh_dir")
     ("G" . "find_files")
     ("*" . "mark_file_by_extension")
+    ("&" . "narrow_file")
     ("v" . "js_preview_toggle")
     ("," . "js_preview_scroll_up_line")
     ("." . "js_preview_scroll_down_line")
