@@ -1077,7 +1077,7 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.eval_js_function('''markFileByExtension''', extension)
         
     def handle_narrow_file(self, rule):
-        self.file_infos = list(filter(lambda f: re.search(rule, f["name"]), self.get_file_infos(self.url)))
+        self.file_infos = list(filter(lambda f: re.search(rule, f["name"], re.IGNORECASE), self.get_file_infos(self.url)))
         self.select_index = 0
         
         self.buffer_widget.eval_js_function('''changePath''', self.url, self.file_infos, self.select_index)
