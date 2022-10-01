@@ -100,6 +100,10 @@
    flex-direction: row;
    align-items: center;
  }
+ 
+ .file:last-child {
+   margin-bottom: 10px;
+ }
 
  .file-icon {
    width: 24px;
