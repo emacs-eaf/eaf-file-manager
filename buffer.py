@@ -47,7 +47,7 @@ FILE_MIME_DICT = {
     "emm": ["eaf-mime-type-not-support", "application-xmind"]
 }
 
-FILE_CODE_HTML_MIMES = ["application-json", "application-x-yaml", "application-x-shellscript"]
+FILE_CODE_HTML_MIMES = ["application-json", "application-x-yaml", "application-x-shellscript", "application-toml"]
 
 def get_fd_command():
     if shutil.which("fd"):
