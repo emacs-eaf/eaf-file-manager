@@ -552,9 +552,12 @@ class AppBuffer(BrowserBuffer):
     @interactive
     def copy_file_path(self):
         select_file = self.vue_get_select_file()
-        select_file_path = os.path.join(self.url, select_file["name"])
-        eval_in_emacs("kill-new", [select_file_path])
-        message_to_emacs("Copy '{}'".format(select_file_path))
+        if select_file != None:
+            select_file_path = os.path.join(self.url, select_file["name"])
+            eval_in_emacs("kill-new", [select_file_path])
+            message_to_emacs("Copy '{}'".format(select_file_path))
+        else:
+            message_to_emacs("No file selected.")
 
     @interactive
     def move_current_or_mark_file(self):
