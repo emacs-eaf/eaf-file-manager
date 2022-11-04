@@ -1084,7 +1084,7 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.eval_js_function('''setSearchMatchFiles''', [])
 
     def handle_mark_file_by_extension(self, extension):
-        self.buffer_widget.eval_js_function('''markFileByExtension''', extension)
+        self.buffer_widget.eval_js_function('''markFileByExtension''', extension.split(".")[-1])
         
     def handle_narrow_file(self, rule):
         self.file_infos = list(filter(lambda f: re.search(rule, f["name"], re.IGNORECASE), self.get_file_infos(self.url)))
