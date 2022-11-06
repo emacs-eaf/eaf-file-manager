@@ -816,10 +816,14 @@ class AppBuffer(BrowserBuffer):
             self.delete_file(file_info)
 
     def delete_file(self, file_info):
-        if file_info["type"] == "file":
-            os.remove(file_info["path"])
-        elif file_info["type"] == "directory":
-            shutil.rmtree(file_info["path"])
+        try:
+            if file_info["type"] == "file":
+                os.remove(file_info["path"])
+            elif file_info["type"] == "directory":
+                shutil.rmtree(file_info["path"])
+        except:
+            import traceback
+            message_to_emacs(traceback.print_exc())
 
     def vue_get_mark_files(self):
         return list(filter(lambda file: file["mark"] == "mark", self.vue_files)).copy()
