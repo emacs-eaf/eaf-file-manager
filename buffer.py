@@ -744,40 +744,17 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.eval_js_function('''renameFiles''', self.batch_rename_files)
 
     def handle_input_response(self, callback_tag, result_content):
-        if callback_tag == "delete_file":
-            self.handle_delete_file()
-        elif callback_tag == "delete_current_file":
-            self.handle_delete_current_file()
-        elif callback_tag == "rename_file":
-            self.handle_rename_file(result_content)
-        elif callback_tag == "create_file":
-            self.handle_create_file(result_content)
-        elif callback_tag == "create_directory":
-            self.handle_create_directory(result_content)
-        elif callback_tag == "move_file":
-            self.handle_move_file(result_content)
-        elif callback_tag == "move_cover_file":
-            self.handle_move_cover_file()
-        elif callback_tag == "move_files":
-            self.handle_move_files(result_content)
-        elif callback_tag == "copy_file":
-            self.handle_copy_file(result_content)
-        elif callback_tag == "copy_files":
-            self.handle_copy_files(result_content)
-        elif callback_tag == "open_link":
-            self.handle_open_link(result_content)
-        elif callback_tag == "find_files":
-            self.handle_find_files(result_content)
-        elif callback_tag == "search_file":
-            self.handle_search_file(result_content)
-        elif callback_tag == "mark_file_by_extension":
-            self.handle_mark_file_by_extension(result_content)
-        elif callback_tag == "narrow_file":
-            self.handle_narrow_file(result_content)
-        elif callback_tag == "change_path":
-            self.handle_change_path(result_content)
-        elif callback_tag == "open_path":
-            self.handle_open_path(result_content)
+        from inspect import signature
+        
+        handle_function_name = "handle_{}".format(callback_tag)
+        if hasattr(self, handle_function_name):
+            handle_function = getattr(self, handle_function_name)
+            function_argument_number = len(signature(getattr(self, handle_function_name)).parameters)
+            
+            if function_argument_number == 1:
+                handle_function(result_content)
+            else:
+                handle_function()
 
     def cancel_input_response(self, callback_tag):
         ''' Cancel input message.'''
