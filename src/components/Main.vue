@@ -41,7 +41,7 @@
             <div class="file-info">
               {{ file.info }}
             </div>
-            <div 
+            <div
               class="file-flag"
               :style="{ 'background': itemFlagBackgroundColor(file) }
               ">
@@ -53,7 +53,10 @@
       <div
         v-if="showPreview === 'true'"
         class="preview">
-        <PreviewImage v-if="previewType == 'file' && previewMime == 'image'" :file="previewPath + '?' + Math.random().toString()"/>
+        <PreviewImage v-if="previewType == 'file' && previewMime == 'image'" 
+          :file="previewPath + '?' + Math.random().toString()"
+          :exif="previewExif"
+        />
         <PreviewHtml v-if="previewType == 'file' && previewMime == 'html'" :file="previewPath"/>
         <PreviewCode
           v-if="previewType == 'file' && previewMime == 'code'"
@@ -175,6 +178,7 @@
        previewType: "",
        previewFiles: [],
        previewMime: "",
+       previewExif: {},
        previewHtmlContent: "",
        previewSize: "",
 
@@ -330,7 +334,7 @@
          return this.backgroundColor;
        }
      },
-     
+
      headerForegroundColor() {
        return this.headerColor;
      },
@@ -405,7 +409,7 @@
      cleanChangeFiles(indexes) {
        indexes.forEach(index => {this.files[index].changed = ""});
      },
-     
+
      unmarkFile() {
        this.files[this.currentIndex].mark = "";
        this.selectNextFile();
@@ -566,7 +570,6 @@
      setPreview(filePath, fileType, fileSize, fileMime, fileHtmlContent, fileInfos) {
        this.previewPath = filePath;
        this.previewType = fileType;
-       this.previewFiles = fileInfos;
        this.previewHtmlContent = fileHtmlContent["content"];
 
        if (fileType == "file") {
@@ -576,6 +579,7 @@
            this.previewMime = "not-support"
          } else if (fileMime.startsWith("image-")) {
            this.previewMime = "image"
+           this.previewExif = fileInfos[0]["exif"]
          } else if (fileMime == "text-html" || fileMime == "application-xhtml+xml") {
            this.previewMime = "html"
          } else if (fileMime == "eaf-mime-type-code") {
@@ -601,6 +605,8 @@
          }
 
          this.previewSize = fileInfos[0]["size"]
+       } else if (fileType == "directory") {
+         this.previewFiles = fileInfos;
        }
      }
    }
@@ -657,7 +663,7 @@
  .current-path-file-number {
    margin-right: 5px;
  }
- 
+
  .current-path-first-part {
    text-overflow: ellipsis;
    white-space: nowrap;
@@ -679,7 +685,7 @@
    padding-left: 20px;
    padding-top: 4px;
    padding-bottom: 4px;
-   
+
    display: flex;
    flex-direction: row;
    align-items: center;
@@ -719,7 +725,7 @@
    display: flex;
    flex-direction: row;
  }
- 
+
  .file-flag {
    width: 6px;
    height: 100%;

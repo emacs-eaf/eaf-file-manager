@@ -1156,13 +1156,35 @@ class FetchPreviewInfoThread(QThread):
             if self.file != "":
                 path = Path(self.file)
                 mime = self.get_file_mime_callback(str(path.absolute()))
-
+                
                 if path.is_file():
                     file_type = "file"
-                    file_infos = [{
-                        "mime": mime,
-                        "size": os.path.getsize(str(path.absolute()))
-                    }]
+                    if mime.startswith("image-"):
+                        from exif import Image
+                        
+                        exif_info = {}
+                        
+                        with path.open("rb") as f:
+                            img = Image(f)
+                            keys = dir(img)
+                            for k in keys:
+                                try:
+                                    v = img.get(k, None)
+                                    if v:
+                                        exif_info[k] = str(img.get(k))
+                                except:
+                                    pass
+                                
+                        file_infos = [{
+                            "mime": mime,
+                            "size": os.path.getsize(str(path.absolute())),
+                            "exif": exif_info
+                        }]
+                    else:
+                        file_infos = [{
+                            "mime": mime,
+                            "size": os.path.getsize(str(path.absolute()))
+                        }]
                 elif path.is_dir():
                     file_type = "directory"
                     file_infos = self.get_files_callback(self.file)

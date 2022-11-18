@@ -20,15 +20,18 @@
   "pip": {
     "linux": [
       "pypinyin",
-      "pygments"
+      "pygments",
+      "exif"
     ],
     "win32": [
       "pypinyin",
-      "pygments"
+      "pygments",
+      "exif"
     ],
     "darwin": [
       "pypinyin",
-      "pygments"
+      "pygments",
+      "exif"
     ]
   },
   "vue_install": true
