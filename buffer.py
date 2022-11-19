@@ -1160,20 +1160,20 @@ class FetchPreviewInfoThread(QThread):
                 if path.is_file():
                     file_type = "file"
                     if mime.startswith("image-"):
-                        from exif import Image
-                        
-                        exif_info = {}
-                        
-                        with path.open("rb") as f:
-                            img = Image(f)
-                            keys = dir(img)
-                            for k in keys:
-                                try:
+                        try:
+                            from exif import Image
+                            
+                            exif_info = {}
+                            
+                            with path.open("rb") as f:
+                                img = Image(f)
+                                keys = dir(img)
+                                for k in keys:
                                     v = img.get(k, None)
                                     if v:
                                         exif_info[k] = str(img.get(k))
-                                except:
-                                    pass
+                        except:
+                            pass
                                 
                         file_infos = [{
                             "mime": mime,
