@@ -596,7 +596,10 @@ class AppBuffer(BrowserBuffer):
         self.send_input_message("Open path: ", "open_path", "file", self.url)
         
     def handle_change_path(self, new_path):
-        self.change_directory(new_path, "")
+        if os.path.exists(new_path):
+            self.change_directory(new_path, "")
+        else:
+            message_to_emacs("{} is not exists.".format(new_path))
 
     def handle_open_path(self, new_path):
         eval_in_emacs('eaf-open-in-file-manager', [new_path])
