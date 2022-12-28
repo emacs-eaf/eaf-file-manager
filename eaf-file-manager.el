@@ -320,7 +320,11 @@
                (eaf-open (file-truename jump-file) "file-manager")
              (eaf-open (file-name-directory (file-truename jump-file)) "file-manager" (format "jump:%s" (file-truename jump-file)) t)))
           ((equal major-mode 'eaf-mode)
-           (eaf-open (file-name-directory (directory-file-name (file-truename default-directory))) "file-manager"))
+           (eaf-open
+            (if (member eaf--buffer-app-name '("file-manager"))
+                (file-name-directory (directory-file-name (file-truename default-directory)))
+              (file-truename default-directory))
+            "file-manager"))
           (t
            (eaf-open (file-truename default-directory) "file-manager")))))
 
