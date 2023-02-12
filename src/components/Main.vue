@@ -63,6 +63,16 @@
           :file="previewPath"
           :size="previewSize"
           :backgroundColor="backgroundColor"/>
+        <PreviewZip
+          v-if="previewType == 'file' && previewMime == 'zip'"
+          :file="previewPath"
+          :size="previewSize"
+          :backgroundColor="backgroundColor"
+          :openFile="openFile"
+          :itemBackgroundColor="itemBackgroundColor"
+          :itemForegroundColor="itemForegroundColor"
+          :fileIconPath="fileIconPath"
+          :showIcon="showIcon"/>
         <PreviewCodeHtml
           v-if="previewType == 'file' && previewMime == 'code-html'"
           :file="previewPath"
@@ -97,6 +107,7 @@
  import PreviewAudio from "./PreviewAudio.vue"
  import PreviewPdf from "./PreviewPdf.vue"
  import PreviewCode from "./PreviewCode.vue"
+ import PreviewZip from "./PreviewZip.vue"
  import PreviewCodeHtml from "./PreviewCodeHtml.vue"
  import PreviewHtml from "./PreviewHtml.vue"
  import PreviewImage from "./PreviewImage.vue"
@@ -114,6 +125,7 @@
      PreviewAudio,
      PreviewPdf,
      PreviewCode,
+     PreviewZip,
      PreviewCodeHtml,
      PreviewHtml,
      PreviewImage,
@@ -602,6 +614,8 @@
            this.previewMime = "audio"
          } else if (fileMime == "eaf-mime-type-office-word") {
            this.previewMime = "office"
+         } else if (fileMime == "application-zip") {
+           this.previewMime = "zip"
          }
 
          this.previewSize = fileInfos[0]["size"]
