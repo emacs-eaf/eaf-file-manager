@@ -408,7 +408,7 @@
        for (var i=0; i < this.files.length; i++) {
          var fileExtension = this.files[i]["path"].split('.').pop();
 
-         if (fileExtension == extension) {
+         if (fileExtension.toLowerCase() == extension.toLowerCase()) {
            this.files[i].mark = "mark";
          }
        }

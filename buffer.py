@@ -254,7 +254,7 @@ class AppBuffer(BrowserBuffer):
             file_type = "symlink"
             file_size = "1"
 
-        if current_dir != None:
+        if current_dir is not None:
             current_dir = os.path.abspath(current_dir)
             name = os.path.abspath(file_path).replace(current_dir, "", 1)[1:]
         else:
@@ -552,7 +552,7 @@ class AppBuffer(BrowserBuffer):
     @interactive
     def copy_file_path(self):
         select_file = self.vue_get_select_file()
-        if select_file != None:
+        if select_file is not None:
             select_file_path = os.path.join(self.url, select_file["name"])
             eval_in_emacs("kill-new", [select_file_path])
             message_to_emacs("Copy '{}'".format(select_file_path))
@@ -570,7 +570,7 @@ class AppBuffer(BrowserBuffer):
             self.send_input_message("Move mark files to: ", "move_files", "file", destination_path)
         else:
             self.move_file = self.vue_get_select_file()
-            if self.move_file != None:
+            if self.move_file is not None:
                 self.send_input_message("Move '{}' to: ".format(self.move_file["name"]), "move_file", "file", destination_path)
 
     @interactive
@@ -584,7 +584,7 @@ class AppBuffer(BrowserBuffer):
             self.send_input_message("Copy mark files to: ", "copy_files", "file", destination_path)
         else:
             self.copy_file = self.vue_get_select_file()
-            if self.copy_file != None:
+            if self.copy_file is not None:
                 self.send_input_message("Copy '{}' to: ".format(self.copy_file["name"]), "copy_file", "file", destination_path)
 
     @interactive
@@ -653,7 +653,7 @@ class AppBuffer(BrowserBuffer):
 
         if self.show_preview:
             current_file = self.vue_get_select_file()
-            if current_file != None:
+            if current_file is not None:
                 self.update_preview(current_file["path"])
 
     @interactive
@@ -672,7 +672,7 @@ class AppBuffer(BrowserBuffer):
     @interactive
     def open_current_file_in_new_tab(self):
         current_file = self.vue_get_select_file()
-        if current_file != None:
+        if current_file is not None:
             eval_in_emacs("eaf-open-in-file-manager", [current_file["path"]])
 
     @interactive
@@ -686,7 +686,7 @@ class AppBuffer(BrowserBuffer):
     @interactive
     def open_file_with_external_app(self):
         file_info = self.vue_get_select_file()
-        if file_info != None:
+        if file_info is not None:
             # Don't sue subprocess, otherwise external application will exit when you call eaf-stop-process.
             eval_in_emacs("eaf-file-manager-open-file-with-external-app", [file_info["path"]])
             message_to_emacs("Open file by external app '{}'".format(file_info["path"]))
@@ -698,13 +698,13 @@ class AppBuffer(BrowserBuffer):
             for file_info in self.file_infos:
                 old_file_info_dict[file_info["path"]] = file_info
 
-        if self.new_select_file != None:
+        if self.new_select_file is not None:
             # Select new file if self.new_select_file is not None.
             self.change_directory(self.url, self.new_select_file)
             self.new_select_file = None
         else:
             current_file = self.vue_get_select_file()
-            if current_file != None:
+            if current_file is not None:
                 self.change_directory(self.url, current_file["path"])
             else:
                 self.change_directory(self.url, "")
@@ -813,7 +813,7 @@ class AppBuffer(BrowserBuffer):
     
     def get_select_file_name(self):
         current_file = self.vue_get_select_file()
-        if current_file != None:
+        if current_file is not None:
             return current_file["path"]
         else:
             return ""
@@ -863,7 +863,7 @@ class AppBuffer(BrowserBuffer):
 
     def handle_delete_file(self):
         next_to_file = self.vue_get_file_next_to_last_mark()
-        if next_to_file != None:
+        if next_to_file is not None:
             self.new_select_file = next_to_file["path"]
 
         self.delete_files(self.vue_get_mark_files())
@@ -873,7 +873,7 @@ class AppBuffer(BrowserBuffer):
 
     def handle_delete_current_file(self):
         file_info = self.vue_get_select_file()
-        if file_info != None:
+        if file_info is not None:
             if self.vue_current_index > 0:
                 self.new_select_file = self.vue_files[self.vue_current_index - 1]["path"]
 
@@ -931,7 +931,7 @@ class AppBuffer(BrowserBuffer):
                 message_to_emacs("Insufficient permissions to create directory: {}".format(new_directory))
 
     def handle_move_file(self, new_file):
-        if self.move_file != None:
+        if self.move_file is not None:
             if new_file == self.url:
                 message_to_emacs("The directory has not changed, file '{}' not moved.".format(self.move_file["name"]))
             else:
@@ -970,7 +970,7 @@ class AppBuffer(BrowserBuffer):
         elif os.path.isdir(new_dir):
             try:
                 next_to_file = self.vue_get_file_next_to_last_mark()
-                if next_to_file != None:
+                if next_to_file is not None:
                     self.new_select_file = next_to_file["path"]
 
                 for move_file in self.move_files:
@@ -986,7 +986,7 @@ class AppBuffer(BrowserBuffer):
             message_to_emacs("'{}' is not directory, abandon movement.")
 
     def handle_copy_file(self, new_file):
-        if self.copy_file != None:
+        if self.copy_file is not None:
             if new_file == self.url:
                 message_to_emacs("The directory has not changed, file '{}' not copyd.".format(self.copy_file["name"]))
             else:
@@ -1051,7 +1051,7 @@ class AppBuffer(BrowserBuffer):
         if in_minibuffer:
             all_files = list(map(self.pick_search_string, self.vue_get_all_files()))
             self.search_files = list(filter(
-                lambda args: not False in list(map(lambda str: self.is_file_match(args[1], str), search_string.split())),
+                lambda args: False not in list(map(lambda str: self.is_file_match(args[1], str), search_string.split())),
                 enumerate(all_files)
             ))
             self.search_files_index = 0
@@ -1083,7 +1083,7 @@ class AppBuffer(BrowserBuffer):
 
     def is_file_match(self, file, search_word):
         return ((len(search_word) > 0 and search_word[0] != "!" and search_word.lower() in file.lower()) or
-                (len(search_word) > 0 and search_word[0] == "!" and (not search_word.lower()[1:] in file.lower())))
+                (len(search_word) > 0 and search_word[0] == "!" and (search_word.lower()[1:] not in file.lower())))
 
     def marker_offset_x(self):
         if self.show_icon:
