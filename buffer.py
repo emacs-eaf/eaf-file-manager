@@ -94,6 +94,7 @@ class AppBuffer(BrowserBuffer):
         self.fetch_preview_info_threads = []
         self.search_file_threads = []
         self.fetch_git_log_threads = []
+        self.cr2_convert_threads = []
         
         self.sort_key = "name"
         self.sort_reverse = False
@@ -678,7 +679,25 @@ class AppBuffer(BrowserBuffer):
     @interactive
     def mark_file_by_extension(self):
         self.send_input_message("Mark file by extension: ", "mark_file_by_extension", "string")
-        
+
+    @interactive
+    def convert_cr2_files(self):
+        files = list(filter(lambda file: file["type"] == "file", self.file_infos))
+        cr2_files = list(filter(lambda file: file["extension"].lower() == ".cr2", files))
+        if len(cr2_files) == 0:
+            message_to_emacs("No CR2 files were found in the current directory.")
+        else:
+            cr2_paths = list(map(lambda file: file["path"], cr2_files))
+
+            try:
+                import imageio
+
+                thread = Cr2ConvertThread(cr2_paths)
+                self.cr2_convert_threads.append(thread)
+                thread.start()
+            except:
+                message_to_emacs("Please use pip3 install 'imageio' first.")
+
     @interactive
     def narrow_file(self):
         self.send_input_message("Narrow file: ", "narrow_file", "string")
@@ -1297,3 +1316,22 @@ class FdSearchThread(FileSearchThread):
         self.send_files()
 
         self.finish_search.emit(self.search_dir, "{} {}".format(get_fd_command(), self.search_regex), self.match_number)
+
+
+class Cr2ConvertThread(QThread):
+
+    def __init__(self, cr2_paths):
+        QThread.__init__(self)
+
+        self.cr2_paths = cr2_paths
+
+    def run(self):
+        import imageio
+
+        for cr2_path in self.cr2_paths:
+            target_path = os.path.splitext(cr2_path)[0] + ".jpeg"
+
+            image = imageio.imread(cr2_path)
+            imageio.imwrite(target_path, image, format='JPEG')
+
+            print("Convert {} file to {}".format(cr2_path, target_path))

@@ -106,6 +106,7 @@
     ("g" . "refresh_dir")
     ("G" . "find_files")
     ("*" . "mark_file_by_extension")
+    (";" . "convert_cr2_files")
     ("&" . "narrow_file")
     ("v" . "js_preview_toggle")
     ("," . "js_preview_scroll_up_line")

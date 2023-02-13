@@ -26,6 +26,7 @@ File manager application for the [Emacs Application Framework](https://github.co
 (require 'eaf)
 (require 'eaf-file-manager)
 ```
+
 ### The keybinding of EAF File Manager.
 
 | Key   | Event   |
@@ -78,6 +79,7 @@ File manager application for the [Emacs Application Framework](https://github.co
 | `g` | refresh_dir |
 | `G` | find_files |
 | `*` | mark_file_by_extension |
+| `;` | convert_cr2_files |
 | `&` | narrow_file |
 | `v` | js_preview_toggle |
 | `,` | js_preview_scroll_up_line |

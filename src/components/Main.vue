@@ -589,6 +589,8 @@
 
          if (fileMime == "eaf-mime-type-not-support") {
            this.previewMime = "not-support"
+         } else if (fileMime == "image-x-canon-cr2") {
+           this.previewMime = "too-big"
          } else if (fileMime.startsWith("image-")) {
            this.previewMime = "image"
            this.previewExif = fileInfos[0]["exif"]
