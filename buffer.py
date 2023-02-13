@@ -493,7 +493,6 @@ class AppBuffer(BrowserBuffer):
             if file_mime == "eaf-mime-type-code-html":
                 if file_size < 100000:
                     from pygments import highlight
-                    from pygments.styles import get_all_styles
                     from pygments.lexers import PythonLexer, get_lexer_for_filename, html
                     from pygments.formatters import HtmlFormatter
                         
@@ -689,14 +688,13 @@ class AppBuffer(BrowserBuffer):
         else:
             cr2_paths = list(map(lambda file: file["path"], cr2_files))
 
-            try:
-                import imageio
-
+            import importlib
+            if importlib.util.find_spec("imageio") is None:
+                message_to_emacs("Please use pip3 install 'imageio' and 'imagecodecs' first.")
+            else:
                 thread = Cr2ConvertThread(cr2_paths)
                 self.cr2_convert_threads.append(thread)
                 thread.start()
-            except:
-                message_to_emacs("Please use pip3 install 'imageio' first.")
 
     @interactive
     def narrow_file(self):
