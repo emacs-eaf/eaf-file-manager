@@ -85,7 +85,7 @@
            var zipReader = new JSZip();
 
            zipReader.loadAsync(xhr.response).then(function(zip) {
-             zip.forEach(function(relativePath, zipEntry) {
+             zip.forEach(function(_, zipEntry) {
                var fileType = "";
                var fileIcon = "";
                if (zipEntry.dir) {

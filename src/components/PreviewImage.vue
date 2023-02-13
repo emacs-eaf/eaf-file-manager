@@ -105,7 +105,4 @@
    padding-top: 2px;
    padding-bottom: 2px;
  }
-
- .title {
- }
 </style>
