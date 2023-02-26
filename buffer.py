@@ -1293,7 +1293,7 @@ class FdSearchThread(FileSearchThread):
     def run(self):
         fd_command = get_fd_command()
 
-        process = subprocess.Popen("{} -c never -I --search-path '{}' {}".format(fd_command, self.search_dir, self.search_regex),
+        process = subprocess.Popen("{} -c never -t f -I --search-path '{}' {}".format(fd_command, self.search_dir, self.search_regex),
                                    shell=True,
                                    stderr=subprocess.PIPE,
                                    stdout=subprocess.PIPE)
