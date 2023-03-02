@@ -25,6 +25,9 @@ from PyQt6.QtGui import QColor, QIcon
 from core.utils import eval_in_emacs, PostGui, get_emacs_vars, interactive, message_to_emacs, get_emacs_func_result    # type: ignore
 from core.webengine import BrowserBuffer    # type: ignore
 from pathlib import Path
+from pygments import highlight
+from pygments.lexers import PythonLexer, get_lexer_for_filename, html
+from pygments.formatters import HtmlFormatter
 import copy
 import json
 import os
@@ -482,38 +485,49 @@ class AppBuffer(BrowserBuffer):
     def get_preview_file(self):
         return self.preview_file
 
+    def get_file_size(self, file_path):
+        """Get the size of the given file in bytes."""
+        return os.path.getsize(file_path)
+
+    def get_file_html_content(self, file_path, theme_mode):
+        """Return the HTML content of the specified file."""
+        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            content = f.read()
+
+            try:
+                # All styles please look: https://pygments.org/styles/
+                style_name = "monokai" if theme_mode == "dark" else "stata-light"
+
+                if file_path.endswith(".vue"):
+                    return highlight(content, html.HtmlLexer(), HtmlFormatter(full=True, style=style_name))
+                else:
+                    return highlight(content, get_lexer_for_filename(file_path), HtmlFormatter(full=True, style=style_name))
+            except:
+                return highlight(content, PythonLexer(), HtmlFormatter())
+
+
     def update_preview_info(self, file, file_type, file_mime, file_infos):
+        """Update preview information."""
         file_html_content = ""
-        
         file_size = 0
-        
+
         if file_type == "file":
-            file_size = os.path.getsize(file)
-            
+            file_size = self.get_file_size(file)
+
             if file_mime == "eaf-mime-type-code-html":
                 if file_size < 100000:
-                    from pygments import highlight
-                    from pygments.lexers import PythonLexer, get_lexer_for_filename, html
-                    from pygments.formatters import HtmlFormatter
-                        
-                    with open(file, "r", encoding="utf-8", errors="ignore") as f:
-                        content = f.read()
-                        
-                        try:
-                            # All styles please look: https://pygments.org/styles/
-                            style_name = "monokai" if self.theme_mode == "dark" else "stata-light"
-                            
-                            if file.endswith(".vue"):
-                                file_html_content = highlight(content, html.HtmlLexer(), HtmlFormatter(full=True, style=style_name))
-                            else:
-                                file_html_content = highlight(content, get_lexer_for_filename(file), HtmlFormatter(full=True, style=style_name))
-                        except:
-                            file_html_content = highlight(content, PythonLexer(), HtmlFormatter())
+                    file_html_content = self.get_file_html_content(file, self.theme_mode)
                 else:
                     file_mime = "eaf-mime-type-code"
-        
-        self.buffer_widget.eval_js_function('''setPreview''', file, file_type, file_size, file_mime, {"content": file_html_content}, file_infos)
 
+        # Call JavaScript function setPreview to update preview information
+        self.buffer_widget.eval_js_function('''setPreview''',
+                                            file,
+                                            file_type,
+                                            file_size,
+                                            file_mime,
+                                            {"content": file_html_content},
+                                            file_infos)
     @interactive
     def search_file(self):
         self.search_start_index = self.vue_current_index
