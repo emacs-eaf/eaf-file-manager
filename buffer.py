@@ -22,7 +22,9 @@
 from PyQt6 import QtCore
 from PyQt6.QtCore import QThread, QMimeDatabase, QFileSystemWatcher, QTimer
 from PyQt6.QtGui import QColor, QIcon
-from core.utils import eval_in_emacs, PostGui, get_emacs_vars, interactive, message_to_emacs, get_emacs_func_result    # type: ignore
+from core.utils import (eval_in_emacs, PostGui, get_emacs_vars, interactive,
+                        message_to_emacs, get_emacs_func_result,
+                        get_emacs_theme_foreground, get_emacs_theme_background)
 from core.webengine import BrowserBuffer    # type: ignore
 from pathlib import Path
 from pygments import highlight
@@ -164,6 +166,14 @@ class AppBuffer(BrowserBuffer):
             "true" if self.show_preview and self.width_enough_to_show_preview() else "false",
             "true" if self.show_icon else "false",
             self.theme_mode)
+
+    @interactive
+    def update_theme(self):
+        self.theme_foreground_color = get_emacs_theme_foreground()
+        self.theme_background_color = get_emacs_theme_background()
+        self.buffer_widget.eval_js("document.body.style.background = '{}'; document.body.style.color = '{}'".format(
+            self.theme_background_color, self.theme_foreground_color))
+        self.init_vars()
         
     def width_enough_to_show_preview(self): 
         (frame_width, _) = get_emacs_func_result("eaf-get-render-size", [])                
