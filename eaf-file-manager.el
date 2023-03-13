@@ -101,6 +101,7 @@
     ("X" . "delete_current_file")
     ("o" . "toggle_hidden_file")
     ("O" . "toggle_preview")
+    ("a" . "filter_file_with_regex")
     ("q" . "bury-buffer")
     ("Q" . "close_buffer")
     ("g" . "refresh_dir")

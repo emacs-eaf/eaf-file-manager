@@ -650,6 +650,17 @@ class AppBuffer(BrowserBuffer):
         eval_in_emacs("eaf-file-manager-rename-edit-buffer", [self.buffer_id, directory, json.dumps(output)])
 
     @interactive
+    def filter_file_with_regex(self):
+        self.send_input_message("Filter file with regex: ", "filter_file_with_regex", "string")
+
+    def handle_filter_file_with_regex(self, regex):
+        import re
+        filter_files = list(filter(lambda f: re.search(regex, f["name"]), self.vue_get_all_files()))
+
+        self.select_index = 0
+        self.buffer_widget.eval_js_function('''changePath''', self.url, filter_files, self.select_index)
+
+    @interactive
     def toggle_hidden_file(self):
         if self.show_hidden_file:
             message_to_emacs("Hide hidden file")
