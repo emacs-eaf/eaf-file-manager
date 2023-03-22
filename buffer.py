@@ -23,8 +23,7 @@ from PyQt6 import QtCore
 from PyQt6.QtCore import QThread, QMimeDatabase, QFileSystemWatcher, QTimer
 from PyQt6.QtGui import QColor, QIcon
 from core.utils import (eval_in_emacs, PostGui, get_emacs_vars, interactive,
-                        message_to_emacs, get_emacs_func_result,
-                        get_emacs_theme_foreground, get_emacs_theme_background)
+                        message_to_emacs, get_emacs_func_result)
 from core.webengine import BrowserBuffer    # type: ignore
 from pathlib import Path
 from pygments import highlight
