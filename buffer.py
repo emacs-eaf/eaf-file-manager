@@ -739,6 +739,9 @@ class AppBuffer(BrowserBuffer):
             eval_in_emacs("eaf-file-manager-open-file-with-external-app", [file_info["path"]])
             message_to_emacs("Open file by external app '{}'".format(file_info["path"]))
 
+    def some_view_show(self):
+        self.fetch_git_log()
+
     def refresh(self):
         old_file_info_dict = {}
         
