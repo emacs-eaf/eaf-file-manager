@@ -164,6 +164,26 @@ class AppBuffer(BrowserBuffer):
             "true" if self.show_icon else "false",
             self.theme_mode)
 
+    def create_and_start_thread(self, thread_class_name, thread_args, signal_name=None, callback=None):
+        globals_dict = globals()
+
+        thread_class = globals_dict.get(thread_class_name)
+
+        if not thread_class:
+            print("Class not found!")
+            return
+
+        thread = thread_class(*thread_args)
+        if signal_name and callback:
+            signal = getattr(thread, signal_name, None)
+            if signal:
+                signal.connect(callback)
+            else:
+                print("Signal not found!")
+
+        self.thread_queue.append(thread)
+        thread.start()
+
     @interactive
     def update_theme(self):
         super().update_theme()
@@ -453,10 +473,7 @@ class AppBuffer(BrowserBuffer):
             return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(file_info[info_key]))
 
     def fetch_git_log(self):
-        thread = GitCommitThread(self.url)
-        thread.fetch_command_result.connect(self.update_git_log)
-        self.thread_queue.append(thread)
-        thread.start()
+        self.create_and_start_thread("GitCommitThread", [self.url], "fetch_command_result", self.update_git_log)
 
     @PostGui()
     def update_git_log(self, log):
@@ -480,11 +497,9 @@ class AppBuffer(BrowserBuffer):
         if self.show_preview:
             self.preview_file = file
 
-            thread = FetchPreviewInfoThread(file, self.get_preview_file, self.get_file_infos, self.get_file_mime)
-            thread.fetch_finish.connect(self.update_preview_info)
+            self.create_and_start_thread("FetchPreviewInfoThread", [file, self.get_preview_file, self.get_file_infos, self.get_file_mime],
+                                         "fetch_finish", self.update_preview_info)
 
-            self.thread_queue.append(thread)
-            thread.start()
 
     def get_preview_file(self):
         return self.preview_file
@@ -581,19 +596,16 @@ class AppBuffer(BrowserBuffer):
     def compressed_file(self):
         select_file = self.vue_get_select_file()["path"]
 
-        thread = CompressionThread(select_file)
-        thread.compression_finish.connect(lambda path: message_to_emacs(f"Compress finish: {path}"))
-        self.thread_queue.append(thread)
-        thread.start()
+        self.create_and_start_thread("CompressionThread", [select_file],
+                                     "compression_finish", lambda path: message_to_emacs(f"Compress finish: {path}"))
 
     @interactive
     def decompressed_file(self):
         select_file = self.vue_get_select_file()["path"]
 
-        thread = DecompressionThread(select_file)
-        thread.decompression_finish.connect(lambda path: message_to_emacs(f"Decompress finish: {path}"))
-        self.thread_queue.append(thread)
-        thread.start()
+        self.create_and_start_thread("DecompressionThread", [select_file],
+                                     "decompression_finish", lambda path: message_to_emacs(f"Decompress finish: {path}"))
+
 
     @interactive
     def move_current_or_mark_file(self):
@@ -739,9 +751,8 @@ class AppBuffer(BrowserBuffer):
             if importlib.util.find_spec("imageio") is None:
                 message_to_emacs("Please use pip3 install 'imageio' and 'imagecodecs' first.")
             else:
-                thread = Cr2ConvertThread(cr2_paths)
-                self.thread_queue.append(thread)
-                thread.start()
+                self.create_and_start_thread("Cr2ConvertThread", [cr2_paths])
+
 
     @interactive
     def narrow_file(self):
