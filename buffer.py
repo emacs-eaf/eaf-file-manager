@@ -32,6 +32,7 @@ from pygments.formatters import HtmlFormatter
 import copy
 import json
 import os
+import tarfile
 import shutil
 import subprocess
 import time
@@ -99,6 +100,7 @@ class AppBuffer(BrowserBuffer):
         self.search_file_threads = []
         self.fetch_git_log_threads = []
         self.cr2_convert_threads = []
+        self.compress_file_threads = []
         
         self.sort_key = "name"
         self.sort_reverse = False
@@ -578,6 +580,24 @@ class AppBuffer(BrowserBuffer):
             message_to_emacs("Copy '{}'".format(select_file_path))
         else:
             message_to_emacs("No file selected.")
+
+    @interactive
+    def compressed_file(self):
+        select_file = self.vue_get_select_file()["path"]
+
+        thread = CompressionThread(select_file)
+        thread.compression_finish.connect(lambda path: message_to_emacs(f"Compress finish: {path}"))
+        self.compress_file_threads.append(thread)
+        thread.start()
+
+    @interactive
+    def decompressed_file(self):
+        select_file = self.vue_get_select_file()["path"]
+
+        thread = DecompressionThread(select_file)
+        thread.decompression_finish.connect(lambda path: message_to_emacs(f"Decompress finish: {path}"))
+        self.compress_file_threads.append(thread)
+        thread.start()
 
     @interactive
     def move_current_or_mark_file(self):
@@ -1367,3 +1387,77 @@ class Cr2ConvertThread(QThread):
             imageio.imwrite(target_path, image, format='JPEG')
 
             print("Convert {} file to {}".format(cr2_path, target_path))
+
+class CompressionThread(QThread):
+
+    compression_finish = QtCore.pyqtSignal(str)
+
+    def __init__(self, source_path):
+        QThread.__init__(self)
+
+        self.source_path = source_path
+
+    def run(self):
+        message_to_emacs(f"Start compress {self.source_path}...")
+        self.create_tar_gz(self.source_path)
+
+    def count_files(self, directory):
+        total_files = 0
+        if os.path.isfile(directory):
+            return 1
+        else:
+            for root, _, files in os.walk(directory):
+                total_files += len(files)
+        return total_files
+
+    def add_to_tar(self, tar, file_path, arcname, processed_files, total_files):
+        tar.add(file_path, arcname=arcname)
+        progress = (processed_files / total_files) * 100
+        print(f"Compress {self.source_path}: {progress:.2f}%")
+
+    def create_tar_gz(self, source_path):
+        total_files = self.count_files(source_path)
+        processed_files = 0
+
+        if os.path.isfile(source_path):
+            output_filename = os.path.splitext(source_path)[0] + ".tar.gz"
+        else:
+            output_filename = source_path.rstrip(os.sep) + ".tar.gz"
+
+        with tarfile.open(output_filename, "w:gz") as tar:
+            if os.path.isfile(source_path):
+                self.add_to_tar(tar, source_path, os.path.basename(source_path), processed_files + 1, total_files)
+            else:
+                for root, _, files in os.walk(source_path):
+                    for file in files:
+                        file_path = os.path.join(root, file)
+                        arcname = os.path.relpath(file_path, source_path)
+                        self.add_to_tar(tar, file_path, arcname, processed_files + 1, total_files)
+                        processed_files += 1
+
+        self.compression_finish.emit(output_filename)
+
+class DecompressionThread(QThread):
+    
+    decompression_finish = QtCore.pyqtSignal(str)
+
+    def __init__(self, input_file):
+        QThread.__init__(self)
+
+        self.input_file = input_file
+
+    def run(self):
+        message_to_emacs(f"Start decompress {self.input_file}...")
+        self.extract_tar_gz(self.input_file)
+        
+    def extract_tar_gz(self, input_file):
+        if not tarfile.is_tarfile(input_file):
+            message_to_emacs(f"{input_file} is not a valid tar.gz file.")
+            return
+
+        output_dir = os.path.dirname(input_file)
+
+        with tarfile.open(input_file, "r:gz") as tar:
+            tar.extractall(output_dir)
+
+        self.decompression_finish.emit(output_dir)

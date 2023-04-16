@@ -94,8 +94,8 @@ File manager application for the [Emacs Application Framework](https://github.co
 | `5` | sort_by_created_time |
 | `6` | sort_by_access_time |
 | `!` | eaf-file-manager-run-command-for-mark-files |
-| `z` | eaf-file-manager-compress-file |
-| `Z` | eaf-file-manager-uncompress-file |
 | `B` | eaf-file-manager-byte-compile-file |
+| `z` | compressed_file |
+| `Z` | decompressed_file |
 | `C-s` | search_file |
 

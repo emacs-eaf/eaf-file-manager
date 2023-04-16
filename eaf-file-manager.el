@@ -121,9 +121,9 @@
     ("5" . "sort_by_created_time")
     ("6" . "sort_by_access_time")
     ("!" . "eaf-file-manager-run-command-for-mark-files")
-    ("z" . "eaf-file-manager-compress-file")
-    ("Z" . "eaf-file-manager-uncompress-file")
     ("B" . "eaf-file-manager-byte-compile-file")
+    ("z" . "compressed_file")
+    ("Z" . "decompressed_file")
     ("C-s" . "search_file")
     )
   "The keybinding of EAF File Manager."
@@ -339,27 +339,6 @@
            (let ((command (read-string "Run command: ")))
              (when command
                (shell-command (format "%s %s" command (string-join mark-files " ")))))))))
-
-(defun eaf-file-manager-compress-file ()
-  (interactive)
-  (let* ((mark-files (eaf-call-sync "execute_function" eaf--buffer-id "get_mark_file_names"))
-         (file-string (if (> (length mark-files) 0)
-                          (string-join mark-files " ")
-                        (eaf-call-sync "execute_function" eaf--buffer-id "get_select_file_name")
-                        )))
-
-    (if (string-equal file-string "")
-        (message "No file need to compress.")
-      (let ((file-name (read-string "Compress file name: ")))
-        (when file-name
-          (shell-command (format "tar -zcvf %s.tar.gz %s" file-name file-string)))))))
-
-(defun eaf-file-manager-uncompress-file ()
-  (interactive)
-  (let* ((current-file (eaf-call-sync "execute_function" eaf--buffer-id "get_select_file_name")))
-    (if (string-equal current-file "")
-        (message "No file in current directory.")
-      (shell-command (format "tar -xvf %s" current-file)))))
 
 (defun eaf-file-manager-byte-compile-file ()
   (interactive)
