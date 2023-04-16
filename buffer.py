@@ -96,12 +96,8 @@ class AppBuffer(BrowserBuffer):
             os.makedirs(self.icon_cache_dir)
 
         self.preview_file = None
-        self.fetch_preview_info_threads = []
-        self.search_file_threads = []
-        self.fetch_git_log_threads = []
-        self.cr2_convert_threads = []
-        self.compress_file_threads = []
-        
+        self.thread_queue = []
+
         self.sort_key = "name"
         self.sort_reverse = False
 
@@ -206,7 +202,7 @@ class AppBuffer(BrowserBuffer):
             thread = PythonSearchThread(os.path.expanduser(dir), search_regex, self.filter_file)
         thread.append_search.connect(self.handle_append_search)
         thread.finish_search.connect(self.handle_finish_search)
-        self.search_file_threads.append(thread)
+        self.thread_queue.append(thread)
         thread.start()
 
     def get_file_mime(self, file_path, use_preview=True):
@@ -459,7 +455,7 @@ class AppBuffer(BrowserBuffer):
     def fetch_git_log(self):
         thread = GitCommitThread(self.url)
         thread.fetch_command_result.connect(self.update_git_log)
-        self.fetch_git_log_threads.append(thread)
+        self.thread_queue.append(thread)
         thread.start()
 
     @PostGui()
@@ -487,7 +483,7 @@ class AppBuffer(BrowserBuffer):
             thread = FetchPreviewInfoThread(file, self.get_preview_file, self.get_file_infos, self.get_file_mime)
             thread.fetch_finish.connect(self.update_preview_info)
 
-            self.fetch_preview_info_threads.append(thread)
+            self.thread_queue.append(thread)
             thread.start()
 
     def get_preview_file(self):
@@ -587,7 +583,7 @@ class AppBuffer(BrowserBuffer):
 
         thread = CompressionThread(select_file)
         thread.compression_finish.connect(lambda path: message_to_emacs(f"Compress finish: {path}"))
-        self.compress_file_threads.append(thread)
+        self.thread_queue.append(thread)
         thread.start()
 
     @interactive
@@ -596,7 +592,7 @@ class AppBuffer(BrowserBuffer):
 
         thread = DecompressionThread(select_file)
         thread.decompression_finish.connect(lambda path: message_to_emacs(f"Decompress finish: {path}"))
-        self.compress_file_threads.append(thread)
+        self.thread_queue.append(thread)
         thread.start()
 
     @interactive
@@ -744,7 +740,7 @@ class AppBuffer(BrowserBuffer):
                 message_to_emacs("Please use pip3 install 'imageio' and 'imagecodecs' first.")
             else:
                 thread = Cr2ConvertThread(cr2_paths)
-                self.cr2_convert_threads.append(thread)
+                self.thread_queue.append(thread)
                 thread.start()
 
     @interactive
@@ -1183,12 +1179,12 @@ class AppBuffer(BrowserBuffer):
 
     def destroy_buffer(self):
         ''' Destroy buffer.'''
-        for search_file_thread in self.search_file_threads:
+        for search_file_thread in self.thread_queue:
             if search_file_thread.isRunning():
                 search_file_thread.quit()
                 search_file_thread.wait()
 
-        for fetch_preview_info_thread in self.fetch_preview_info_threads:
+        for fetch_preview_info_thread in self.thread_queue:
             if fetch_preview_info_thread.isRunning():
                 fetch_preview_info_thread.quit()
                 fetch_preview_info_thread.wait()
