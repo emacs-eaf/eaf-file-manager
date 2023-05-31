@@ -153,11 +153,11 @@ class AppBuffer(BrowserBuffer):
                 select_color = "#EEEEEE"
             else:
                 select_color = QColor(self.theme_background_color).darker(110).name()
-                
-        
+
+
         self.buffer_widget.eval_js_function(
-            '''init''', 
-            self.theme_background_color, self.theme_foreground_color, 
+            '''init''',
+            self.theme_background_color, self.theme_foreground_color,
             header_color, directory_color, symlink_color, mark_color, select_color, search_match_color, search_keyword_color,
             self.icon_cache_dir, os.path.sep,
             "true" if self.show_preview and self.width_enough_to_show_preview() else "false",
@@ -188,9 +188,9 @@ class AppBuffer(BrowserBuffer):
     def update_theme(self):
         super().update_theme()
         self.init_vars()
-        
-    def width_enough_to_show_preview(self): 
-        (frame_width, _) = get_emacs_func_result("eaf-get-render-size", [])                
+
+    def width_enough_to_show_preview(self):
+        (frame_width, _) = get_emacs_func_result("eaf-get-render-size", [])
         return self.buffer_widget.width() > int(frame_width) * 2 / 3
 
     @PostGui()
@@ -231,25 +231,25 @@ class AppBuffer(BrowserBuffer):
         else:
             file_info = QtCore.QFileInfo(file_path)
             file_suffix = file_info.suffix()
-            
+
             if file_suffix in FILE_MIME_DICT:
                 return FILE_MIME_DICT[file_suffix][0] if use_preview else FILE_MIME_DICT[file_suffix][1]
             else:
                 mime = self.mime_db.mimeTypeForFile(file_info).name().replace("/", "-")
-                
+
                 if use_preview:
                     if (mime.startswith("text-") or mime in FILE_CODE_HTML_MIMES):
                         mime = "eaf-mime-type-code-html"
                     elif mime == "application-x-sharedlib":
                         mime = "eaf-mime-type-not-support"
-                
+
                 return mime
 
     def generate_file_icon(self, file_path):
         file_mime = self.get_file_mime(file_path, False)
         icon_name = "{}.{}".format(file_mime, "png")
         icon_path = os.path.join(self.icon_cache_dir, icon_name)
-        
+
         if not os.path.exists(icon_path):
             if file_mime == "directory":
                 icon = QIcon.fromTheme("folder")
@@ -262,7 +262,7 @@ class AppBuffer(BrowserBuffer):
                     icon = QIcon.fromTheme("text-plain")
 
             icon.pixmap(64, 64).save(icon_path)
-            
+
         return icon_name
 
     def get_file_info(self, file_path, current_dir = None):
@@ -367,6 +367,7 @@ class AppBuffer(BrowserBuffer):
         else:
             return a_type_weights - b_type_weights
 
+    @PostGui()
     @QtCore.pyqtSlot()
     def open_select_files(self):
         mark_files = list(filter(lambda f: f["mark"] == "mark", self.vue_get_all_files()))
@@ -383,7 +384,7 @@ class AppBuffer(BrowserBuffer):
                     eval_in_emacs("eaf-open-in-file-manager", [mark_file_path])
                 else:
                     eval_in_emacs("find-file", [mark_file_path])
-    
+
     @QtCore.pyqtSlot(str, str)
     def change_directory(self, dir, current_dir):
         self.url = dir
@@ -392,7 +393,7 @@ class AppBuffer(BrowserBuffer):
 
         eval_in_emacs('eaf--change-default-directory', [self.buffer_id, dir])
         self.change_title("Dir [{}]".format(os.path.sep.join(list(filter(lambda x: x != '', dir.split(os.path.sep)))[-2:])))
-        
+
         self.file_infos = self.get_file_infos(dir)
 
         self.select_index = 0
@@ -407,27 +408,27 @@ class AppBuffer(BrowserBuffer):
             self.init_first_file_preview()
 
         self.fetch_git_log()
-        
+
     @interactive
     def sort_by_created_time(self):
         self.sort_by_file_key("ctime", "ctime")
         message_to_emacs("Sort file by created time.")
-        
+
     @interactive
-    def sort_by_modified_time(self): 
+    def sort_by_modified_time(self):
         self.sort_by_file_key("mtime", "mtime")
         message_to_emacs("Sort file by modified time.")
-    
+
     @interactive
-    def sort_by_access_time(self): 
+    def sort_by_access_time(self):
         self.sort_by_file_key("atime", "atime")
         message_to_emacs("Sort file by access time.")
-    
+
     @interactive
     def sort_by_size(self):
         self.sort_by_file_key("bytes", "bytes")
         message_to_emacs("Sort file by size.")
-        
+
     @interactive
     def sort_by_name(self):
         self.sort_by_file_key("name", "bytes")
@@ -437,7 +438,7 @@ class AppBuffer(BrowserBuffer):
     def sort_by_type(self):
         self.sort_by_file_key("extension", "bytes")
         message_to_emacs("Sort file by type.")
-        
+
     def sort_by_file_key(self, key, info_key):
         if key == self.sort_key:
             # If the sorting type is the same as the last time, then the order is reversed.
@@ -445,21 +446,21 @@ class AppBuffer(BrowserBuffer):
         else:
             # Keep sort order as default value if sorting type is not same as the last time.
             self.sort_reverse = False
-            
+
         self.sort_key = key
-        
+
         select_path = self.file_infos[self.select_index]["path"]
-        
+
         for file_info in self.file_infos:
             file_info["info"] = self.get_file_sort_info(file_info, info_key)
-        
+
         from functools import cmp_to_key
         self.file_infos.sort(key=cmp_to_key(lambda a, b: self.sort_file_by_key(a, b, key)), reverse=self.sort_reverse)
         files = list(map(lambda file: file["path"], self.file_infos))
         self.select_index = files.index(select_path)
-        
+
         self.buffer_widget.eval_js_function('''changePath''', self.url, self.file_infos, self.select_index)
-        
+
     def get_file_sort_info(self, file_info, info_key):
         if info_key == "bytes":
             if file_info["type"] == "file":
@@ -500,7 +501,29 @@ class AppBuffer(BrowserBuffer):
             self.create_and_start_thread("FetchPreviewInfoThread", [file, self.get_preview_file, self.get_file_infos, self.get_file_mime],
                                          "fetch_finish", self.update_preview_info)
 
+    @PostGui()
+    def update_preview_info(self, file, file_type, file_mime, file_infos):
+        """Update preview information."""
+        file_html_content = ""
+        file_size = 0
 
+        if file_type == "file":
+            file_size = self.get_file_size(file)
+
+            if file_mime == "eaf-mime-type-code-html":
+                if file_size < 100000:
+                    file_html_content = self.get_file_html_content(file, self.theme_mode)
+                else:
+                    file_mime = "eaf-mime-type-code"
+
+        # Call JavaScript function setPreview to update preview information
+        self.buffer_widget.eval_js_function('''setPreview''',
+                                            file,
+                                            file_type,
+                                            file_size,
+                                            file_mime,
+                                            {"content": file_html_content},
+                                            file_infos)
     def get_preview_file(self):
         return self.preview_file
 
@@ -525,28 +548,6 @@ class AppBuffer(BrowserBuffer):
                 return highlight(content, PythonLexer(), HtmlFormatter())
 
 
-    def update_preview_info(self, file, file_type, file_mime, file_infos):
-        """Update preview information."""
-        file_html_content = ""
-        file_size = 0
-
-        if file_type == "file":
-            file_size = self.get_file_size(file)
-
-            if file_mime == "eaf-mime-type-code-html":
-                if file_size < 100000:
-                    file_html_content = self.get_file_html_content(file, self.theme_mode)
-                else:
-                    file_mime = "eaf-mime-type-code"
-
-        # Call JavaScript function setPreview to update preview information
-        self.buffer_widget.eval_js_function('''setPreview''',
-                                            file,
-                                            file_type,
-                                            file_size,
-                                            file_mime,
-                                            {"content": file_html_content},
-                                            file_infos)
     @interactive
     def search_file(self):
         self.search_start_index = self.vue_current_index
@@ -581,7 +582,7 @@ class AppBuffer(BrowserBuffer):
     def copy_dir_path(self):
         eval_in_emacs("kill-new", [self.url])
         message_to_emacs("Copy '{}'".format(self.url))
-        
+
     @interactive
     def copy_file_path(self):
         select_file = self.vue_get_select_file()
@@ -597,15 +598,22 @@ class AppBuffer(BrowserBuffer):
         select_file = self.vue_get_select_file()["path"]
 
         self.create_and_start_thread("CompressionThread", [select_file],
-                                     "compression_finish", lambda path: message_to_emacs(f"Compress finish: {path}"))
+                                     "compression_finish", self.handle_compress_finish)
+
+    @PostGui()
+    def handle_compress_finish(self, path):
+        message_to_emacs(f"Compress finish: {path}")
 
     @interactive
     def decompressed_file(self):
         select_file = self.vue_get_select_file()["path"]
 
         self.create_and_start_thread("DecompressionThread", [select_file],
-                                     "decompression_finish", lambda path: message_to_emacs(f"Decompress finish: {path}"))
+                                     "decompression_finish", self.handle_decompress_finish)
 
+    @PostGui()
+    def handle_decompress_finish(self, path):
+        message_to_emacs(f"Decompress finish: {path}")
 
     @interactive
     def move_current_or_mark_file(self):
@@ -642,7 +650,7 @@ class AppBuffer(BrowserBuffer):
     @interactive
     def open_path(self):
         self.send_input_message("Open path: ", "open_path", "file", self.url)
-        
+
     def handle_change_path(self, new_path):
         if os.path.exists(new_path):
             self.change_directory(new_path, "")
@@ -651,7 +659,7 @@ class AppBuffer(BrowserBuffer):
 
     def handle_open_path(self, new_path):
         eval_in_emacs('eaf-open-in-file-manager', [new_path])
-        
+
     @interactive
     def batch_rename(self):
         directory = os.path.basename(os.path.normpath(self.url))
@@ -757,7 +765,7 @@ class AppBuffer(BrowserBuffer):
     @interactive
     def narrow_file(self):
         self.send_input_message("Narrow file: ", "narrow_file", "string")
-        
+
     @interactive
     def open_file_with_external_app(self):
         file_info = self.vue_get_select_file()
@@ -771,7 +779,7 @@ class AppBuffer(BrowserBuffer):
 
     def refresh(self):
         old_file_info_dict = {}
-        
+
         if not self.inhibit_mark_change_file:
             for file_info in self.file_infos:
                 old_file_info_dict[file_info["path"]] = file_info
@@ -798,7 +806,7 @@ class AppBuffer(BrowserBuffer):
                 else:
                     change_file_indexes.append(index)
             self.buffer_widget.eval_js_function("markChangeFiles", change_file_indexes)
-            
+
             QTimer().singleShot(10000, lambda : self.buffer_widget.eval_js_function("cleanChangeFiles", change_file_indexes))
 
         self.fetch_git_log()
@@ -806,7 +814,7 @@ class AppBuffer(BrowserBuffer):
     @PostGui()
     def batch_rename_confirm(self, new_file_string):
         self.inhibit_mark_change_file = True
-        
+
         new_files = json.loads(new_file_string)
 
         for [total, id, path, old_file_name, new_file_name] in new_files:
@@ -827,12 +835,12 @@ class AppBuffer(BrowserBuffer):
 
     def handle_input_response(self, callback_tag, result_content):
         from inspect import signature
-        
+
         handle_function_name = "handle_{}".format(callback_tag)
         if hasattr(self, handle_function_name):
             handle_function = getattr(self, handle_function_name)
             function_argument_number = len(signature(getattr(self, handle_function_name)).parameters)
-            
+
             if function_argument_number == 1:
                 handle_function(result_content)
             else:
@@ -886,10 +894,10 @@ class AppBuffer(BrowserBuffer):
 
     def vue_get_mark_files(self):
         return list(filter(lambda file: file["mark"] == "mark", self.vue_files)).copy()
-    
+
     def get_mark_file_names(self):
         return list(map(lambda file: file["path"], self.vue_get_mark_files()))
-    
+
     def get_select_file_name(self):
         current_file = self.vue_get_select_file()
         if current_file is not None:
@@ -1017,32 +1025,32 @@ class AppBuffer(BrowserBuffer):
                 try:
                     if self.vue_current_index > 0:
                         self.new_select_file = self.vue_files[self.vue_current_index - 1]["path"]
-            
+
                     new_path = new_file
                     if os.path.isdir(new_file):
                         new_path = os.path.join(new_file, self.move_file["name"])
-                        
+
                     if os.path.exists(new_path):
                         self.move_original_filename = self.move_file["name"]
                         self.move_original_path = self.move_file["path"]
                         self.move_destination_path = new_path
-                        
+
                         self.send_input_message("Destination path {} already exists, need to cover the it?".format(new_file), "move_cover_file", "yes-or-no")
                     else:
                         shutil.move(self.move_file["path"], new_file)
                         self.buffer_widget.eval_js_function("removeSelectFile")
-                        
+
                         message_to_emacs("Move '{}' to '{}'".format(self.move_file["name"], new_file))
                 except:
                     import traceback
                     message_to_emacs("Error in move file: " + str(traceback.print_exc()))
-                    
+
     def handle_move_cover_file(self):
         os.remove(self.move_destination_path)
         shutil.move(self.move_original_path, self.move_destination_path)
         self.buffer_widget.eval_js_function("removeSelectFile")
         message_to_emacs("Move '{}' to '{}'".format(self.move_original_filename, os.path.dirname(self.move_destination_path)))
-                    
+
     def handle_move_files(self, new_dir):
         if new_dir == self.url:
             message_to_emacs("The directory has not changed, mark files not moved.")
@@ -1071,10 +1079,10 @@ class AppBuffer(BrowserBuffer):
             else:
                 try:
                     self.copy_to(self.copy_file["path"], new_file)
-            
+
                     self.new_select_file = new_file
                     self.refresh()
-            
+
                     message_to_emacs("Copy '{}' to '{}'".format(self.copy_file["name"], new_file))
                 except:
                     import traceback
@@ -1094,7 +1102,7 @@ class AppBuffer(BrowserBuffer):
                 message_to_emacs("Error in copy files: " + str(traceback.print_exc()))
         else:
             message_to_emacs("'{}' is not directory, abandon copy.")
-            
+
     def copy_to(self, src, dst):
         if os.path.isdir(src):
             if os.path.exists(dst):
@@ -1148,16 +1156,16 @@ class AppBuffer(BrowserBuffer):
 
     def handle_mark_file_by_extension(self, extension):
         self.buffer_widget.eval_js_function('''markFileByExtension''', extension.split(".")[-1])
-        
+
     def handle_narrow_file(self, rule):
         self.file_infos = list(filter(lambda f: re.search(rule, f["name"], re.IGNORECASE), self.get_file_infos(self.url)))
         self.select_index = 0
-        
+
         self.buffer_widget.eval_js_function('''changePath''', self.url, self.file_infos, self.select_index)
-        
+
         if len(self.file_infos) > 0:
             self.init_first_file_preview()
-            
+
         message_to_emacs("Narrow files with rule: {}".format(rule))
 
     def is_file_match(self, file, search_word):
@@ -1238,15 +1246,15 @@ class FetchPreviewInfoThread(QThread):
             if self.file != "":
                 path = Path(self.file)
                 mime = self.get_file_mime_callback(str(path.absolute()))
-                
+
                 if path.is_file():
                     file_type = "file"
                     if mime.startswith("image-"):
                         try:
                             from exif import Image
-                            
+
                             exif_info = {}
-                            
+
                             with path.open("rb") as f:
                                 img = Image(f)
                                 keys = dir(img)
@@ -1256,7 +1264,7 @@ class FetchPreviewInfoThread(QThread):
                                         exif_info[k] = str(img.get(k))
                         except:
                             pass
-                                
+
                         file_infos = [{
                             "mime": mime,
                             "size": os.path.getsize(str(path.absolute())),
@@ -1446,7 +1454,7 @@ class CompressionThread(QThread):
         self.compression_finish.emit(output_filename)
 
 class DecompressionThread(QThread):
-    
+
     decompression_finish = QtCore.pyqtSignal(str)
 
     def __init__(self, input_file):
@@ -1457,7 +1465,7 @@ class DecompressionThread(QThread):
     def run(self):
         message_to_emacs(f"Start decompress {self.input_file}...")
         self.extract_tar_gz(self.input_file)
-        
+
     def extract_tar_gz(self, input_file):
         if not tarfile.is_tarfile(input_file):
             message_to_emacs(f"{input_file} is not a valid tar.gz file.")
