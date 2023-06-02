@@ -368,7 +368,6 @@ class AppBuffer(BrowserBuffer):
             return a_type_weights - b_type_weights
 
     @PostGui()
-    @QtCore.pyqtSlot()
     def open_select_files(self):
         mark_files = list(filter(lambda f: f["mark"] == "mark", self.vue_get_all_files()))
         if len(mark_files) == 0:
