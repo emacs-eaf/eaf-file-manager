@@ -88,7 +88,7 @@ class AppBuffer(BrowserBuffer):
         self.search_files_index = 0
 
         self.file_changed_wacher = QFileSystemWatcher()
-        self.file_changed_wacher.directoryChanged.connect(lambda path: self.refresh())
+        self.file_changed_wacher.directoryChanged.connect(lambda path: self.update_directory())
 
         self.mime_db = QMimeDatabase()
         self.icon_cache_dir = os.path.join(os.path.dirname(__file__,), "src", "assets", "icon_cache")
@@ -105,6 +105,13 @@ class AppBuffer(BrowserBuffer):
         if len(self.file_changed_wacher.directories()) > 0:
             self.file_changed_wacher.removePaths(self.file_changed_wacher.directories())
         self.file_changed_wacher.addPath(self.url)
+
+    def update_directory(self):
+        try:
+            self.refresh()
+        except:
+            import traceback
+            message_to_emacs(traceback.print_exc())
 
     def init_app(self):
         self.init_vars()
