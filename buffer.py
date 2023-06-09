@@ -392,6 +392,10 @@ class AppBuffer(BrowserBuffer):
                     eval_in_emacs("find-file", [mark_file_path])
 
     @QtCore.pyqtSlot(str, str)
+    def vue_change_directory(self, dir, current_dir):
+        self.change_directory(dir, current_dir)
+
+    @PostGui()
     def change_directory(self, dir, current_dir):
         self.url = dir
 
@@ -479,6 +483,7 @@ class AppBuffer(BrowserBuffer):
             import time
             return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(file_info[info_key]))
 
+    @PostGui()
     def fetch_git_log(self):
         self.create_and_start_thread("GitCommitThread", [self.url], "fetch_command_result", self.update_git_log)
 
@@ -500,6 +505,10 @@ class AppBuffer(BrowserBuffer):
             eval_in_emacs("message", ["Already in root directory"])
 
     @QtCore.pyqtSlot(str)
+    def vue_update_preview(self, file):
+        self.update_preview(file)
+
+    @PostGui()
     def update_preview(self, file):
         if self.show_preview:
             self.preview_file = file

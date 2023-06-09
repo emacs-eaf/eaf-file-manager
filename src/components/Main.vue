@@ -477,7 +477,7 @@
      },
 
      updatePreview() {
-       window.pyobject.update_preview(this.files[this.currentIndex].path);
+       window.pyobject.vue_update_preview(this.files[this.currentIndex].path);
      },
 
      renameFile() {
@@ -549,7 +549,7 @@
 
      openFile(file) {
        if (file.type == "directory") {
-         window.pyobject.change_directory(file.path, "");
+         window.pyobject.vue_change_directory(file.path, "");
        } else if (file.type == "file") {
          window.pyobject.eval_emacs_function("find-file", [file.path])
        }
