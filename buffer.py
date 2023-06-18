@@ -19,24 +19,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt6 import QtCore
-from PyQt6.QtCore import QThread, QMimeDatabase, QFileSystemWatcher, QTimer
-from PyQt6.QtGui import QColor, QIcon
-from core.utils import (eval_in_emacs, PostGui, get_emacs_vars, interactive,
-                        message_to_emacs, get_emacs_func_result)
-from core.webengine import BrowserBuffer    # type: ignore
-from pathlib import Path
-from pygments import highlight
-from pygments.lexers import PythonLexer, get_lexer_for_filename, html
-from pygments.formatters import HtmlFormatter
 import copy
 import json
 import os
-import tarfile
+import re
 import shutil
 import subprocess
+import tarfile
 import time
-import re
+from pathlib import Path
+
+from core.utils import PostGui, eval_in_emacs, get_emacs_func_result, get_emacs_vars, interactive, message_to_emacs
+from core.webengine import BrowserBuffer  # type: ignore
+from pygments import highlight
+from pygments.formatters import HtmlFormatter
+from pygments.lexers import PythonLexer, get_lexer_for_filename, html
+from PyQt6 import QtCore
+from PyQt6.QtCore import QFileSystemWatcher, QMimeDatabase, QThread, QTimer
+from PyQt6.QtGui import QColor, QIcon
 
 FILE_MIME_DICT = {
     "vue": ["eaf-mime-type-code-html", "application-javascript"],
@@ -1197,7 +1197,7 @@ class AppBuffer(BrowserBuffer):
         return 4
 
     def pick_search_string(self, file):
-        from pypinyin import pinyin, Style
+        from pypinyin import Style, pinyin
 
         file_name = file["name"]
 
