@@ -109,6 +109,7 @@ class AppBuffer(BrowserBuffer):
             self.file_changed_wacher.removePaths(self.file_changed_wacher.directories())
         self.file_changed_wacher.addPath(self.url)
 
+    @PostGui()
     def update_directory(self):
         try:
             self.refresh()
@@ -799,6 +800,7 @@ class AppBuffer(BrowserBuffer):
     def some_view_show(self):
         self.fetch_git_log()
 
+    @PostGui()
     def refresh(self):
         old_file_info_dict = {}
 
@@ -855,6 +857,7 @@ class AppBuffer(BrowserBuffer):
 
         self.buffer_widget.eval_js_function('''renameFiles''', self.batch_rename_files)
 
+    @PostGui()
     def handle_input_response(self, callback_tag, result_content):
         from inspect import signature
 
@@ -868,6 +871,7 @@ class AppBuffer(BrowserBuffer):
             else:
                 handle_function()
 
+    @PostGui()
     def cancel_input_response(self, callback_tag):
         ''' Cancel input message.'''
         if callback_tag == "open_link":
@@ -876,6 +880,7 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.eval_js_function('''selectFileByIndex''', self.search_start_index)
             self.buffer_widget.eval_js_function('''setSearchMatchFiles''', [])
 
+    @PostGui()
     def handle_search_forward(self, callback_tag):
         if callback_tag == "search_file":
             if len(self.search_files) > 0:
@@ -889,6 +894,7 @@ class AppBuffer(BrowserBuffer):
 
                 self.buffer_widget.eval_js_function('''selectFileByIndex''', self.search_files[self.search_files_index][0])
 
+    @PostGui()
     def handle_search_backward(self, callback_tag):
         if callback_tag == "search_file":
             if len(self.search_files) > 0:
@@ -902,6 +908,7 @@ class AppBuffer(BrowserBuffer):
 
                 self.buffer_widget.eval_js_function('''selectFileByIndex''', self.search_files[self.search_files_index][0])
 
+    @PostGui()
     def handle_search_finish(self, callback_tag):
         if callback_tag == "search_file":
             self.buffer_widget.eval_js_function('''setSearchMatchFiles''', [])
