@@ -80,8 +80,6 @@ class AppBuffer(BrowserBuffer):
         self.show_preview = None
         self.show_icon = None
 
-        self.enable_debug = False
-
         self.hide_preview_by_width = False
 
         self.new_select_file = None
@@ -149,11 +147,10 @@ class AppBuffer(BrowserBuffer):
              "font-lock-string-face",
              "warning"])
 
-        (self.show_hidden_file, self.show_preview, self.show_icon, self.enable_debug) = get_emacs_vars([
+        (self.show_hidden_file, self.show_preview, self.show_icon) = get_emacs_vars([
             "eaf-file-manager-show-hidden-file",
             "eaf-file-manager-show-preview",
-            "eaf-file-manager-show-icon",
-            "eaf-enable-debug"])
+            "eaf-file-manager-show-icon"])
 
         if self.theme_mode == "dark":
             if self.theme_background_color == "#000000":
@@ -515,9 +512,6 @@ class AppBuffer(BrowserBuffer):
 
     @PostGui()
     def update_preview(self, file):
-        if self.enable_debug:
-            print("[EAF/file-manager] update_preview: ", file)
-        
         if self.show_preview:
             self.preview_file = file
 
@@ -936,9 +930,6 @@ class AppBuffer(BrowserBuffer):
                 else:
                     self.search_files_index += 1
 
-                if self.enable_debug:
-                    print("[EAF/file-manager] handle_search_forward: ", self.search_files, self.search_files_index)
-
                 self.buffer_widget.eval_js_function('''selectFileByIndex''', self.search_files[self.search_files_index][0])
 
     @PostGui()
@@ -949,9 +940,6 @@ class AppBuffer(BrowserBuffer):
                     self.search_files_index = len(self.search_files) - 1
                 else:
                     self.search_files_index -= 1
-
-                if self.enable_debug:
-                    print("[EAF/file-manager] handle_search_backward: ", self.search_files, self.search_files_index)
 
                 self.buffer_widget.eval_js_function('''selectFileByIndex''', self.search_files[self.search_files_index][0])
 
