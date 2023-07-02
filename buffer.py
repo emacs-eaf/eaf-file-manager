@@ -521,8 +521,55 @@ class AppBuffer(BrowserBuffer):
         if self.show_preview:
             self.preview_file = file
 
-            self.create_and_start_thread("FetchPreviewInfoThread", [file, self.get_preview_file, self.get_file_infos, self.get_file_mime],
-                                         "fetch_finish", self.update_preview_info)
+            QTimer().singleShot(300, lambda : self.fetch_preview_info(file, self.get_preview_file, self.get_file_infos, self.get_file_mime))
+
+    @PostGui()
+    def fetch_preview_info(self, file, get_preview_file_callback, get_files_callback, get_file_mime_callback):
+        if get_preview_file_callback() == file:
+            path = ""
+            mime = ""
+            file_type = ""
+            file_infos = []
+
+            if file != "":
+                path = Path(file)
+                mime = get_file_mime_callback(str(path.absolute()))
+
+                if path.is_file():
+                    file_type = "file"
+                    if mime.startswith("image-"):
+                        try:
+                            from exif import Image
+
+                            exif_info = {}
+
+                            with path.open("rb") as f:
+                                img = Image(f)
+                                keys = dir(img)
+                                for k in keys:
+                                    v = img.get(k, None)
+                                    if v:
+                                        exif_info[k] = str(img.get(k))
+                        except:
+                            pass
+
+                        file_infos = [{
+                            "mime": mime,
+                            "size": os.path.getsize(str(path.absolute())),
+                            "exif": exif_info
+                        }]
+                    else:
+                        file_infos = [{
+                            "mime": mime,
+                            "size": os.path.getsize(str(path.absolute()))
+                        }]
+                elif path.is_dir():
+                    file_type = "directory"
+                    file_infos = get_files_callback(file)
+                elif path.is_symlink():
+                    file_type = "symlink"
+
+            self.update_preview_info(file, file_type, mime, file_infos)
 
     @PostGui()
     def update_preview_info(self, file, file_type, file_mime, file_infos):
@@ -1256,67 +1303,6 @@ class AppBuffer(BrowserBuffer):
             if self.show_preview:
                 self.buffer_widget.eval_js_function('''setPreviewOption''', "false")
                 self.hide_preview_by_width = True
-
-class FetchPreviewInfoThread(QThread):
-
-    fetch_finish = QtCore.pyqtSignal(str, str, str, list)
-
-    def __init__(self, file, get_preview_file_callback, get_files_callback, get_file_mime_callback):
-        QThread.__init__(self)
-
-        self.file = file
-        self.get_preview_file_callback = get_preview_file_callback
-        self.get_files_callback = get_files_callback
-        self.get_file_mime_callback = get_file_mime_callback
-
-    def run(self):
-        # Wait 300 milliseconds, if current preview file is changed, stop fetch thread.
-        time.sleep(0.3)
-        if self.get_preview_file_callback() == self.file:
-            path = ""
-            mime = ""
-            file_type = ""
-            file_infos = []
-
-            if self.file != "":
-                path = Path(self.file)
-                mime = self.get_file_mime_callback(str(path.absolute()))
-
-                if path.is_file():
-                    file_type = "file"
-                    if mime.startswith("image-"):
-                        try:
-                            from exif import Image
-
-                            exif_info = {}
-
-                            with path.open("rb") as f:
-                                img = Image(f)
-                                keys = dir(img)
-                                for k in keys:
-                                    v = img.get(k, None)
-                                    if v:
-                                        exif_info[k] = str(img.get(k))
-                        except:
-                            pass
-
-                        file_infos = [{
-                            "mime": mime,
-                            "size": os.path.getsize(str(path.absolute())),
-                            "exif": exif_info
-                        }]
-                    else:
-                        file_infos = [{
-                            "mime": mime,
-                            "size": os.path.getsize(str(path.absolute()))
-                        }]
-                elif path.is_dir():
-                    file_type = "directory"
-                    file_infos = self.get_files_callback(self.file)
-                elif path.is_symlink():
-                    file_type = "symlink"
-
-            self.fetch_finish.emit(self.file, file_type, mime, file_infos)
 
 class GitCommitThread(QThread):
 
