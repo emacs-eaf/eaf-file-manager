@@ -1269,17 +1269,13 @@ class AppBuffer(BrowserBuffer):
 
     def destroy_buffer(self):
         ''' Destroy buffer.'''
-        for search_file_thread in self.thread_queue:
-            if search_file_thread.isRunning():
-                search_file_thread.quit()
-                search_file_thread.wait()
-
-        for fetch_preview_info_thread in self.thread_queue:
-            if fetch_preview_info_thread.isRunning():
-                fetch_preview_info_thread.quit()
-                fetch_preview_info_thread.wait()
+        for thread in self.thread_queue:
+            if thread.isRunning():
+                thread.quit()
+                thread.wait()
 
         if self.buffer_widget is not None:
+            self.buffer_widget.web_page.deleteLater()
             self.buffer_widget.deleteLater()
 
     def resize_view(self):
