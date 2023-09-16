@@ -49,7 +49,8 @@ FILE_MIME_DICT = {
     "org": ["eaf-mime-type-code-html", "application-emacs-org"],
     "js": ["eaf-mime-type-code-html", "application-javascript"],
     "xmind": ["eaf-mime-type-not-support", "application-xmind"],
-    "emm": ["eaf-mime-type-not-support", "application-xmind"]
+    "emm": ["eaf-mime-type-not-support", "application-xmind"],
+    "zst": ["eaf-mime-type-not-support", "application-x-compressed-tar"]
 }
 
 FILE_CODE_HTML_MIMES = ["application-json", "application-x-yaml", "application-x-shellscript", "application-toml"]
