@@ -1203,6 +1203,7 @@ class AppBuffer(BrowserBuffer):
     def handle_find_files(self, regex):
         eval_in_emacs("eaf-open", [self.url, "file-manager", "search:{}".format(regex), "always-new"])
 
+    @PostGui()
     def handle_search_file(self, search_string):
         in_minibuffer = get_emacs_func_result("minibufferp", [])
 
