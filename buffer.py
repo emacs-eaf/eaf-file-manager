@@ -39,6 +39,8 @@ from PyQt6.QtCore import QFileSystemWatcher, QMimeDatabase, QThread, QTimer
 from PyQt6.QtGui import QColor, QIcon
 
 FILE_MIME_DICT = {
+    "mdx": ["eaf-mime-type-code-html", "text-markdown"],
+    "dart": ["eaf-mime-type-code-html", "application-vnd.dart"],
     "vue": ["eaf-mime-type-code-html", "application-javascript"],
     "xls": ["eaf-mime-type-not-support", "application-vnd.oasis.opendocument.spreadsheet"],
     "xlsx": ["eaf-mime-type-not-support", "application-vnd.oasis.opendocument.spreadsheet"],
