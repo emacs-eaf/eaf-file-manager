@@ -110,7 +110,7 @@ class AppBuffer(BrowserBuffer):
             self.file_changed_wacher.removePaths(self.file_changed_wacher.directories())
         self.file_changed_wacher.addPath(self.url)
 
-    @run_in_main_thread
+    @PostGui()
     def update_directory(self):
         try:
             self.refresh()
@@ -205,14 +205,14 @@ class AppBuffer(BrowserBuffer):
         (frame_width, _) = get_emacs_func_result("eaf-get-render-size", [])
         return self.buffer_widget.width() > int(frame_width) * 2 / 3
 
-    @run_in_main_thread
+    @PostGui()
     def handle_append_search(self, file_paths, first_search):
         self.buffer_widget.eval_js_function('''appendSearch''', list(map(lambda file_path: self.get_file_info(file_path, self.url), file_paths)))
 
         if first_search:
             self.update_preview(file_paths[0])
 
-    @run_in_main_thread
+    @PostGui()
     def handle_finish_search(self, search_dir, search_regex, match_number):
         self.buffer_widget.eval_js_function('''finishSearch''')
 
@@ -379,13 +379,17 @@ class AppBuffer(BrowserBuffer):
         else:
             return a_type_weights - b_type_weights
 
-    @run_in_main_thread
+    @PostGui()
     def open_select_files(self):
         mark_files = list(filter(lambda f: f["mark"] == "mark", self.vue_get_all_files()))
         if len(mark_files) == 0:
             current_select_file = self.vue_files[self.vue_current_index]["path"]
             if os.path.isdir(current_select_file):
-                self.change_directory(current_select_file, "")
+                # NOTE:
+                # Don't call self.change_directory function here, it will crash EAF.
+                # We call elisp function eaf-file-manager-change-directory to change directory.
+                # Use python->elisp->python loop to avoid crash EAF.
+                eval_in_emacs("eaf-file-manager-change-directory", [current_select_file])
             else:
                 eval_in_emacs("find-file", [current_select_file])
         else:
@@ -400,8 +404,8 @@ class AppBuffer(BrowserBuffer):
     def vue_change_directory(self, dir, current_dir):
         self.change_directory(dir, current_dir)
 
-    @run_in_main_thread
-    def change_directory(self, dir, current_dir):
+    @PostGui()
+    def change_directory(self, dir, current_dir=""):
         self.url = dir
 
         self.monitor_current_dir()
@@ -488,11 +492,11 @@ class AppBuffer(BrowserBuffer):
             import time
             return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(file_info[info_key]))
 
-    @run_in_main_thread
+    @PostGui()
     def fetch_git_log(self):
         self.create_and_start_thread("GitCommitThread", [self.url], "fetch_command_result", self.update_git_log)
 
-    @run_in_main_thread
+    @PostGui()
     def update_git_log(self, log):
         self.buffer_widget.eval_js_function('''updateGitLog''', {"log": log})
 
@@ -513,14 +517,14 @@ class AppBuffer(BrowserBuffer):
     def vue_update_preview(self, file):
         self.update_preview(file)
 
-    @run_in_main_thread
+    @PostGui()
     def update_preview(self, file):
         if self.show_preview:
             self.preview_file = file
 
             QTimer().singleShot(300, lambda : self.fetch_preview_info(file, self.get_preview_file, self.get_file_infos, self.get_file_mime))
 
-    @run_in_main_thread
+    @PostGui()
     def fetch_preview_info(self, file, get_preview_file_callback, get_files_callback, get_file_mime_callback):
         if get_preview_file_callback() == file:
             path = ""
@@ -568,7 +572,7 @@ class AppBuffer(BrowserBuffer):
 
             self.update_preview_info(file, file_type, mime, file_infos)
 
-    @run_in_main_thread
+    @PostGui()
     def update_preview_info(self, file, file_type, file_mime, file_infos):
         """Update preview information."""
         file_html_content = ""
@@ -667,7 +671,7 @@ class AppBuffer(BrowserBuffer):
         self.create_and_start_thread("CompressionThread", [select_file],
                                      "compression_finish", self.handle_compress_finish)
 
-    @run_in_main_thread
+    @PostGui()
     def handle_compress_finish(self, path):
         message_to_emacs(f"Compress finish: {path}")
 
@@ -678,7 +682,7 @@ class AppBuffer(BrowserBuffer):
         self.create_and_start_thread("DecompressionThread", [select_file],
                                      "decompression_finish", self.handle_decompress_finish)
 
-    @run_in_main_thread
+    @PostGui()
     def handle_decompress_finish(self, path):
         message_to_emacs(f"Decompress finish: {path}")
 
@@ -844,7 +848,7 @@ class AppBuffer(BrowserBuffer):
     def some_view_show(self):
         self.fetch_git_log()
 
-    @run_in_main_thread
+    @PostGui()
     def refresh(self):
         old_file_info_dict = {}
 
@@ -879,7 +883,7 @@ class AppBuffer(BrowserBuffer):
 
         self.fetch_git_log()
 
-    @run_in_main_thread
+    @PostGui()
     def batch_rename_confirm(self, new_file_string):
         self.inhibit_mark_change_file = True
 
@@ -901,7 +905,7 @@ class AppBuffer(BrowserBuffer):
 
         self.buffer_widget.eval_js_function('''renameFiles''', self.batch_rename_files)
 
-    @run_in_main_thread
+    @PostGui()
     def handle_input_response(self, callback_tag, result_content):
         from inspect import signature
 
@@ -915,7 +919,7 @@ class AppBuffer(BrowserBuffer):
             else:
                 handle_function()
 
-    @run_in_main_thread
+    @PostGui()
     def cancel_input_response(self, callback_tag):
         ''' Cancel input message.'''
         if callback_tag == "open_link":
@@ -924,7 +928,7 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.eval_js_function('''selectFileByIndex''', self.search_start_index)
             self.buffer_widget.eval_js_function('''setSearchMatchFiles''', [])
 
-    @run_in_main_thread
+    @PostGui()
     def handle_search_forward(self, callback_tag):
         if callback_tag == "search_file":
             if len(self.search_files) > 0:
@@ -935,7 +939,7 @@ class AppBuffer(BrowserBuffer):
 
                 self.buffer_widget.eval_js_function('''selectFileByIndex''', self.search_files[self.search_files_index][0])
 
-    @run_in_main_thread
+    @PostGui()
     def handle_search_backward(self, callback_tag):
         if callback_tag == "search_file":
             if len(self.search_files) > 0:
@@ -946,7 +950,7 @@ class AppBuffer(BrowserBuffer):
 
                 self.buffer_widget.eval_js_function('''selectFileByIndex''', self.search_files[self.search_files_index][0])
 
-    @run_in_main_thread
+    @PostGui()
     def handle_search_finish(self, callback_tag):
         if callback_tag == "search_file":
             self.buffer_widget.eval_js_function('''setSearchMatchFiles''', [])
@@ -1205,7 +1209,7 @@ class AppBuffer(BrowserBuffer):
     def handle_find_files(self, regex):
         eval_in_emacs("eaf-open", [self.url, "file-manager", "search:{}".format(regex), "always-new"])
 
-    @run_in_main_thread
+    @PostGui()
     def handle_search_file(self, search_string):
         in_minibuffer = get_emacs_func_result("minibufferp", [])
 
