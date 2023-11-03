@@ -127,12 +127,12 @@ class AppBuffer(BrowserBuffer):
                 if self.search_regex != "":
                     self.search_directory(self.url, self.search_regex)
                 else:
-                    self.change_directory(self.url, "")
+                    self.change_directory(self.url)
             elif self.arguments.startswith("jump:"):
                 jump_file = self.arguments.split("jump:")[1]
                 self.change_directory(self.url, jump_file)
         else:
-            self.change_directory(self.url, "")
+            self.change_directory(self.url)
 
     def init_first_file_preview(self):
         if self.file_infos == []:
@@ -724,7 +724,7 @@ class AppBuffer(BrowserBuffer):
 
     def handle_change_path(self, new_path):
         if os.path.exists(new_path):
-            self.change_directory(new_path, "")
+            self.change_directory(new_path)
         else:
             message_to_emacs("{} is not exists.".format(new_path))
 
@@ -865,7 +865,7 @@ class AppBuffer(BrowserBuffer):
             if current_file is not None:
                 self.change_directory(self.url, current_file["path"])
             else:
-                self.change_directory(self.url, "")
+                self.change_directory(self.url)
 
         if self.inhibit_mark_change_file:
             self.inherit_mark_change_file = False
