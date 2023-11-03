@@ -421,6 +421,9 @@ class AppBuffer(BrowserBuffer):
             files = list(map(lambda file: file["path"], self.file_infos))
             self.select_index = files.index(current_dir) if current_dir in files else 0
 
+        # FIXME:
+        # When user search file keyword and press RETURN char, EAF will crash by below code.
+        # I don't know why it happened, please tell me if you know reason, thank you.
         self.buffer_widget.eval_js_function('''changePath''', self.url, self.file_infos, self.select_index)
 
         if len(self.file_infos) > 0:
