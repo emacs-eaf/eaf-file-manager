@@ -368,12 +368,6 @@
     (let ((process-connection-type nil)) (start-process "" nil "xdg-open" path))
     )))
 
-(defun eaf-file-manager-change-directory (directory)
-  "EAF file manager will crash if we call change_directory in python side.
-
-This function is call cache to avoid EAF crash."
-  (eaf-call-async "execute_function_with_args" eaf--buffer-id "change_directory" directory))
-
 (provide 'eaf-file-manager)
 
 ;;; eaf-file-manager.el ends here

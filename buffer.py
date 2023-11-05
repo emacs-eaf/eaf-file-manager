@@ -385,11 +385,7 @@ class AppBuffer(BrowserBuffer):
         if len(mark_files) == 0:
             current_select_file = self.vue_files[self.vue_current_index]["path"]
             if os.path.isdir(current_select_file):
-                # NOTE:
-                # Don't call self.change_directory function here, it will crash EAF.
-                # We call elisp function eaf-file-manager-change-directory to change directory.
-                # Use python->elisp->python loop to avoid crash EAF.
-                eval_in_emacs("eaf-file-manager-change-directory", [current_select_file])
+                self.change_directory(current_select_file)
             else:
                 eval_in_emacs("find-file", [current_select_file])
         else:
@@ -421,9 +417,6 @@ class AppBuffer(BrowserBuffer):
             files = list(map(lambda file: file["path"], self.file_infos))
             self.select_index = files.index(current_dir) if current_dir in files else 0
 
-        # FIXME:
-        # When user search file keyword and press RETURN char, EAF will crash by below code.
-        # I don't know why it happened, please tell me if you know reason, thank you.
         self.buffer_widget.eval_js_function('''changePath''', self.url, self.file_infos, self.select_index)
 
         if len(self.file_infos) > 0:
