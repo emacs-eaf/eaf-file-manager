@@ -42,6 +42,7 @@ FILE_MIME_DICT = {
     "mdx": ["eaf-mime-type-code-html", "text-markdown"],
     "dart": ["eaf-mime-type-code-html", "application-vnd.dart"],
     "vue": ["eaf-mime-type-code-html", "application-javascript"],
+    "kt": ["eaf-mime-type-code-html", "application-x-kotlin"],
     "xls": ["eaf-mime-type-not-support", "application-vnd.oasis.opendocument.spreadsheet"],
     "xlsx": ["eaf-mime-type-not-support", "application-vnd.oasis.opendocument.spreadsheet"],
     "ppt": ["eaf-mime-type-not-support", "application-vnd.oasis.opendocument.presentation"],
