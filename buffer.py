@@ -46,7 +46,7 @@ FILE_MIME_DICT = {
     "xls": ["eaf-mime-type-not-support", "application-vnd.oasis.opendocument.spreadsheet"],
     "xlsx": ["eaf-mime-type-not-support", "application-vnd.oasis.opendocument.spreadsheet"],
     "ppt": ["eaf-mime-type-not-support", "application-vnd.oasis.opendocument.presentation"],
-    "pptx": ["eaf-mime-type-not-support", "application-vnd.oasis.opendocument.presentation"],
+    "pptx": ["eaf-mime-type-not-support", "application-vnd.oasis.opendocument.presoentation"],
     "doc": ["eaf-mime-type-office-word", "application-vnd.oasis.opendocument.text"],
     "docx": ["eaf-mime-type-office-word", "application-vnd.oasis.opendocument.text"],
     "org": ["eaf-mime-type-code-html", "application-emacs-org"],
