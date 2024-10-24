@@ -11,10 +11,10 @@
     "core-js": "^3.16.1",
     "jszip": "^3.10.1",
     "mammoth": "^1.4.17",
-    "pdfvuer": "^1.9.2",
+    "pdfvuer": "^2.0.1",
     "qwebchannel": "^5.9.0",
-    "vue": "^2.6.14",
-    "vue-audio-visual": "^2.4.0"
+    "vue": "^3.5.12",
+    "vue-audio-visual": "^3.0.8"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.13",
