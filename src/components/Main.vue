@@ -597,17 +597,9 @@
          } else if (fileMime == "text-html" || fileMime == "application-xhtml+xml") {
            this.previewMime = "html"
          } else if (fileMime == "eaf-mime-type-code") {
-           if (fileSize > 100000) {
-             this.previewMime = "too-big"
-           } else {
-             this.previewMime = "code"
-           }
+           this.previewMime = "code"
          } else if (fileMime == "eaf-mime-type-code-html") {
-           if (fileSize > 100000) {
-             this.previewMime = "too-big"
-           } else {
-             this.previewMime = "code-html"
-           }
+           this.previewMime = "code-html"
          } else if (fileMime == "application-pdf") {
            this.previewMime = "pdf"
          } else if (fileMime.startsWith("video-")) {

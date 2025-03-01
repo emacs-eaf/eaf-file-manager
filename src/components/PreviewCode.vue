@@ -61,7 +61,11 @@
        xhr.onload = () => {
          if (xhr.status == 0) {
            var enc = new TextDecoder();
-           this.content = enc.decode(xhr.response)
+           this.content = enc.decode(xhr.response);
+           
+           if (this.content && this.content.length > 100000) {
+             this.content = this.content.substring(0, 100000) + '\n\n// 文件过大，仅显示前 100000 字节内容';
+           }
          }
        };
        xhr.send();

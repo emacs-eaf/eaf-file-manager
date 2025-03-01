@@ -580,10 +580,7 @@ class AppBuffer(BrowserBuffer):
             file_size = self.get_file_size(file)
 
             if file_mime == "eaf-mime-type-code-html":
-                if file_size < 100000:
-                    file_html_content = self.get_file_html_content(file, self.theme_mode)
-                else:
-                    file_mime = "eaf-mime-type-code"
+                file_html_content = self.get_file_html_content(file)
 
         # Call JavaScript function setPreview to update preview information
         self.buffer_widget.eval_js_function('''setPreview''',
@@ -600,22 +597,41 @@ class AppBuffer(BrowserBuffer):
         """Get the size of the given file in bytes."""
         return os.path.getsize(file_path)
 
-    def get_file_html_content(self, file_path, theme_mode):
+    def get_file_html_content(self, file_path):
         """Return the HTML content of the specified file."""
+        def limit_html_content(html_content):
+            """限制HTML内容大小并添加警告信息"""
+            if len(html_content) > 100000:
+                # 查找HTML体的结束位置
+                body_end_index = html_content.rfind('</body>')
+                if body_end_index > 0:
+                    # 在</body>前插入警告信息
+                    warning_message = '<div style="color:red;margin-top:20px;font-weight:bold;"><!-- 文件过大，仅显示部分内容 --></div>'
+                    return html_content[:100000] + warning_message + html_content[body_end_index:]
+                else:
+                    # 如果找不到</body>标签，直接截取
+                    return html_content[:100000] + '<!-- 文件过大，仅显示前 100000 字节内容 -->'
+            return html_content
+        
         with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
             content = f.read()
 
             try:
                 # All styles please look: https://pygments.org/styles/
-                style_name = "monokai" if theme_mode == "dark" else "stata-light"
+                style_name = "monokai" if self.theme_mode == "dark" else "stata-light"
 
                 if file_path.endswith(".vue"):
-                    return highlight(content, html.HtmlLexer(), HtmlFormatter(full=True, style=style_name))
+                    html_content = highlight(content,
+                                             html.HtmlLexer(),
+                                             HtmlFormatter(full=True, style=style_name))
                 else:
-                    return highlight(content, get_lexer_for_filename(file_path), HtmlFormatter(full=True, style=style_name))
+                    html_content = highlight(content,
+                                             get_lexer_for_filename(file_path),
+                                             HtmlFormatter(full=True, style=style_name))
             except:
-                return highlight(content, PythonLexer(), HtmlFormatter())
+                html_content = highlight(content, PythonLexer(), HtmlFormatter())
 
+            return limit_html_content(html_content)
 
     @interactive
     def search_file(self):
