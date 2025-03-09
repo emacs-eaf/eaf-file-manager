@@ -340,10 +340,17 @@ class AppBuffer(BrowserBuffer):
 
     def get_file_infos(self, path):
         file_infos = []
-        for p in Path(os.path.expanduser(path)).glob("*"):
-            if self.filter_file(p.name):
-                file_infos.append(self.get_file_info(str(p.absolute())))
-
+        path = os.path.expanduser(path)
+        
+        try:
+            for entry in os.scandir(path):
+                if self.filter_file(entry.name):
+                    file_infos.append(self.get_file_info(entry.path))
+        except PermissionError:
+            message_to_emacs(f"Cannot access directory {path}: Permission denied")
+        except FileNotFoundError:
+            message_to_emacs(f"Directory does not exist: {path}")
+        
         from functools import cmp_to_key
         file_infos.sort(key=cmp_to_key(lambda a, b: self.sort_file_by_key(a, b, "name")))
 
