@@ -180,25 +180,46 @@ class AppBuffer(BrowserBuffer):
             "true" if self.show_icon else "false",
             self.theme_mode)
 
-    def create_and_start_thread(self, thread_class_name, thread_args, signal_name=None, callback=None):
+    def create_and_start_thread(self, thread_class_name, thread_args, *signal_callbacks):
+        """
+        Create and start a new thread with automatic cleanup.
+        
+        Args:
+            thread_class_name: Name of thread class to instantiate
+            thread_args: List of arguments to pass to thread constructor
+            *signal_callbacks: Variable number of signal_name, callback pairs
+        """
+        # Clean finished threads first
+        self.clean_finished_threads()
+        
         globals_dict = globals()
-
         thread_class = globals_dict.get(thread_class_name)
 
         if not thread_class:
-            print("Class not found!")
+            print(f"Thread class {thread_class_name} not found!")
             return
 
         thread = thread_class(*thread_args)
-        if signal_name and callback:
-            signal = getattr(thread, signal_name, None)
-            if signal:
-                signal.connect(callback)
-            else:
-                print("Signal not found!")
+        
+        # Connect signals to callbacks
+        if signal_callbacks:
+            for i in range(0, len(signal_callbacks), 2):
+                if i+1 < len(signal_callbacks):
+                    signal_name = signal_callbacks[i]
+                    callback = signal_callbacks[i+1]
+                    
+                    signal = getattr(thread, signal_name, None)
+                    if signal:
+                        signal.connect(callback)
+                    else:
+                        print(f"Signal {signal_name} not found in {thread_class_name}!")
 
         self.thread_queue.append(thread)
         thread.start()
+
+    def clean_finished_threads(self):
+        """Remove finished threads from the thread queue to prevent memory leaks."""
+        self.thread_queue = [t for t in self.thread_queue if t.isRunning()]
 
     @interactive
     def update_theme(self):
@@ -232,14 +253,16 @@ class AppBuffer(BrowserBuffer):
 
         if fd_command != "":
             self.buffer_widget.eval_js_function('''initSearch''', dir, "{} {}".format(fd_command, search_regex))
-            thread = FdSearchThread(os.path.expanduser(dir), search_regex, self.filter_file)
+            self.create_and_start_thread("FdSearchThread", 
+                                       [os.path.expanduser(dir), search_regex, self.filter_file],
+                                       "append_search", self.handle_append_search,
+                                       "finish_search", self.handle_finish_search)
         else:
             self.buffer_widget.eval_js_function('''initSearch''', dir, search_regex)
-            thread = PythonSearchThread(os.path.expanduser(dir), search_regex, self.filter_file)
-        thread.append_search.connect(self.handle_append_search)
-        thread.finish_search.connect(self.handle_finish_search)
-        self.thread_queue.append(thread)
-        thread.start()
+            self.create_and_start_thread("PythonSearchThread", 
+                                       [os.path.expanduser(dir), search_regex, self.filter_file],
+                                       "append_search", self.handle_append_search,
+                                       "finish_search", self.handle_finish_search)
 
     def get_file_mime(self, file_path, use_preview=True):
         if os.path.isdir(file_path):
