@@ -100,6 +100,8 @@ class AppBuffer(BrowserBuffer):
         self.icon_cache_dir = os.path.join(os.path.dirname(__file__,), "src", "assets", "icon_cache")
         if not os.path.exists(self.icon_cache_dir):
             os.makedirs(self.icon_cache_dir)
+        # Add memory cache for icons
+        self.icon_memory_cache = {}
 
         self.preview_file = None
         self.thread_queue = []
@@ -262,6 +264,11 @@ class AppBuffer(BrowserBuffer):
     def generate_file_icon(self, file_path):
         file_mime = self.get_file_mime(file_path, False)
         icon_name = "{}.{}".format(file_mime, "png")
+        
+        # Check if icon is in memory cache first
+        if file_mime in self.icon_memory_cache:
+            return self.icon_memory_cache[file_mime]
+        
         icon_path = os.path.join(self.icon_cache_dir, icon_name)
 
         if not os.path.exists(icon_path):
@@ -277,6 +284,9 @@ class AppBuffer(BrowserBuffer):
 
             icon.pixmap(64, 64).save(icon_path)
 
+        # Store in memory cache
+        self.icon_memory_cache[file_mime] = icon_name
+        
         return icon_name
 
     def get_file_info(self, file_path, current_dir = None):
