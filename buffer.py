@@ -105,6 +105,11 @@ class AppBuffer(BrowserBuffer):
 
         self.preview_file = None
         self.thread_queue = []
+        # Add preview timer and track current preview request
+        self.preview_timer = QTimer()
+        self.preview_timer.setSingleShot(True)
+        self.preview_timer.timeout.connect(self.process_delayed_preview)
+        self.pending_preview_file = None
 
         self.sort_key = "name"
         self.sort_reverse = False
@@ -557,79 +562,62 @@ class AppBuffer(BrowserBuffer):
 
     @PostGui()
     def update_preview(self, file):
-        if self.show_preview:
-            self.preview_file = file
+        """Schedule a preview update with debouncing to prevent excessive updates."""
+        if not self.show_preview or self.hide_preview_by_width:
+            return
+        
+        # Cancel any pending preview
+        if self.preview_timer.isActive():
+            self.preview_timer.stop()
+        
+        # Store the file to preview
+        self.pending_preview_file = file
+        
+        # Start timer for delayed preview (150ms is usually a good balance)
+        self.preview_timer.start(150)
 
-            QTimer().singleShot(300, lambda : self.fetch_preview_info(file, self.get_preview_file, self.get_file_infos, self.get_file_mime))
+    def process_delayed_preview(self):
+        """Process the queued preview request after the debounce delay."""
+        if self.pending_preview_file:
+            self._update_preview(self.pending_preview_file)
+            self.pending_preview_file = None
 
-    @PostGui()
-    def fetch_preview_info(self, file, get_preview_file_callback, get_files_callback, get_file_mime_callback):
-        if get_preview_file_callback() == file:
-            path = ""
-            mime = ""
-            file_type = ""
-            file_infos = []
-
-            if file != "":
-                path = Path(file)
-                mime = get_file_mime_callback(str(path.absolute()))
-
-                if path.is_file():
-                    file_type = "file"
-                    if mime.startswith("image-"):
-                        try:
-                            from exif import Image
-
-                            exif_info = {}
-
-                            with path.open("rb") as f:
-                                img = Image(f)
-                                keys = dir(img)
-                                for k in keys:
-                                    v = img.get(k, None)
-                                    if v:
-                                        exif_info[k] = str(img.get(k))
-                        except:
-                            pass
-
-                        file_infos = [{
-                            "mime": mime,
-                            "size": os.path.getsize(str(path.absolute())),
-                            "exif": exif_info
-                        }]
-                    else:
-                        file_infos = [{
-                            "mime": mime,
-                            "size": os.path.getsize(str(path.absolute()))
-                        }]
-                elif path.is_dir():
-                    file_type = "directory"
-                    file_infos = get_files_callback(file)
-                elif path.is_symlink():
-                    file_type = "symlink"
-
-            self.update_preview_info(file, file_type, mime, file_infos)
-
-    @PostGui()
-    def update_preview_info(self, file, file_type, file_mime, file_infos):
-        """Update preview information."""
+    def _update_preview(self, file):
+        """Actual preview update implementation."""
+        if not self.show_preview or self.hide_preview_by_width:
+            return
+        
+        self.preview_file = file
+        
         file_html_content = ""
-        file_size = 0
-
-        if file_type == "file":
-            file_size = self.get_file_size(file)
-
+        
+        if os.path.isdir(file):
+            file_type = "directory"
+            file_infos = self.get_file_infos(file)
+            file_mime = ""
+            file_size = 0
+        else:
+            file_type = "file"
+            file_size = os.path.getsize(file)
+            file_mime = self.get_file_mime(file)
+            file_infos = []
+            
+            # Get HTML content for code files if needed
             if file_mime == "eaf-mime-type-code-html":
                 file_html_content = self.get_file_html_content(file)
+        
+        # Use the existing setPreview JS function
+        self.buffer_widget.eval_js_function(
+            '''setPreview''',
+            file,
+            file_type,
+            file_size,
+            file_mime,
+            {"content": file_html_content},
+            file_infos,
+            self.get_file_exif(file) or {}
+        )
 
-        # Call JavaScript function setPreview to update preview information
-        self.buffer_widget.eval_js_function('''setPreview''',
-                                            file,
-                                            file_type,
-                                            file_size,
-                                            file_mime,
-                                            {"content": file_html_content},
-                                            file_infos)
     def get_preview_file(self):
         return self.preview_file
 
@@ -1353,6 +1341,34 @@ class AppBuffer(BrowserBuffer):
             if self.show_preview:
                 self.buffer_widget.eval_js_function('''setPreviewOption''', "false")
                 self.hide_preview_by_width = True
+
+    def get_file_exif(self, file_path):
+        """Get EXIF information from an image file."""
+        if not os.path.isfile(file_path):
+            return None
+        
+        file_mime = self.get_file_mime(file_path)
+        
+        # Only process EXIF for image files
+        if file_mime.startswith("image-"):
+            try:
+                from exif import Image
+                
+                exif_info = {}
+                
+                with open(file_path, "rb") as f:
+                    img = Image(f)
+                    keys = dir(img)
+                    for k in keys:
+                        v = img.get(k, None)
+                        if v:
+                            exif_info[k] = str(img.get(k))
+                
+                return exif_info
+            except:
+                pass
+        
+        return None
 
 class GitCommitThread(QThread):
 
