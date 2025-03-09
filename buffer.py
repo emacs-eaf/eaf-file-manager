@@ -1253,6 +1253,7 @@ class AppBuffer(BrowserBuffer):
                 lambda args: False not in list(map(lambda str: self.is_file_match(args[1], str), search_string.split())),
                 enumerate(all_files)
             ))
+
             self.search_files_index = 0
 
             self.buffer_widget.eval_js_function('''setSearchMatchFiles''', list(map(lambda args: args[0], self.search_files)))
@@ -1389,17 +1390,42 @@ class PythonSearchThread(FileSearchThread):
         FileSearchThread.__init__(self, search_dir, search_regex, filter_file_callback)
 
     def run(self):
-        for p in Path(self.search_dir).rglob(self.search_regex):
-            if self.filter_file_callback(p.name):
-                self.file_paths.append(str(p.absolute()))
-                self.match_number += 1
+        import fnmatch
+        
+        # Convert wildcard expression to pattern for matching
+        pattern = self.search_regex
+        
+        # Use os.walk for more efficient directory traversal
+        for root, dirs, files in os.walk(self.search_dir):
+            # Process files first
+            for filename in files:
+                if fnmatch.fnmatch(filename, pattern) and self.filter_file_callback(filename):
+                    full_path = os.path.join(root, filename)
+                    self.file_paths.append(full_path)
+                    self.match_number += 1
+                    
+                    # Periodically send found files to update UI
+                    if (time.time() - self.start_time) > self.search_send_duration:
+                        self.send_files()
+                        self.start_time = time.time()
+            
+            # Then process directory name matches
+            for dirname in dirs:
+                if fnmatch.fnmatch(dirname, pattern) and self.filter_file_callback(dirname):
+                    full_path = os.path.join(root, dirname)
+                    self.file_paths.append(full_path)
+                    self.match_number += 1
+                    
+                    if (time.time() - self.start_time) > self.search_send_duration:
+                        self.send_files()
+                        self.start_time = time.time()
+                    
+            # Filter out directories that don't need to be traversed
+            dirs[:] = [d for d in dirs if self.filter_file_callback(d)]
 
-                if (time.time() - self.start_time) > self.search_send_duration:
-                    self.send_files()
-                    self.start_time = time.time()
-
+        # Send any remaining files
         self.send_files()
-
+        
         self.finish_search.emit(self.search_dir, self.search_regex, self.match_number)
 
 class FdSearchThread(FileSearchThread):
