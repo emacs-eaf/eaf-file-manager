@@ -52,7 +52,8 @@
 
       <div
         v-if="showPreview === 'true'"
-        class="preview">
+        class="preview"
+        :style="{ 'border-left-color': themeMode === 'dark' ? '#333' : '#ccc' }">
         <PreviewImage v-if="previewType == 'file' && previewMime == 'image'" 
           :file="previewPath + '?' + Math.random().toString()"
           :exif="previewExif"
@@ -722,7 +723,7 @@
    height: 100%;
    overflow: hidden;
 
-   border-left: 1px solid #CCC;
+   border-left: 1px solid #ccc;
  }
 
  .content {
