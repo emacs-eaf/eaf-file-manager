@@ -722,7 +722,7 @@
    height: 100%;
    overflow: hidden;
 
-   border-left: 1px solid;
+   border-left: 1px solid #CCC;
  }
 
  .content {
