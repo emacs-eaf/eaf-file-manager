@@ -40,6 +40,7 @@ from PyQt6.QtGui import QColor, QIcon
 
 FILE_MIME_DICT = {
     "mdx": ["eaf-mime-type-code-html", "text-markdown"],
+    "desktop": ["eaf-mime-type-code-html", "text-markdown"],
     "dart": ["eaf-mime-type-code-html", "application-vnd.dart"],
     "vue": ["eaf-mime-type-code-html", "application-javascript"],
     "kt": ["eaf-mime-type-code-html", "application-x-kotlin"],
